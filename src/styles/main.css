@@ -356,7 +356,10 @@ canvas,
 .header-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  /* 10px (was 16px): tightens the left cluster so the right-side actions
+     (Search / settings / Sign In) clear the viewport edge on medium-width
+     desktops. Paired with the progressive-disclosure tiers below .github-link. */
+  gap: 10px;
 }
 
 /* Variant Switcher */
@@ -658,7 +661,7 @@ canvas,
 .logo {
   font-weight: bold;
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   color: var(--accent);
 }
 
@@ -1060,12 +1063,37 @@ canvas,
   color: var(--text);
 }
 
-/* Medium-width desktop: keep header utility actions reachable when OS scaling
-   reduces the effective viewport width (e.g. 1920px @ 150% = ~1280px CSS). */
-@media (max-width: 1360px) {
-  .credit-link {
-    display: none;
-  }
+/* Progressive header disclosure — keep the core right-side actions (Search,
+   settings, and especially the Sign In / Create account cluster) fully on
+   screen as usable width shrinks: small laptops, split-screen, OS scaling
+   (1920px @ 150% = ~1280px CSS), and browsers with a vertical tab strip.
+   The single-row header wants ~1520px; without these tiers it silently
+   overflows and clips the rightmost item (Sign In) anywhere below ~1520px.
+   Items are dropped least-essential first; each is still reachable elsewhere
+   (footer links, the mobile hamburger menu, or the map's own controls). The
+   full mobile hamburger takes over at <=768px. !important mirrors the <=768
+   block below (needed to beat the #missionPresetMount id rule in header.css). */
+@media (max-width: 1530px) {
+  /* redundant with footer/menu: X credit + GitHub icon */
+  .credit-link,
+  .github-link { display: none !important; }
+}
+@media (max-width: 1420px) {
+  .version,
+  .fullscreen-btn { display: none !important; }
+}
+@media (max-width: 1330px) {
+  /* Link + Embed share .copy-link-btn */
+  .copy-link-btn { display: none !important; }
+}
+@media (max-width: 1200px) {
+  .pizzint-indicator { display: none !important; }
+}
+@media (max-width: 1075px) {
+  .mission-preset-mount { display: none !important; }
+}
+@media (max-width: 980px) {
+  .variant-switcher { display: none !important; }
 }
 
 .search-btn {
@@ -1489,6 +1517,81 @@ canvas,
 .map-dim-btn.active {
   background: var(--green);
   color: var(--bg);
+}
+
+/* GeoSpy: satellites layer on flat map coherence hint */
+.geospy-satellites-flat-hint {
+  position: fixed;
+  left: 12px;
+  bottom: 72px;
+  z-index: 10050;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: min(420px, calc(100% - 24px));
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel-bg) 94%, transparent);
+  color: var(--text-secondary);
+  font-size: 12px;
+  line-height: 1.35;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
+}
+
+.geospy-satellites-flat-hint.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.geospy-satellites-flat-hint-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.geospy-satellites-flat-hint-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 6px;
+  align-items: center;
+}
+
+.geospy-satellites-flat-hint-predict,
+.geospy-satellites-flat-hint-switch {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 4px 8px;
+  cursor: pointer;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.geospy-satellites-flat-hint-predict:hover,
+.geospy-satellites-flat-hint-switch:hover {
+  background: color-mix(in srgb, var(--border) 45%, transparent);
+}
+
+.geospy-satellites-flat-hint-dismiss {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.geospy-satellites-flat-hint-dismiss:hover {
+  color: var(--text-primary);
 }
 
 .map-header-actions {
@@ -4199,6 +4302,61 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
 .toast-notification.visible {
   opacity: 1;
   transform: translateX(-50%) translateY(0);
+}
+
+/* GeoSpy first-run tip for overhead-pass prediction */
+.geospy-overhead-tip {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface-active);
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  z-index: 10002;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(520px, calc(100vw - 24px));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.geospy-overhead-tip.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.geospy-overhead-tip-try,
+.geospy-overhead-tip-dismiss {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.geospy-overhead-tip-try {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  font-weight: 600;
+}
+
+.geospy-overhead-tip-try:hover,
+.geospy-overhead-tip-dismiss:hover {
+  background: color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.geospy-overhead-tip-try:hover {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 /* Story Modal */
@@ -6960,6 +7118,142 @@ body.playback-mode .status-dot {
   border-bottom: none;
 }
 
+.market-item-clickable {
+  cursor: pointer;
+  transition: background 0.12s ease;
+  border-radius: 4px;
+  margin: 0 -6px;
+  padding-left: 6px;
+  padding-right: 6px;
+}
+
+.market-item-clickable:hover,
+.market-item-clickable:focus-visible {
+  background: var(--surface-active);
+  outline: none;
+}
+
+.market-chart-hint {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-dim);
+  background: var(--bg-subtle, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.market-chart-hint-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.market-chart-hint-dismiss {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted, var(--text-dim));
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.market-chart-hint-dismiss:hover {
+  color: var(--text);
+}
+
+.commodity-item-clickable {
+  cursor: pointer;
+}
+
+.commodity-item-clickable:hover,
+.commodity-item-clickable:focus-visible {
+  background: var(--surface-active, rgba(255, 255, 255, 0.06));
+  outline: none;
+}
+
+/* Expandable Bloomberg-terminal-style price chart (market-chart-modal.ts). */
+.market-chart-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  background: var(--overlay-medium);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.market-chart-modal {
+  position: relative;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-strong);
+  border-radius: 8px;
+  padding: 20px 22px 16px;
+  max-width: 95vw;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5);
+}
+
+.market-chart-close {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  line-height: 0;
+  border-radius: 4px;
+}
+
+.market-chart-close:hover {
+  color: var(--text);
+  background: var(--surface-active);
+}
+
+.market-chart-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 8px;
+  padding-right: 28px;
+}
+
+.market-chart-name {
+  font-weight: 600;
+}
+
+.market-chart-symbol {
+  color: var(--text-dim);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin-top: 2px;
+}
+
+.market-chart-quote {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.market-chart-price {
+  font-variant-numeric: tabular-nums;
+  font-size: 15px;
+}
+
+.market-chart-canvas {
+  line-height: 0;
+}
+
 .market-info {
   display: flex;
   flex-direction: column;
@@ -7762,6 +8056,12 @@ a.prediction-link:hover {
   background: var(--bg);
   border: 1px solid var(--border);
   cursor: pointer;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
 }
 
 .panel-toggle-item:hover {
@@ -7877,7 +8177,13 @@ a.prediction-link:hover {
   background: var(--bg);
   border: 1px solid var(--border);
   cursor: pointer;
-  font-size: 10px;
+  font: inherit;
+  color: inherit;
+  text-align: inherit;
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 0;
+  font-size: 10px; 
 }
 
 .source-toggle-item:hover {
@@ -7990,6 +8296,15 @@ a.prediction-link:hover {
   .sources-toggle-grid {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+/* Accessibility Focus Styles */
+
+.panel-toggle-item:focus-visible,
+.source-toggle-item:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+  border-color: var(--text-dim);
 }
 
 /* Map Popups */
@@ -13689,7 +14004,7 @@ a.prediction-link:hover {
     display: none !important;
   }
 
-  /* Mobile: show "World Monitor" instead of "MONITOR" */
+  /* Mobile: show full GeoSpy brand instead of short logo */
   .logo {
     display: none;
   }
@@ -15563,6 +15878,12 @@ a.prediction-link:hover {
   background: rgba(255, 170, 0, 0.15);
   color: var(--semantic-elevated);
   border: 1px solid rgba(255, 170, 0, 0.3);
+}
+
+.propaganda-badge.unknown {
+  background: rgba(160, 160, 170, 0.12);
+  color: var(--text-dim, #9aa0a6);
+  border: 1px solid rgba(160, 160, 170, 0.25);
 }
 
 .top-source .propaganda-badge {
@@ -18632,6 +18953,13 @@ a.prediction-link:hover {
   border-color: var(--text-dim);
 }
 
+.unified-settings-select:focus-visible,
+.unified-settings-lang-select:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+  border-color: var(--text);
+}
+
 /* Responsive grids */
 @media (max-width: 500px) {
 
@@ -18682,6 +19010,11 @@ a.prediction-link:hover {
 
 .wm-pref-group > summary:hover {
   background: rgba(255, 255, 255, 0.06);
+}
+
+.wm-pref-group > summary:focus-visible {
+  outline: 2px solid var(--text);
+  outline-offset: -2px;
 }
 
 .wm-pref-group-content {
@@ -18823,6 +19156,16 @@ a.prediction-link:hover {
 .ai-flow-switch input:checked+.ai-flow-slider::before {
   transform: translateX(14px);
   background: #fff;
+}
+
+.ai-flow-switch input:focus-visible + .ai-flow-slider {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
+}
+
+.ai-flow-switch input:focus-visible + .ai-flow-slider {
+  outline: 2px solid var(--text);
+  outline-offset: 2px;
 }
 
 /* Ollama CTA */

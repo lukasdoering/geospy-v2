@@ -6,11 +6,70 @@ import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { miniSparkline } from '@/utils/sparkline';
 import { SITE_VARIANT } from '@/config';
 import { createWatchlistButton } from './watchlist-modal';
+import { openMarketChartModal } from './market-chart-modal';
+
+const MARKET_CHART_HINT_KEY = 'geospy-market-chart-hint-dismissed';
+
+function hasPlottableSeries(series: { sparkline?: number[] } | null | undefined): boolean {
+  return Array.isArray(series?.sparkline) && series!.sparkline!.filter((v) => Number.isFinite(v)).length >= 2;
+}
+
+function isMarketChartHintDismissed(): boolean {
+  try {
+    return localStorage.getItem(MARKET_CHART_HINT_KEY) === '1';
+  } catch {
+    return true;
+  }
+}
+
+function dismissMarketChartHint(): void {
+  try {
+    localStorage.setItem(MARKET_CHART_HINT_KEY, '1');
+  } catch {
+    /* ignore */
+  }
+}
+
+function marketChartHintHtml(): string {
+  if (isMarketChartHintDismissed()) return '';
+  return `<div class="market-chart-hint" role="note" data-testid="market-chart-hint"><span class="market-chart-hint-text">${escapeHtml(t('components.markets.chartHint'))}</span><button type="button" class="market-chart-hint-dismiss" data-market-chart-hint-dismiss aria-label="Dismiss">×</button></div>`;
+}
 
 export class MarketPanel extends Panel {
+  private _markets: MarketData[] = [];
+
   constructor() {
     super({ id: 'markets', title: t('panels.markets'), infoTooltip: t('components.markets.infoTooltip') });
     this.header.appendChild(createWatchlistButton());
+
+    // Delegated once on the persistent content element (renderMarkets only swaps
+    // innerHTML): click or Enter/Space on a plottable ticker opens its terminal chart.
+    const openFromEvent = (target: HTMLElement): void => {
+      if (target.closest('[data-market-chart-hint-dismiss]')) {
+        dismissMarketChartHint();
+        target.closest('.market-chart-hint')?.remove();
+        return;
+      }
+      const row = target.closest<HTMLElement>('[data-market-chart]');
+      if (!row) return;
+      const idx = Number(row.dataset.marketChart);
+      const stock = this._markets[idx];
+      if (stock) {
+        dismissMarketChartHint();
+        this.content.querySelector('.market-chart-hint')?.remove();
+        openMarketChartModal(stock);
+      }
+    };
+    this.content.addEventListener('click', (e) => openFromEvent(e.target as HTMLElement));
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const row = (e.target as HTMLElement).closest('[data-market-chart]');
+        if (row) {
+          e.preventDefault();
+          openFromEvent(e.target as HTMLElement);
+        }
+      }
+    });
   }
 
   public renderMarkets(data: MarketData[], rateLimited?: boolean): void {
@@ -19,10 +78,17 @@ export class MarketPanel extends Panel {
       return;
     }
 
-    const html = data
-      .map(
-        (stock) => `
-      <div class="market-item">
+    this._markets = data;
+    const hasChartable = data.some(hasPlottableSeries);
+    const hint = hasChartable ? marketChartHintHtml() : '';
+    const html = hint + data
+      .map((stock, idx) => {
+        const clickable = hasPlottableSeries(stock);
+        const attrs = clickable
+          ? ` class="market-item market-item-clickable" data-market-chart="${idx}" role="button" tabindex="0" aria-label="${t('components.markets.chart.title', { symbol: escapeHtml(stock.display) })}"`
+          : ' class="market-item"';
+        return `
+      <div${attrs}>
         <div class="market-info">
           <span class="market-name">${escapeHtml(stock.name)}</span>
           <span class="market-symbol">${escapeHtml(stock.display)}</span>
@@ -33,8 +99,8 @@ export class MarketPanel extends Panel {
           <span class="market-change ${getChangeClass(stock.change!)}">${formatChange(stock.change!)}</span>
         </div>
       </div>
-    `
-      )
+    `;
+      })
       .join('');
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
@@ -380,12 +446,36 @@ export class CommoditiesPanel extends Panel {
   private _tab: CommoditiesTab = 'commodities';
   private _commodityData: Array<{ display: string; price: number | null; change: number | null; sparkline?: number[]; symbol?: string }> = [];
   private _fxRates: EcbFxRateItem[] = [];
+  private _chartableCommodities: Array<{ display: string; price: number | null; change: number | null; sparkline?: number[]; symbol?: string }> = [];
 
   constructor() {
     super({ id: 'commodities', title: t('panels.commodities'), infoTooltip: t('components.commodities.infoTooltip') });
 
     this.content.addEventListener('click', (e) => {
-      const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-tab]');
+      const target = e.target as HTMLElement;
+      if (target.closest('[data-market-chart-hint-dismiss]')) {
+        dismissMarketChartHint();
+        target.closest('.market-chart-hint')?.remove();
+        return;
+      }
+      const chartRow = target.closest<HTMLElement>('[data-commodity-chart]');
+      if (chartRow) {
+        const idx = Number(chartRow.dataset.commodityChart);
+        const item = this._chartableCommodities[idx];
+        if (item) {
+          dismissMarketChartHint();
+          this.content.querySelector('.market-chart-hint')?.remove();
+          openMarketChartModal({
+            name: item.display,
+            display: item.symbol || item.display,
+            price: item.price,
+            change: item.change,
+            sparkline: item.sparkline,
+          });
+        }
+        return;
+      }
+      const btn = target.closest<HTMLElement>('[data-tab]');
       const tab = btn?.dataset.tab;
       if (
         tab === 'commodities' ||
@@ -395,6 +485,13 @@ export class CommoditiesPanel extends Panel {
         this._tab = tab as CommoditiesTab;
         this._render();
       }
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-commodity-chart]');
+      if (!row) return;
+      e.preventDefault();
+      row.click();
     });
   }
 
@@ -492,17 +589,26 @@ export class CommoditiesPanel extends Panel {
       return;
     }
 
+    const hasChartable = validData.some(hasPlottableSeries);
+    this._chartableCommodities = validData;
+    const hint = hasChartable ? marketChartHintHtml() : '';
     const grid = '<div class="commodities-grid">' +
-      validData.map(c => `
-        <div class="commodity-item">
+      validData.map((c, idx) => {
+        const clickable = hasPlottableSeries(c);
+        const attrs = clickable
+          ? ` class="commodity-item commodity-item-clickable" data-commodity-chart="${idx}" role="button" tabindex="0" aria-label="${t('components.markets.chart.title', { symbol: escapeHtml(c.display) })}"`
+          : ' class="commodity-item"';
+        return `
+        <div${attrs}>
           <div class="commodity-name">${escapeHtml(c.display)}</div>
           ${miniSparkline(c.sparkline, c.change, 60, 18)}
           <div class="commodity-price">${formatPrice(c.price!)}</div>
           <div class="commodity-change ${getChangeClass(c.change!)}">${formatChange(c.change!)}</div>
         </div>
-      `).join('') + '</div>';
+      `;
+      }).join('') + '</div>';
 
-    this.setSafeContent(unsafeRawHtml(tabBar + grid, 'legacy Panel.setContent() migration'));
+    this.setSafeContent(unsafeRawHtml(tabBar + hint + grid, 'legacy Panel.setContent() migration'));
   }
 }
 
