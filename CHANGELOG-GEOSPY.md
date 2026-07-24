@@ -22,6 +22,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Entity-decode shared helper; consumer-prices implausible movers
 - Settings a11y focus; Sign In visibility; AuthHeaderWidget cleanup
 - sharp ≥0.35 (blog-site); tauri ≥2.11.1; humanitarian health wiring
+- Renewable Energy panel discloses static fallback (parity with ProgressCharts)
 
 ### Docs
 - README GeoSpy highlights; CONTRIBUTING fork preamble; solutions note for overhead-pass surface

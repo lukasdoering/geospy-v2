@@ -644,7 +644,9 @@
       "infoTooltip": "<strong>Regulation</strong> Regulatory actions, policy changes, and enforcement updates from global regulators: financial, tech, energy, and trade authorities. Sourced from official government and regulatory body publications."
     },
     "renewable": {
-      "infoTooltip": "<strong>Renewable Energy</strong> Share of electricity generation from renewables by region and year, plus US installed capacity for solar, wind, and coal (MW). Sources: World Bank (EG.ELC.RNEW.ZS) and EIA."
+      "infoTooltip": "<strong>Renewable Energy</strong> Share of electricity generation from renewables by region and year, plus US installed capacity for solar, wind, and coal (MW). Sources: World Bank (EG.ELC.RNEW.ZS) and EIA.",
+      "fallbackBadge": "Showing static fallback data — live series unavailable",
+      "fallbackTooltip": "The live World Bank renewable seed could not be reached. This panel is rendered from a hardcoded snapshot last verified Feb 2026."
     },
     "sanctionsPressure": {
       "infoTooltip": "OFAC sanctions designations from the SDN and Consolidated Lists. Shows which countries face the highest designation pressure, what programs are driving it, and what has been newly added since the last update.",
