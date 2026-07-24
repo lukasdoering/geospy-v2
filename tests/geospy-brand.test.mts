@@ -45,4 +45,15 @@ describe('GeoSpy brand config', () => {
     assert.match(shell, /Fetching live GeoSpy data/);
     assert.match(shell, /<strong>GeoSpy Analyst<\/strong>/);
   });
+
+  it('brands settings and embed entry HTML as GeoSpy', () => {
+    const settings = readFileSync(new URL('../settings.html', import.meta.url), 'utf8');
+    assert.match(settings, /<title>GeoSpy Settings<\/title>/);
+    assert.match(settings, /GeoSpy Settings/);
+    assert.doesNotMatch(settings, /World Monitor Settings/);
+
+    const embed = readFileSync(new URL('../embed.html', import.meta.url), 'utf8');
+    assert.match(embed, /<title>GeoSpy Live Map Embed<\/title>/);
+    assert.doesNotMatch(embed, /World Monitor Live Map Embed/);
+  });
 });
