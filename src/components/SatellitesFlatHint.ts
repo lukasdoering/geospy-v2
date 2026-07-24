@@ -33,13 +33,20 @@ export function syncSatellitesFlatHint(
   map: SatellitesFlatHintHost | null | undefined,
 ): void {
   const existing = document.getElementById(HINT_ID);
-  const shouldShow = Boolean(satellitesEnabled && map && !map.isGlobeMode?.() && !isDismissed());
+  const onFlat = Boolean(map && map.isGlobeMode && !map.isGlobeMode());
+  // Show on flat map even if the satellites layer was turned off in a prior
+  // session — overhead-pass prediction still works, and Switch to 3D explains
+  // where live orbits appear. satellitesEnabled only tweaks the copy.
+  const shouldShow = Boolean(onFlat && !isDismissed());
 
   if (!shouldShow) {
     existing?.remove();
     return;
   }
-  if (existing) return;
+  if (existing) {
+    existing.classList.add('visible');
+    return;
+  }
 
   const hint = document.createElement('div');
   hint.id = HINT_ID;
@@ -48,7 +55,9 @@ export function syncSatellitesFlatHint(
 
   const text = document.createElement('span');
   text.className = 'geospy-satellites-flat-hint-text';
-  text.textContent = 'Live orbits on 3D globe · Right-click any point for overhead passes';
+  text.textContent = satellitesEnabled
+    ? 'Live orbits on 3D globe · Right-click any point for overhead passes'
+    : 'Right-click the map for overhead passes · Switch to 3D for live orbits';
 
   const switchBtn = document.createElement('button');
   switchBtn.type = 'button';
@@ -80,8 +89,9 @@ export function syncSatellitesFlatHint(
   });
 
   hint.append(text, switchBtn, dismissBtn);
-  const mapSection = document.getElementById('mapSection') || document.body;
-  mapSection.appendChild(hint);
+  // Fixed to the viewport so map WebGL/canvas stacking cannot bury the hint.
+  document.body.appendChild(hint);
+  requestAnimationFrame(() => hint.classList.add('visible'));
 }
 
 export function removeSatellitesFlatHint(): void {

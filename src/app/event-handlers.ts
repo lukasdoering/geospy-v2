@@ -2210,7 +2210,10 @@ export class EventHandlerManager implements AppModule {
       });
     });
     // Initial coherence tip for default-on satellites on flat map.
+    // Retry a few times — map mode / layer hydration can lag the first paint.
     window.setTimeout(() => this.syncSatellitesFlatHint(), 1500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 3500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 6000);
   }
 
   private syncSatellitesFlatHint(): void {
