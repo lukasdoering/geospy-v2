@@ -25,6 +25,10 @@ git fetch origin
 git checkout cursor/geospy-working-demo-4151
 npm ci
 npm run dev
+# http://localhost:3000
+npm run geospy:smoke
+npm run geospy:verify   # smoke + focused overhead/renewable tests
+npm run geospy:demo     # print try-this checklist
 ```
 
 Variant-specific development:
@@ -39,11 +43,12 @@ npm run dev:energy
 
 ## GeoSpy Highlights (this fork)
 
-- **Overhead pass prediction** — right-click the map (or Cmd/Ctrl+K → “overhead passes”) to compute upcoming LEO imaging passes at that point
-- **Orbital polish** — pass duration, type badges, copy summary, retry, revisit window, and a flat-map hint that live orbits render on the 3D globe
+- **Overhead pass prediction** — right-click the map, tip **Try now**, Cmd/Ctrl+Shift+O, or Cmd/Ctrl+K → “overhead passes”
+- **Orbital polish** — duration, type badges, AOS/LOS, prefs footer, copy/retry/refresh, revisit stats, a11y, flat-map coherence hint
 - **GeoSpy product chrome** — header/footer/offline branding with explicit WorldMonitor attribution; API hosts stay upstream for zero-env data
-- **Markets chart** — Cmd/Ctrl+K → “Markets” / “Panel: Markets”, then click a ticker sparkline for the terminal chart
+- **Markets chart** — Cmd/Ctrl+K → “Markets” / “Panel: Markets”, then click a ticker sparkline (in-panel hint)
 - **Integration branch** — [`cursor/geospy-working-demo-4151`](https://github.com/lukasdoering/geospy-v2/tree/cursor/geospy-working-demo-4151) / [PR #6](https://github.com/lukasdoering/geospy-v2/pull/6)
+- **Changelog** — [CHANGELOG-GEOSPY.md](CHANGELOG-GEOSPY.md)
 
 ## What It Does
 
