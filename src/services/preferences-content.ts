@@ -6,6 +6,13 @@ import { getGlobeVisualPreset, setGlobeVisualPreset, GLOBE_VISUAL_PRESET_OPTIONS
 import type { StreamQuality } from '@/services/ai-flow-settings';
 import { getThemePreference, setThemePreference, type ThemePreference } from '@/utils/theme-manager';
 import { getFontFamily, setFontFamily, type FontFamily } from '@/services/font-settings';
+import {
+  getOverheadPassSettings,
+  setOverheadMinElevationDeg,
+  setOverheadWindowMinutes,
+  type OverheadMinElevationDeg,
+  type OverheadWindowMinutes,
+} from '@/services/overhead-pass-settings';
 import { escapeHtml } from '@/utils/sanitize';
 import { trackLanguageChange } from '@/services/analytics';
 import { exportSettings, importSettings, type ImportResult } from '@/utils/settings-persistence';
