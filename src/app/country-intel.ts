@@ -245,7 +245,7 @@ export class CountryIntelManager implements AppModule {
       tip.setAttribute('role', 'status');
       const strong = document.createElement('strong');
       strong.textContent = 'GeoSpy tip';
-      tip.append(strong, document.createTextNode(' — Right-click the map → Predict Overhead Passes '));
+      tip.append(strong, document.createTextNode(' — Right-click map, Cmd+K “overhead”, or Cmd/Ctrl+Shift+O '));
       const dismissBtn = document.createElement('button');
       dismissBtn.type = 'button';
       dismissBtn.className = 'geospy-overhead-tip-dismiss';
