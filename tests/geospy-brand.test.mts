@@ -54,6 +54,10 @@ describe('GeoSpy brand config', () => {
     assert.match(en, /a single GeoSpy license unlocks everything/);
     assert.doesNotMatch(en, /Requires a World Monitor license key/);
     assert.match(shell, /Requires a GeoSpy license key/);
+
+    const commands = readFileSync(new URL('../src/config/commands.ts', import.meta.url), 'utf8');
+    assert.match(commands, /Panel: GeoSpy Analyst/);
+    assert.doesNotMatch(commands, /Panel: WM Analyst/);
   });
 
   it('brands settings and embed entry HTML as GeoSpy', () => {
