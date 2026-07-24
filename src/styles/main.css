@@ -24339,6 +24339,10 @@ body.map-width-resizing {
   border-bottom: 1px solid var(--border-subtle, rgba(255,255,255,0.05));
 }
 .cp-global-row:hover { background: var(--overlay-subtle); }
+.cp-global-row-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .cp-global-row td { padding: 6px 6px; vertical-align: middle; }
 .cp-global-flag { font-size: 0.8rem; white-space: nowrap; }
 .cp-global-index { color: var(--text-primary, #e0e0e0); font-variant-numeric: tabular-nums; }
