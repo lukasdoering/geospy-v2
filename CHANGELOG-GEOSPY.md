@@ -9,7 +9,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - GeoSpy brand identity (header, footer, offline, Tauri productName, honest meta)
 - Overhead satellite pass prediction (SGP4) from map context menu
 - Discoverability: Cmd+K, Cmd/Ctrl+Shift+O, last-location rerun, first-run tip (Try now CTA), flat-map coherence hint
-- Popup polish: duration, type badges, copy, Retry/Refresh, revisit median + SAR/optical counts, testids
+- Popup polish: duration, type badges, copy, Retry/Refresh, revisit median + SAR/optical counts, testids, prefs footer, AOS/LOS, a11y
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
 - Satellites layer default-on (full variant)
 - Markets expandable terminal price chart

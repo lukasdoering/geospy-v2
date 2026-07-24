@@ -1,16 +1,43 @@
 import type { OverheadPass } from '@/services/satellites';
+import { BRAND } from '@/config/brand';
+import {
+  getOverheadPassSettings,
+  type OverheadPassSettings,
+} from '@/services/overhead-pass-settings';
 
 let activePopup: HTMLElement | null = null;
+let clickOutsideHandler: ((e: MouseEvent) => void) | null = null;
+let previouslyFocused: HTMLElement | null = null;
 
 function onEscape(e: KeyboardEvent): void {
   if (e.key === 'Escape') dismissOrbitalPassesPopup();
 }
 
+function clearClickOutsideListener(): void {
+  if (!clickOutsideHandler) return;
+  document.removeEventListener('click', clickOutsideHandler);
+  clickOutsideHandler = null;
+}
+
 export function dismissOrbitalPassesPopup(): void {
-  if (!activePopup) return;
+  if (!activePopup) {
+    clearClickOutsideListener();
+    document.removeEventListener('keydown', onEscape);
+    return;
+  }
   activePopup.remove();
   activePopup = null;
+  clearClickOutsideListener();
   document.removeEventListener('keydown', onEscape);
+  const restore = previouslyFocused;
+  previouslyFocused = null;
+  if (restore && typeof restore.focus === 'function' && document.contains(restore)) {
+    try {
+      restore.focus();
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 export function formatEta(aosMs: number, nowMs: number): string {
@@ -92,19 +119,36 @@ export function buildOverheadPassesSummaryLine(
   return parts.join(' · ');
 }
 
+export function formatOverheadSettingsSummary(
+  settings: OverheadPassSettings = getOverheadPassSettings(),
+): string {
+  return `Threshold ${settings.minElevationDeg}° · window ${settings.windowMinutes / 60}h · Settings → Satellites`;
+}
+
+export function defaultOverheadEmptyDetail(
+  settings: OverheadPassSettings = getOverheadPassSettings(),
+): string {
+  return `No LEO imaging passes above ${settings.minElevationDeg}° elevation in the next ${settings.windowMinutes / 60} hours.`;
+}
+
 export function buildOverheadPassesClipboardText(
   lat: number,
   lng: number,
   passes: OverheadPass[],
   nowMs: number = Date.now(),
 ): string {
-  const header = `GeoSpy overhead passes @ ${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
+  const header = `${BRAND.name} overhead passes @ ${lat.toFixed(3)}°, ${lng.toFixed(3)}°`;
   if (passes.length === 0) return `${header}\n(no passes in window)`;
   const lines = passes.map((p) => {
     const dur = formatPassDuration(p.aosMs, p.losMs);
-    return `- ${p.name} (${p.type || 'sat'}/${p.country || '—'}) ${formatEta(p.aosMs, nowMs)} ${formatUtc(p.aosMs)} max ${Math.round(p.maxElevationDeg)}° · ${dur}`;
+    return `- ${p.name} (${p.type || 'sat'}/${p.country || '—'}) ${formatEta(p.aosMs, nowMs)} AOS ${formatUtc(p.aosMs)} LOS ${formatUtc(p.losMs)} max ${Math.round(p.maxElevationDeg)}° · ${dur}`;
   });
   return [header, ...lines].join('\n');
+}
+
+function buildSinglePassClipboardLine(p: OverheadPass, nowMs: number): string {
+  const dur = formatPassDuration(p.aosMs, p.losMs);
+  return `${p.name} (${p.type || 'sat'}/${p.country || '—'}) ${formatEta(p.aosMs, nowMs)} AOS ${formatUtc(p.aosMs)} LOS ${formatUtc(p.losMs)} max ${Math.round(p.maxElevationDeg)}° · ${dur}`;
 }
 
 function el<K extends keyof HTMLElementTagNameMap>(
@@ -127,6 +171,8 @@ export interface OrbitalPassesPopupOptions {
   onRefresh?: () => void;
   /** Optional empty-state copy when there are zero passes. */
   emptyDetail?: string;
+  /** Optional prefs footer (elevation / window). Defaults to current settings. */
+  settingsSummary?: string | false;
 }
 
 export function showOrbitalPassesPopup(
@@ -138,8 +184,11 @@ export function showOrbitalPassesPopup(
   options: OrbitalPassesPopupOptions = {},
 ): void {
   dismissOrbitalPassesPopup();
+  previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
   const popup = el('div', 'orbital-passes-popup');
   popup.setAttribute('role', 'dialog');
+  popup.setAttribute('aria-modal', 'true');
   popup.setAttribute('aria-label', 'Overhead satellite passes');
   popup.setAttribute('data-testid', 'orbital-passes-popup');
 
@@ -189,6 +238,7 @@ export function showOrbitalPassesPopup(
   const closeBtn = el('button', 'orbital-passes-close', '×');
   closeBtn.type = 'button';
   closeBtn.setAttribute('aria-label', 'Close');
+  closeBtn.setAttribute('data-testid', 'orbital-passes-close');
   closeBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     dismissOrbitalPassesPopup();
@@ -213,6 +263,7 @@ export function showOrbitalPassesPopup(
     if (options.onRetry) {
       const retry = el('button', 'orbital-passes-retry', 'Retry');
       retry.type = 'button';
+      retry.setAttribute('data-testid', 'orbital-passes-retry');
       retry.addEventListener('click', (e) => {
         e.stopPropagation();
         options.onRetry?.();
@@ -224,8 +275,7 @@ export function showOrbitalPassesPopup(
     popup.append(el(
       'div',
       'orbital-passes-empty',
-      options.emptyDetail
-        || 'No LEO imaging passes above 20° elevation in the next 3 hours.',
+      options.emptyDetail ?? defaultOverheadEmptyDetail(),
     ));
   } else {
     const list = el('ul', 'orbital-passes-list');
@@ -238,6 +288,10 @@ export function showOrbitalPassesPopup(
     popup.append(summary);
     for (const p of passes) {
       const row = el('li', 'orbital-passes-row');
+      row.tabIndex = 0;
+      row.setAttribute('role', 'button');
+      row.setAttribute('aria-label', `Copy ${p.name} pass details`);
+      row.title = 'Click to copy this pass';
       const nameRow = el('div', 'orbital-passes-name-row');
       nameRow.append(el('div', 'orbital-passes-name', p.name));
       const typeBadge = el('span', `orbital-passes-type orbital-passes-type--${(p.type || 'sat').toLowerCase()}`, p.type || 'sat');
@@ -247,21 +301,54 @@ export function showOrbitalPassesPopup(
       meta.append(
         el('span', undefined, p.country || '—'),
         el('span', undefined, formatEta(p.aosMs, nowMs)),
-        el('span', undefined, formatUtc(p.aosMs)),
+        el('span', undefined, `AOS ${formatUtc(p.aosMs)}`),
+        el('span', undefined, `LOS ${formatUtc(p.losMs)}`),
         el('span', undefined, `max ${Math.round(p.maxElevationDeg)}°`),
         el('span', undefined, formatPassDuration(p.aosMs, p.losMs)),
       );
       row.append(meta);
+      const copyRow = () => {
+        const text = buildSinglePassClipboardLine(p, nowMs);
+        void navigator.clipboard.writeText(text).catch(() => {});
+      };
+      row.addEventListener('click', (e) => {
+        e.stopPropagation();
+        copyRow();
+      });
+      row.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          e.stopPropagation();
+          copyRow();
+        }
+      });
       list.append(row);
     }
     popup.append(list);
   }
 
+  if (!options.loading && options.settingsSummary !== false) {
+    const footer = el(
+      'div',
+      'orbital-passes-prefs',
+      options.settingsSummary ?? formatOverheadSettingsSummary(),
+    );
+    footer.setAttribute('data-testid', 'orbital-passes-prefs');
+    popup.append(footer);
+  }
+
+  clickOutsideHandler = () => dismissOrbitalPassesPopup();
   requestAnimationFrame(() => {
-    document.addEventListener('click', dismissOrbitalPassesPopup, { once: true });
+    if (clickOutsideHandler) {
+      document.addEventListener('click', clickOutsideHandler, { once: true });
+    }
   });
   popup.addEventListener('click', (e) => e.stopPropagation());
   document.addEventListener('keydown', onEscape);
   document.body.appendChild(popup);
   activePopup = popup;
+  // Focus the close control so Escape + screen readers have a clear entry point.
+  requestAnimationFrame(() => {
+    if (closeBtn.isConnected) closeBtn.focus();
+  });
 }

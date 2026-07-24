@@ -31,6 +31,8 @@ mustInclude('src/config/brand.ts', "name: 'GeoSpy'", 'GeoSpy brand name');
 mustInclude('src/config/brand.ts', 'lukasdoering/geospy-v2', 'GeoSpy github URL');
 mustInclude('src/components/OrbitalPassesPopup.ts', 'buildOverheadPassesSummaryLine', 'revisit summary helper');
 mustInclude('src/components/OrbitalPassesPopup.ts', 'orbital-passes-popup', 'popup testid');
+mustInclude('src/components/OrbitalPassesPopup.ts', 'aria-modal', 'popup aria-modal');
+mustInclude('src/components/OrbitalPassesPopup.ts', 'orbital-passes-prefs', 'prefs footer testid');
 mustInclude('src/components/SatellitesFlatHint.ts', 'geospy-satellites-flat-hint', 'flat-map hint');
 mustInclude('src/services/overhead-pass-settings.ts', 'geospy-overhead-min-elevation', 'overhead prefs storage');
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes'", 'Cmd+K overhead command');
