@@ -1786,7 +1786,11 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyDefaultPanel('commodities', () => import('@/components/MarketPanel'), 'CommoditiesPanel');
     this.lazyDefaultPanel('energy-complex', () => import('@/components/EnergyComplexPanel'), 'EnergyComplexPanel');
-    this.lazyDefaultPanel('oil-inventories', () => import('@/components/OilInventoriesPanel'), 'OilInventoriesPanel');
+    this.lazyDefaultPanel('oil-inventories', () => import('@/components/OilInventoriesPanel'), 'OilInventoriesPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
     this.lazyImportedPanel('energy-crisis', () => import('@/components/EnergyCrisisPanel'), 'EnergyCrisisPanel', (EnergyCrisisPanel) => {
       const p = new EnergyCrisisPanel();
       p.setLocationClickHandler((lat: number, lon: number) => {
@@ -1931,6 +1935,9 @@ export class PanelLayoutManager implements AppModule {
       });
       supplyChainPanel.setOnDismissScenario(() => {
         this.ctx.map?.deactivateScenario();
+      });
+      supplyChainPanel.setChokepointFocusHandler((id) => {
+        this.ctx.map?.openChokepoint?.(id);
       });
       this.ctx.map?.setSupplyChainPanel(supplyChainPanel);
       return supplyChainPanel;
