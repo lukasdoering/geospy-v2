@@ -7142,6 +7142,39 @@ body.playback-mode .status-dot {
   background: var(--bg-subtle, rgba(255, 255, 255, 0.04));
   border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
   border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.market-chart-hint-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.market-chart-hint-dismiss {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted, var(--text-dim));
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+  padding: 0 2px;
+}
+
+.market-chart-hint-dismiss:hover {
+  color: var(--text);
+}
+
+.commodity-item-clickable {
+  cursor: pointer;
+}
+
+.commodity-item-clickable:hover,
+.commodity-item-clickable:focus-visible {
+  background: var(--surface-active, rgba(255, 255, 255, 0.06));
+  outline: none;
 }
 
 /* Expandable Bloomberg-terminal-style price chart (market-chart-modal.ts). */

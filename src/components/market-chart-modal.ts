@@ -1,16 +1,24 @@
 // Expandable Bloomberg-terminal-style price chart for a market ticker.
 //
-// Opened by clicking a row in MarketPanel. Follows the singleton-overlay
-// pattern used by StoryModal (create overlay -> setTrustedHtml -> backdrop/Esc
-// close). The chart itself is rendered by the pure terminalChart() util from the
-// ticker's existing intraday number[] series — no new data source.
+// Opened by clicking a row in MarketPanel / CommoditiesPanel. Follows the
+// singleton-overlay pattern used by StoryModal (create overlay -> setTrustedHtml
+// -> backdrop/Esc close). The chart itself is rendered by the pure terminalChart()
+// util from the ticker's existing intraday number[] series — no new data source.
 
-import type { MarketData } from '@/types';
 import { t } from '@/services/i18n';
 import { formatPrice, formatChange, getChangeClass } from '@/utils';
 import { escapeHtml } from '@/utils/sanitize';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 import { terminalChart } from '@/utils/terminal-chart';
+
+/** Minimal series shape shared by markets + commodities rows. */
+export interface ChartableSeries {
+  name: string;
+  display: string;
+  price: number | null | undefined;
+  change: number | null | undefined;
+  sparkline?: number[];
+}
 
 let modalEl: HTMLElement | null = null;
 
@@ -26,11 +34,14 @@ export function closeMarketChartModal(): void {
   }
 }
 
-export function openMarketChartModal(stock: MarketData): void {
+export function openMarketChartModal(stock: ChartableSeries): void {
   closeMarketChartModal();
 
+  const price = typeof stock.price === 'number' && Number.isFinite(stock.price) ? stock.price : null;
+  const change = typeof stock.change === 'number' && Number.isFinite(stock.change) ? stock.change : null;
+
   const chart = terminalChart(stock.sparkline, {
-    change: stock.change,
+    change,
     width: 520,
     height: 240,
     formatValue: (v) => formatPrice(v),
@@ -44,7 +55,7 @@ export function openMarketChartModal(stock: MarketData): void {
   modalEl.setAttribute('aria-modal', 'true');
   modalEl.setAttribute('aria-label', t('components.markets.chart.title', { symbol: stock.display }));
 
-  const changeClass = getChangeClass(stock.change);
+  const changeClass = getChangeClass(change);
   setTrustedHtml(
     modalEl,
     trustedHtml(
@@ -59,8 +70,8 @@ export function openMarketChartModal(stock: MarketData): void {
             <div class="market-chart-symbol">${escapeHtml(stock.display)}</div>
           </div>
           <div class="market-chart-quote">
-            <span class="market-chart-price">${formatPrice(stock.price)}</span>
-            <span class="market-change ${changeClass}">${formatChange(stock.change)}</span>
+            <span class="market-chart-price">${price == null ? '—' : formatPrice(price)}</span>
+            <span class="market-change ${changeClass}">${change == null ? '—' : formatChange(change)}</span>
           </div>
         </div>
         <div class="market-chart-canvas">${chart}</div>
