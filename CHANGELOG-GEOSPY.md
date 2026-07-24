@@ -41,6 +41,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Hormuz Tracker: Show on map → open Hormuz Strait chokepoint
 - Strategic Posture: remove noisy vessel-augment console.log spam
 - Infrastructure Cascade: wire select/analyze → map focus (chokepoint open / setCenter)
+- Strategic Risk: wire dead `enable-panel` CustomEvent → enablePanelById
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

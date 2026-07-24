@@ -42,6 +42,7 @@ const focusedTests = [
   'tests/investments-chokepoint-map.test.mts',
   'tests/hormuz-map-focus.test.mts',
   'tests/cascade-map-focus.test.mts',
+  'tests/strategic-risk-enable-panel.test.mts',
 ];
 
 function run(cmd, args, label) {

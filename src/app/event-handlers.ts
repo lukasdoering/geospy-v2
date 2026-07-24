@@ -236,6 +236,7 @@ export class EventHandlerManager implements AppModule {
   private boundWidgetModifyHandler: ((e: Event) => void) | null = null;
   private boundUndoHandler: ((e: KeyboardEvent) => void) | null = null;
   private boundNotifyForCountryHandler: ((e: Event) => void) | null = null;
+  private boundEnablePanelHandler: ((e: Event) => void) | null = null;
   private boundMissionOutsideHandler: ((e: MouseEvent) => void) | null = null;
   private boundMissionKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private boundEmbedModalKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -469,6 +470,10 @@ export class EventHandlerManager implements AppModule {
         this.boundNotifyForCountryHandler,
       );
       this.boundNotifyForCountryHandler = null;
+    }
+    if (this.boundEnablePanelHandler) {
+      window.removeEventListener('enable-panel', this.boundEnablePanelHandler);
+      this.boundEnablePanelHandler = null;
     }
     this.closeMissionPresetPopover();
     if (this.missionDataRefreshTimer) {
@@ -1867,6 +1872,15 @@ export class EventHandlerManager implements AppModule {
       WM_OPEN_NOTIFICATIONS_FOR_COUNTRY,
       this.boundNotifyForCountryHandler,
     );
+
+    // Strategic Risk "Enable" source/action buttons dispatch this event.
+    this.boundEnablePanelHandler = (e: Event) => {
+      const panelId = (e as CustomEvent<{ panelId?: string }>).detail?.panelId;
+      if (typeof panelId === 'string' && panelId) {
+        this.enablePanelById(panelId);
+      }
+    };
+    window.addEventListener('enable-panel', this.boundEnablePanelHandler);
   }
 
   setupAuthWidget(): void {
