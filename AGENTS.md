@@ -244,3 +244,13 @@ Heavy checks (`test:data`, typechecks, edge-bundle) must run **sequentially** in
 - [Health endpoints](docs/health-endpoints.mdx)
 - [Adding endpoints guide](docs/adding-endpoints.mdx)
 - [API reference (OpenAPI)](docs/api/)
+
+## Cursor Cloud specific instructions
+
+Dependencies are refreshed on startup by the update script (`npm ci`, which also runs the `blog-site` postinstall). Commands below reference existing scripts documented under "How to Run" and `package.json`.
+
+- **Run the app:** `npm run dev` serves the SPA at `http://localhost:3000` (not 5173). It runs sebuf RPC handlers in-process via the Vite plugin, so the core dashboard works with **no env vars / no `.env.local`**. Missing API keys/Redis/relay only degrade individual layers (e.g. "Energy data unavailable", empty feeds), they do not block startup. Egress to some upstream feeds is restricted in the VM — `[feed-fetch] ... both-failed` log lines are expected and non-fatal.
+- **Node:** VM ships Node 22 which works fine for dev/lint/typecheck/tests, even though `.nvmrc` pins 24.
+- **Lint / typecheck:** `npm run lint` (biome; passes with warnings only), `npm run typecheck` (src) and `npm run typecheck:api` (api/server) — both clean.
+- **Tests:** `npm run test:sidecar` (fully green) and `npm run test:data`. In `test:data`, a few subtests are expected to fail in this environment and are NOT setup problems: `dashboard critical CSS graph` needs a prior `vite build` (`dist/dashboard.html`), and a couple of timing-sensitive suites (`bootstrap-r2-reader`, `notification-channels-relay-timeout`) can flake with `cancelledByParent` under `--test-concurrency=16`.
+- **Out of scope for basic setup:** full Edge API parity (`vercel dev`), Redis/relay, Convex, and the Tauri desktop app (`npm run desktop:dev`) are optional and not required to run/verify the core web dashboard.
