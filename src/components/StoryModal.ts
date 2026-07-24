@@ -3,6 +3,7 @@ import type { StoryData } from '@/services/story-data';
 // stays off the eager boot graph; this is the second of its two eager edges (the
 // other is country-intel). renderAndDisplay runs on story-modal open (interaction).
 import { generateStoryDeepLink, getShareUrls, shareTexts } from '@/services/story-share';
+import { BRAND } from '@/config/brand';
 import { t } from '@/services/i18n';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 
@@ -124,7 +125,8 @@ function downloadStory(): void {
   if (!currentDataUrl) return;
   const a = document.createElement('a');
   a.href = currentDataUrl;
-  a.download = `worldmonitor-${currentData?.countryCode.toLowerCase() || 'story'}-${Date.now()}.png`;
+  const slug = BRAND.name.toLowerCase();
+  a.download = `${slug}-${currentData?.countryCode.toLowerCase() || 'story'}-${Date.now()}.png`;
   a.click();
   flashButton('.story-save', t('modals.story.saved'), t('modals.story.save'));
 }
@@ -135,7 +137,8 @@ async function shareWhatsApp(data: StoryData): Promise<void> {
     return;
   }
 
-  const file = new File([currentBlob], `${data.countryCode.toLowerCase()}-worldmonitor.png`, { type: 'image/png' });
+  const slug = BRAND.name.toLowerCase();
+  const file = new File([currentBlob], `${data.countryCode.toLowerCase()}-${slug}.png`, { type: 'image/png' });
   const urls = getShareUrls(data);
 
   if (navigator.share && navigator.canShare?.({ files: [file] })) {
