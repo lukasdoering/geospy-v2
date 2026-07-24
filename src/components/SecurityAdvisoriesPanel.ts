@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import type { SecurityAdvisory } from '@/services/security-advisories';
+import { advisoryCountryLabel, resolveAdvisoryMapFocus } from '@/utils/security-advisory-focus';
 
 type AdvisoryFilter = 'all' | 'critical' | 'US' | 'AU' | 'UK' | 'health';
 
@@ -11,6 +12,7 @@ export class SecurityAdvisoriesPanel extends Panel {
   private searchQuery = '';
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
   private onRefreshRequest?: () => void;
+  private onMapFocus?: (lat: number, lon: number) => void;
 
   constructor() {
     super({
@@ -34,6 +36,16 @@ export class SecurityAdvisoriesPanel extends Panel {
       if (target.closest('.sa-refresh-btn')) {
         this.showLoading(t('components.securityAdvisories.loading'));
         this.onRefreshRequest?.();
+        return;
+      }
+      // Title links open the advisory source — don't steal that click for map focus.
+      if (target.closest('a')) return;
+      const row = target.closest<HTMLElement>('[data-sa-focus]');
+      if (!row) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onMapFocus?.(lat, lon);
       }
     });
     this.content.addEventListener('input', (e) => {
@@ -41,6 +53,17 @@ export class SecurityAdvisoriesPanel extends Panel {
       if (inp.dataset.role !== 'sa-search') return;
       this.searchQuery = inp.value;
       this.render({ restoreSearchFocus: true });
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-sa-focus]');
+      if (!row) return;
+      e.preventDefault();
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onMapFocus?.(lat, lon);
+      }
     });
   }
 
@@ -179,10 +202,19 @@ export class SecurityAdvisoriesPanel extends Panel {
         const levelCls = this.getLevelClass(a.level);
         const levelLabel = this.getLevelLabel(a.level);
         const flag = this.getSourceFlag(a.sourceCountry);
+        const focus = resolveAdvisoryMapFocus(a.country);
+        const countryChip = focus
+          ? `<span class="sa-country">${escapeHtml(advisoryCountryLabel(a.country))}</span>`
+          : '';
+        const focusAttrs = focus
+          ? ` data-sa-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" role="button" tabindex="0" title="Show on map"`
+          : '';
+        const clickableCls = focus ? ' sa-item-clickable' : '';
 
-        return `<div class="sa-item ${levelCls}">
+        return `<div class="sa-item ${levelCls}${clickableCls}"${focusAttrs}>
           <div class="sa-item-header">
             <span class="sa-badge ${levelCls}">${levelLabel}</span>
+            ${countryChip}
             <span class="sa-source">${flag} ${escapeHtml(a.source)}</span>
           </div>
           <div class="sa-body">
@@ -221,6 +253,10 @@ export class SecurityAdvisoriesPanel extends Panel {
 
   public setRefreshHandler(handler: () => void): void {
     this.onRefreshRequest = handler;
+  }
+
+  public setCountryClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
   }
 
   public destroy(): void {

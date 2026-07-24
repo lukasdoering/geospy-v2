@@ -39,7 +39,9 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Satellite Fires** — click a region row to focus FIRMS detections
 - **Internet Disruptions** — click an outage/anomaly row to focus the map
 - **Population Exposure** — click a card to focus the event location
-- **Security Advisories** — search by country / title alongside severity pills
+- **Security Advisories** — search by country / title; click a card to focus the country
+- **Radiation Watch** — keyboard-accessible row → map focus (enables radiation layer)
+- **UCDP / Climate / Displacement** — row click enables the matching map layer
 
 ## Docs
 

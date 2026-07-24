@@ -25,7 +25,8 @@ import type { UnifiedSettingsTabId } from '@/components/settings-types';
 export type { UnifiedSettingsTabId };
 
 export interface UnifiedSettingsController {
-  open(tab?: UnifiedSettingsTabId): void;
+  /** Opens settings; may resolve after lazy chunk load (cold open). */
+  open(tab?: UnifiedSettingsTabId): void | Promise<void>;
   refreshPanelToggles(): void;
   getButton(): HTMLButtonElement;
   destroy(): void;

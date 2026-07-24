@@ -1971,6 +1971,9 @@ export class PanelLayoutManager implements AppModule {
       const ucdpEventsPanel = new UcdpEventsPanel();
       ucdpEventsPanel.setEventClickHandler((lat, lon) => {
         this.ctx.map?.setCenter(lat, lon, 5);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.ucdpEvents) {
+          this.callbacks.applyMapLayerChange?.('ucdpEvents', true, 'programmatic');
+        }
       });
       return ucdpEventsPanel;
     });
@@ -1991,13 +1994,23 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('displacement', () => import('@/components/DisplacementPanel'), 'DisplacementPanel', (DisplacementPanel) => {
       const p = new DisplacementPanel();
-      p.setCountryClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.displacement) {
+          this.callbacks.applyMapLayerChange?.('displacement', true, 'programmatic');
+        }
+      });
       return p;
     });
 
     this.lazyImportedPanel('climate', () => import('@/components/ClimateAnomalyPanel'), 'ClimateAnomalyPanel', (ClimateAnomalyPanel) => {
       const p = new ClimateAnomalyPanel();
-      p.setZoneClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setZoneClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.climate) {
+          this.callbacks.applyMapLayerChange?.('climate', true, 'programmatic');
+        }
+      });
       return p;
     });
 
@@ -2012,12 +2025,20 @@ export class PanelLayoutManager implements AppModule {
     this.lazyImportedPanel('security-advisories', () => import('@/components/SecurityAdvisoriesPanel'), 'SecurityAdvisoriesPanel', (SecurityAdvisoriesPanel) => {
       const p = new SecurityAdvisoriesPanel();
       p.setRefreshHandler(() => { void this.callbacks.loadSecurityAdvisories?.(); });
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       return p;
     });
 
     this.lazyImportedPanel('radiation-watch', () => import('@/components/RadiationWatchPanel'), 'RadiationWatchPanel', (RadiationWatchPanel) => {
       const p = new RadiationWatchPanel();
-      p.setLocationClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.radiationWatch) {
+          this.callbacks.applyMapLayerChange?.('radiationWatch', true, 'programmatic');
+        }
+      });
       return p;
     });
 

@@ -31,6 +31,15 @@ export class DisplacementPanel extends Panel {
     });
     this.showLoading(t('common.loadingDisplacement'));
 
+    const focusRow = (row: HTMLElement | null): void => {
+      if (!row?.dataset.lat || !row.dataset.lon) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      // Reject Null Island from empty `data-lat=""` (Number('') === 0).
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onCountryClick?.(lat, lon);
+      }
+    };
     this.content.addEventListener('click', (e) => {
       const tab = (e.target as HTMLElement).closest<HTMLElement>('.panel-tab');
       if (tab?.dataset.tab) {
@@ -38,12 +47,14 @@ export class DisplacementPanel extends Panel {
         this.renderContent();
         return;
       }
-      const row = (e.target as HTMLElement).closest<HTMLElement>('.disp-row');
-      if (row) {
-        const lat = Number(row.dataset.lat);
-        const lon = Number(row.dataset.lon);
-        if (Number.isFinite(lat) && Number.isFinite(lon)) this.onCountryClick?.(lat, lon);
-      }
+      focusRow((e.target as HTMLElement).closest<HTMLElement>('.disp-row[data-lat]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('.disp-row[data-lat]');
+      if (!row) return;
+      e.preventDefault();
+      focusRow(row);
     });
     this.mountFollowedOnlyChip();
   }
@@ -166,7 +177,13 @@ export class DisplacementPanel extends Panel {
           ? `<span class="disp-badge ${badgeCls}">${badgeLabel}</span>`
           : '';
 
-        return `<tr class="disp-row" data-lat="${c.lat || ''}" data-lon="${c.lon || ''}">
+        const hasCoords = Number.isFinite(c.lat) && Number.isFinite(c.lon) && !(c.lat === 0 && c.lon === 0);
+        const focusAttrs = hasCoords
+          ? ` data-lat="${c.lat}" data-lon="${c.lon}" role="button" tabindex="0" title="Show on map"`
+          : '';
+        const clickableCls = hasCoords ? ' disp-row-clickable' : '';
+
+        return `<tr class="disp-row${clickableCls}"${focusAttrs}>
           <td class="disp-name">${escapeHtml(c.name)}</td>
           <td class="disp-status">${badgeHtml}</td>
           <td class="disp-count">${formatPopulation(count)}</td>

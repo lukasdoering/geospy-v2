@@ -142,8 +142,8 @@ class LazyUnifiedSettings implements UnifiedSettingsController {
     return this.button;
   }
 
-  open(tab?: UnifiedSettingsTabId): void {
-    void this.load().then((settings) => {
+  open(tab?: UnifiedSettingsTabId): Promise<void> {
+    return this.load().then((settings) => {
       if (!this.destroyed) settings.open(tab);
     }).catch((error) => {
       // A rejection because the controller was torn down mid-load is a

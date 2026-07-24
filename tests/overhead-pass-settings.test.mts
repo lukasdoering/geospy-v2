@@ -42,5 +42,10 @@ describe('overhead pass settings', () => {
     assert.match(intel, /getOverheadPassSettings/);
     assert.match(intel, /prefs\.minElevationDeg/);
     assert.match(intel, /prefs\.windowMinutes/);
+    // Cold-open Settings is async — must await/retry before focusing elevation.
+    assert.match(intel, /openOverheadPassSettings/);
+    assert.match(intel, /us-overhead-elevation/);
+    assert.match(intel, /scheduleFocus|deadline/);
   });
 });
+

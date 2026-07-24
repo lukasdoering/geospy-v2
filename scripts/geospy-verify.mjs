@@ -26,6 +26,9 @@ const focusedTests = [
   'tests/satellite-fires-panel.test.mts',
   'tests/internet-disruptions-map.test.mts',
   'tests/security-advisories-search.test.mts',
+  'tests/security-advisories-map.test.mts',
+  'tests/panel-map-layer-enable.test.mts',
+  'tests/displacement-map-focus.test.mts',
   'tests/population-exposure-map.test.mts',
   'tests/radiation-watch-map.test.mts',
 ];

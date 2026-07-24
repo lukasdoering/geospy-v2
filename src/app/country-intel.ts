@@ -403,18 +403,38 @@ export class CountryIntelManager implements AppModule {
 
   /** Open Settings → Satellites overhead prefs (from popup footer). */
   private openOverheadPassSettings(): void {
-    this.ctx.unifiedSettings?.open('settings');
-    window.setTimeout(() => {
+    const focusElevation = (): boolean => {
       const elev = document.getElementById('us-overhead-elevation');
-      const group = elev?.closest('details');
+      if (!elev) return false;
+      const group = elev.closest('details');
       if (group instanceof HTMLDetailsElement) group.open = true;
-      elev?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      elev.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
       try {
-        (elev as HTMLSelectElement | null)?.focus();
+        (elev as HTMLSelectElement).focus();
       } catch {
         /* ignore */
       }
-    }, 80);
+      return true;
+    };
+
+    // LazyUnifiedSettings.open is async on cold start — a single 80ms timeout
+    // often races the chunk import and no-ops the scroll/focus.
+    const scheduleFocus = (): void => {
+      if (focusElevation()) return;
+      const deadline = Date.now() + 2500;
+      const tick = (): void => {
+        if (focusElevation()) return;
+        if (Date.now() < deadline) window.setTimeout(tick, 50);
+      };
+      window.setTimeout(tick, 50);
+    };
+
+    const opened = this.ctx.unifiedSettings?.open('settings');
+    if (opened && typeof (opened as Promise<void>).then === 'function') {
+      void (opened as Promise<void>).then(scheduleFocus, scheduleFocus);
+    } else {
+      scheduleFocus();
+    }
   }
 
   private async ensureCountryBriefPage(): Promise<boolean> {
