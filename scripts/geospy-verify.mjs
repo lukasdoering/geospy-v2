@@ -49,6 +49,7 @@ const focusedTests = [
   'tests/fuel-shortage-map-focus.test.mts',
   'tests/energy-asset-map-focus.test.mts',
   'tests/energy-crisis-map-focus.test.mts',
+  'tests/gulf-economies-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
