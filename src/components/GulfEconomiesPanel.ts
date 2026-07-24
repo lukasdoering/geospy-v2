@@ -4,7 +4,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { formatPrice, formatChange, getChangeClass } from '@/utils';
 import { miniSparkline } from '@/utils/sparkline';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import { toIso2 } from '@/utils/country-codes';
 
 import type { ListGulfQuotesResponse, GulfQuote } from '@/generated/client/worldmonitor/market/v1/service_client';
@@ -48,7 +48,7 @@ export class GulfEconomiesPanel extends Panel {
 
   private focusCountry(code?: string): void {
     if (!this.onMapFocus || !code) return;
-    const focus = resolveFuelShortageMapFocus(code);
+    const focus = resolveCountryMapFocus(code);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }

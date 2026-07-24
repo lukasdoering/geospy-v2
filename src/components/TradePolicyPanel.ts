@@ -13,7 +13,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { isFeatureAvailable } from '@/services/runtime-config';
 import { isDesktopRuntime } from '@/services/runtime';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type TabId = 'restrictions' | 'tariffs' | 'flows' | 'barriers' | 'revenue' | 'comtrade';
 
@@ -39,7 +39,7 @@ export class TradePolicyPanel extends Panel {
 
   private focusCountry(nameOrCode?: string): void {
     if (!this.onMapFocus || !nameOrCode) return;
-    const focus = resolveFuelShortageMapFocus(nameOrCode);
+    const focus = resolveCountryMapFocus(nameOrCode);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }

@@ -2,7 +2,7 @@ import { Panel } from './Panel';
 import type { GlobalTender, ListGlobalTendersResponse } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import type { GlobalTenderFilters } from '@/services/global-tenders';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type RequestHandler = (filters: GlobalTenderFilters, append: boolean) => void;
 
@@ -105,7 +105,7 @@ export class GlobalProcurementPanel extends Panel {
 
   private focusCountry(code?: string): void {
     if (!this.onMapFocus || !code) return;
-    const focus = resolveFuelShortageMapFocus(code);
+    const focus = resolveCountryMapFocus(code);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }

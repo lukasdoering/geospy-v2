@@ -24,7 +24,7 @@ import {
   type RetailerSpread,
 } from '@/services/consumer-prices';
 import { getAllCountriesInflation, type CountryInflationRow } from '@/services/imf-country-data';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type TabId = 'overview' | 'categories' | 'movers' | 'spread' | 'health' | 'world';
 
@@ -161,7 +161,7 @@ export class ConsumerPricesPanel extends Panel {
 
   private focusCountry(code?: string): void {
     if (!this.onMapFocus || !code) return;
-    const focus = resolveFuelShortageMapFocus(code);
+    const focus = resolveCountryMapFocus(code);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }
