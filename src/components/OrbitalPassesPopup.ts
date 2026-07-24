@@ -37,6 +37,61 @@ export function formatPassDuration(aosMs: number, losMs: number): string {
   return m ? `${h}h ${m}m` : `${h}h`;
 }
 
+/** Median gap between consecutive AOS times, in minutes. Null if <2 passes. */
+export function medianRevisitMinutes(aosTimesMs: number[]): number | null {
+  if (aosTimesMs.length < 2) return null;
+  const sorted = [...aosTimesMs].sort((a, b) => a - b);
+  const gaps: number[] = [];
+  for (let i = 1; i < sorted.length; i++) {
+    gaps.push((sorted[i]! - sorted[i - 1]!) / 60_000);
+  }
+  gaps.sort((a, b) => a - b);
+  const mid = Math.floor(gaps.length / 2);
+  const median = gaps.length % 2 === 0
+    ? (gaps[mid - 1]! + gaps[mid]!) / 2
+    : gaps[mid]!;
+  return Math.round(median);
+}
+
+export function countPassTypes(passes: OverheadPass[]): { sar: number; optical: number; other: number } {
+  let sar = 0;
+  let optical = 0;
+  let other = 0;
+  for (const p of passes) {
+    const t = (p.type || '').toLowerCase();
+    if (t === 'sar') sar++;
+    else if (t === 'optical') optical++;
+    else other++;
+  }
+  return { sar, optical, other };
+}
+
+export function buildOverheadPassesSummaryLine(
+  passes: OverheadPass[],
+  nowMs: number = Date.now(),
+): string {
+  const uniqueSats = new Set(passes.map((p) => p.noradId));
+  const next = passes[0]!;
+  const windowHours = Math.max(
+    1,
+    Math.round((Math.max(...passes.map((p) => p.aosMs)) - nowMs) / 3_600_000),
+  );
+  const parts = [
+    `${passes.length} pass${passes.length === 1 ? '' : 'es'}`,
+    `${uniqueSats.size} sat${uniqueSats.size === 1 ? '' : 's'}`,
+    `next ${formatEta(next.aosMs, nowMs)}`,
+    `~${windowHours}h window`,
+  ];
+  const median = medianRevisitMinutes(passes.map((p) => p.aosMs));
+  if (median != null) parts.push(`median revisit ~${median}m`);
+  const types = countPassTypes(passes);
+  const typeBits: string[] = [];
+  if (types.sar) typeBits.push(`${types.sar} SAR`);
+  if (types.optical) typeBits.push(`${types.optical} optical`);
+  if (typeBits.length) parts.push(typeBits.join(' · '));
+  return parts.join(' · ');
+}
+
 export function buildOverheadPassesClipboardText(
   lat: number,
   lng: number,
@@ -158,16 +213,10 @@ export function showOrbitalPassesPopup(
   } else {
     const list = el('ul', 'orbital-passes-list');
     const nowMs = Date.now();
-    const uniqueSats = new Set(passes.map((p) => p.noradId));
-    const next = passes[0]!;
-    const windowHours = Math.max(
-      1,
-      Math.round((Math.max(...passes.map((p) => p.aosMs)) - nowMs) / 3_600_000),
-    );
     const summary = el(
       'div',
       'orbital-passes-summary',
-      `${passes.length} pass${passes.length === 1 ? '' : 'es'} · ${uniqueSats.size} sat${uniqueSats.size === 1 ? '' : 's'} · next ${formatEta(next.aosMs, nowMs)} · ~${windowHours}h window`,
+      buildOverheadPassesSummaryLine(passes, nowMs),
     );
     popup.append(summary);
     for (const p of passes) {
