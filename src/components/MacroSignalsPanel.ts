@@ -183,12 +183,18 @@ export class MacroSignalsPanel extends Panel {
     }
 
     if (this.error || !this.data) {
-      this.showError(this.error || t('common.noDataShort'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(this.error || t('common.noDataShort'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
     if (this.data.unavailable) {
-      this.showError(t('common.upstreamUnavailable'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.upstreamUnavailable'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 

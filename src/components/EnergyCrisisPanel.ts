@@ -118,7 +118,10 @@ export class EnergyCrisisPanel extends Panel {
     }
 
     if (this.error || !this.data) {
-      this.showError(this.error || 'No data available', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(this.error || 'No data available')}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
