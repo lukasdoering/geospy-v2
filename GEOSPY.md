@@ -81,6 +81,8 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **AI Forecasts** — country-region rows expose a Map chip that focuses the map
 - **Energy Risk Overview** — Hormuz tile opens the Hormuz chokepoint on the map
 - **Cross-Source Signals** — theater-labeled cards focus the map when the theater resolves
+- **Supply Chain** — expanded chokepoint cards expose a Map button that opens the chokepoint
+- **Oil Inventories** — IEA country chips under the bar chart focus the map
 
 ## Implementation note
 

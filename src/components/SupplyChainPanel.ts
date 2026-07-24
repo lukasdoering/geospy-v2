@@ -47,8 +47,20 @@ export class SupplyChainPanel extends Panel {
   private activeScenarioState: { scenarioId: string; result: ScenarioResult } | null = null;
   private scenarioPollController: AbortController | null = null;
 
+  private onChokepointFocus: ((id: string) => void) | null = null;
+
+  public setChokepointFocusHandler(handler: (id: string) => void): void {
+    this.onChokepointFocus = handler;
+  }
+
   constructor() {
     super({ id: 'supply-chain', title: t('panels.supplyChain'), defaultRowSpan: 2, infoTooltip: t('components.supplyChain.infoTooltip') });
+    if (!document.getElementById('sc-map-focus-style')) {
+      const style = document.createElement('style');
+      style.id = 'sc-map-focus-style';
+      style.textContent = '.sc-map-focus{margin-left:6px;font-size:10px;padding:1px 6px;cursor:pointer;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--accent);border-radius:3px}.sc-map-focus:hover{filter:brightness(1.1)}.sc-map-focus:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
+      document.head.appendChild(style);
+    }
     this.content.addEventListener('click', (e) => {
       const tab = (e.target as HTMLElement).closest('.panel-tab') as HTMLElement | null;
       if (tab) {
@@ -65,6 +77,12 @@ export class SupplyChainPanel extends Panel {
         e.stopPropagation();
         const btn = scenarioTrigger.querySelector<HTMLButtonElement>('.sc-scenario-btn');
         if (btn && !btn.disabled) void this.runScenario(scenarioTrigger, btn);
+        return;
+      }
+      const mapBtn = (e.target as HTMLElement).closest('.sc-map-focus') as HTMLElement | null;
+      if (mapBtn?.dataset.chokepointMap) {
+        e.stopPropagation();
+        this.onChokepointFocus?.(mapBtn.dataset.chokepointMap);
         return;
       }
       const card = (e.target as HTMLElement).closest('.trade-restriction-card') as HTMLElement | null;
@@ -463,7 +481,7 @@ export class SupplyChainPanel extends Panel {
               <span>${t('components.supplyChain.riskLevel')}: <span class="${riskClass}">${escapeHtml(ts.riskLevel)}</span></span>
               <span>${ts.incidentCount7d} ${t('components.supplyChain.incidents7d')}</span>
             </div>` : ''}
-            <div class="sc-metric-row">${warRiskBadge}</div>
+            <div class="sc-metric-row">${warRiskBadge}${expanded ? ` <button type="button" class="sc-map-focus" data-chokepoint-map="${escapeHtml(cp.id)}" title="Show on map">Map</button>` : ''}</div>
             ${cp.flowEstimate ? (() => {
               const fe = cp.flowEstimate;
               const pct = Math.round(fe.flowRatio * 100);
