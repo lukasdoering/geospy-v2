@@ -400,6 +400,7 @@ describe('CII docs drift guards', () => {
       { label: 'docs/PRESS_KIT.md', text: readFileSync(resolve(root, 'docs', 'PRESS_KIT.md'), 'utf8') },
       { label: 'docs/COMMUNITY-PROMOTION-GUIDE.md', text: readFileSync(resolve(root, 'docs', 'COMMUNITY-PROMOTION-GUIDE.md'), 'utf8') },
       { label: 'AGENTS.md', text: readFileSync(resolve(root, 'AGENTS.md'), 'utf8') },
+      { label: 'public/home.md', text: readFileSync(resolve(root, 'public', 'home.md'), 'utf8') },
     ];
 
     for (const surface of surfaces) {
@@ -425,6 +426,7 @@ describe('CII docs drift guards', () => {
     const pressKit = surfaces[2]!.text;
     const communityGuide = surfaces[3]!.text;
     const agentsGuide = surfaces[4]!.text;
+    const homeMd = surfaces[5]!.text;
 
     assert.match(llmsBrief, /CII v8[\s\S]{0,80}31 Tier-1 countries/i);
     assert.match(llmsBrief, /CRI[\s\S]{0,120}196-country public rankable universe/i);
@@ -447,6 +449,13 @@ describe('CII docs drift guards', () => {
     assert.match(pressKit, /24 \(including RTL\)/i);
     assert.match(communityGuide, /six specialized views/i);
     assert.match(agentsGuide, /`energy`:\s+Energy security/i);
+    assert.match(homeMd, /Country Instability Index \(CII v8\) across 31 Tier-1 countries/i);
+    assert.match(homeMd, /Country Resilience Index \(CRI\) across a 196-country universe/i);
+    assert.doesNotMatch(
+      homeMd,
+      /Country Instability Index across 196 countries/i,
+      'public/home.md must not attribute the 196-country CRI universe to CII',
+    );
     assert.doesNotMatch(
       `${llmsFull}\n${communityGuide}\n${agentsGuide}`,
       /Tri-Variant Build System|Three Variant Dashboards|three specialized variants|tri-variant architecture|three specialized views/i,
