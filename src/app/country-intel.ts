@@ -226,6 +226,39 @@ export class CountryIntelManager implements AppModule {
     void this.predictOverheadPasses(center.lat, center.lon, screenX, screenY);
   }
 
+  /** Re-run overhead passes at the last requested coordinates (if any). */
+  public predictOverheadPassesAtLastLocation(): void {
+    let lat: number | null = null;
+    let lon: number | null = null;
+    try {
+      const raw = localStorage.getItem('geospy-overhead-last-location');
+      if (raw) {
+        const parsed = JSON.parse(raw) as { lat?: unknown; lon?: unknown };
+        if (typeof parsed.lat === 'number' && typeof parsed.lon === 'number') {
+          lat = parsed.lat;
+          lon = parsed.lon;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    if (lat == null || lon == null) {
+      this.showToast('No previous overhead-pass location yet. Right-click the map first.');
+      return;
+    }
+    const screenX = Math.round(window.innerWidth * 0.55);
+    const screenY = Math.round(window.innerHeight * 0.35);
+    void this.predictOverheadPasses(lat, lon, screenX, screenY);
+  }
+
+  private rememberOverheadLocation(lat: number, lon: number): void {
+    try {
+      localStorage.setItem('geospy-overhead-last-location', JSON.stringify({ lat, lon, at: Date.now() }));
+    } catch {
+      /* ignore */
+    }
+  }
+
   private maybeShowOverheadPassesTip(): void {
     try {
       if (localStorage.getItem('geospy-overhead-passes-tip-dismissed') === '1') return;
@@ -271,6 +304,7 @@ export class CountryIntelManager implements AppModule {
     const retry = () => {
       void this.predictOverheadPasses(lat, lon, screenX, screenY);
     };
+    this.rememberOverheadLocation(lat, lon);
     showOrbitalPassesPopup(screenX, screenY, lat, lon, [], { loading: true });
     try {
       const { predictOverheadPassesAt } = await import('@/services/satellites');

@@ -40,6 +40,8 @@ export interface SearchManagerCallbacks {
   enablePanel: (panelId: string) => boolean;
   /** Predict LEO overhead passes at the current map center (GeoSpy). */
   predictOverheadPassesAtMapCenter: () => void;
+  /** Re-run overhead passes at the last requested map coordinates (GeoSpy). */
+  predictOverheadPassesAtLastLocation: () => void;
 }
 
 export class SearchManager implements AppModule {
@@ -591,6 +593,8 @@ export class SearchManager implements AppModule {
           });
         } else if (action === 'overhead-passes') {
           this.callbacks.predictOverheadPassesAtMapCenter();
+        } else if (action === 'overhead-passes-last') {
+          this.callbacks.predictOverheadPassesAtLastLocation();
         }
         break;
 
