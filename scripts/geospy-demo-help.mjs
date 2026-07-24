@@ -14,14 +14,18 @@ Validate:
   npm run geospy:smoke
   npm run geospy:verify
 
-Try:
-  • Tip → Try now (first visit)
+Try overhead (differentiator):
+  • Tip → Try now / flat hint → Predict passes
   • Right-click map → Predict Overhead Passes
-  • Share button on popup → ?overhead=1 deep link
-  • Cmd/Ctrl+K → "overhead" or "last overhead"
-  • Cmd/Ctrl+Shift+O → passes at map center
-  • Settings → Satellites (elevation / window)
-  • Cmd/Ctrl+K → Markets → click a sparkline
+  • Share / live URL keeps ?overhead=1 while popup open
+  • Cmd/Ctrl+K → "overhead" · Cmd/Ctrl+Shift+O
+  • Settings → Satellites (or prefs footer on popup)
+  • Next-pass chip after you close the popup
+
+Try other polish:
+  • Markets / Commodities / Crypto → click sparkline chart
+  • Disease Outbreaks / Satellite Fires / Internet Disruptions → row click focuses map
+  • Security Advisories → search country/title
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 `);
