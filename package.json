@@ -24,6 +24,7 @@
     "worktree:env": "node scripts/bootstrap-worktree.mjs --skip-install",
     "uninstall:local": "node scripts/uninstall-local.mjs",
     "geospy:smoke": "node scripts/geospy-smoke-check.mjs",
+    "geospy:demo": "node scripts/geospy-demo-help.mjs",
     "lint:md": "markdownlint-cli2 '**/*.md' '!**/node_modules/**' '!.agent/**' '!.agents/**' '!.claude/**' '!.factory/**' '!.windsurf/**' '!skills/**' '!docs/internal/**' '!docs/Docs_To_Review/**' '!docs/archive/**' '!todos/**' '!docs/plans/**' '!docs/brainstorms/**' '!docs/ideation/**'",
     "version:sync": "node scripts/sync-desktop-version.mjs",
     "version:check": "node scripts/sync-desktop-version.mjs --check",
