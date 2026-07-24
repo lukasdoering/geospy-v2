@@ -62,6 +62,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Global Procurement: tender card click/keyboard → country map focus (ISO2)
 - Big Mac Index / National Debt: country row click/keyboard → map focus
 - Consumer Prices World tab: inflation row click/keyboard → country map focus
+- AI Regulation countries tab: country card click/keyboard → map focus
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
