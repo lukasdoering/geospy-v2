@@ -48,6 +48,7 @@ const focusedTests = [
   'tests/energy-map-enable-panels.test.mts',
   'tests/fuel-shortage-map-focus.test.mts',
   'tests/energy-asset-map-focus.test.mts',
+  'tests/energy-crisis-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
