@@ -2229,6 +2229,9 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('airline-intel', () => import('@/components/AirlineIntelPanel'), 'AirlineIntelPanel', (AirlineIntelPanel) => {
       const panel = new AirlineIntelPanel();
+      panel.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 6);
+      });
       void import('@/components/AviationCommandBar')
         .then(({ AviationCommandBar }) => {
           if (!this.ctx.isDestroyed) this.aviationCommandBar = new AviationCommandBar();
