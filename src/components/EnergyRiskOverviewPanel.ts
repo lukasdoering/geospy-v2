@@ -289,6 +289,16 @@ const RISK_OVERVIEW_CSS = `
     flex-direction: column;
     justify-content: center;
   }
+  .ero-tile-hormuz {
+    cursor: pointer;
+  }
+  .ero-tile-hormuz:hover {
+    filter: brightness(1.08);
+  }
+  .ero-tile-hormuz:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 1px;
+  }
   .ero-tile__label {
     font-size: 10px;
     text-transform: uppercase;
