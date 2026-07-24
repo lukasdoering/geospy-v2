@@ -55,6 +55,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Energy Disruptions: row click/keyboard → map focus from cached asset coords + enable energy layers (still opens asset drawer)
 - Pro landing (`/pro`): hero/title/og chrome → GeoSpy Pro (FAQ/schema still describe upstream product facts)
 - Energy Crisis Tracker: policy row click/keyboard → country map focus
+- Gulf Economies: country quote click/keyboard → map focus + calm empty (not error)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

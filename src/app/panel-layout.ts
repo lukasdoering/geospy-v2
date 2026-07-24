@@ -2208,7 +2208,13 @@ export class PanelLayoutManager implements AppModule {
     });
 
     this.lazyPanel('gulf-economies', () =>
-      this.importPanel('gulf-economies', () => import('@/components/GulfEconomiesPanel'), 'GulfEconomiesPanel', (GulfEconomiesPanel) => new GulfEconomiesPanel()),
+      this.importPanel('gulf-economies', () => import('@/components/GulfEconomiesPanel'), 'GulfEconomiesPanel', (GulfEconomiesPanel) => {
+        const p = new GulfEconomiesPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('grocery-basket', () =>
       this.importPanel('grocery-basket', () => import('@/components/GroceryBasketPanel'), 'GroceryBasketPanel', (GroceryBasketPanel) => new GroceryBasketPanel()),
