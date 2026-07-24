@@ -136,7 +136,12 @@ export class DiseaseOutbreaksPanel extends Panel {
     try {
       const data = await fetchDiseaseOutbreaks();
       if (!data.outbreaks?.length) {
-        if (!this._hasData) this.showError(t('components.diseaseOutbreaks.errors.noData'), () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('components.diseaseOutbreaks.errors.noData'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       this._outbreaks = [...data.outbreaks].sort((a, b) => {
