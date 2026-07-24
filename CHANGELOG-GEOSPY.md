@@ -36,6 +36,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Locked-panel / runtime-config copy: GeoSpy license (not World Monitor)
 - OREF Sirens: alert/history row click → map focus (Tel Aviv)
 - Cmd+K: Panel: GeoSpy Analyst (not WM Analyst)
+- GCC Investments: keyboard map focus
+- Chokepoint Status strip: chip → openChokepoint + calm empty state
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
