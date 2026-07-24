@@ -414,7 +414,10 @@ export class NewsPanel extends Panel {
     if (items.length === 0) {
       this.renderRequestId += 1; // Cancel in-flight clustering from previous renders.
       this.setDataBadge('unavailable');
-      this.showError(t('common.noNewsAvailable'));
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noNewsAvailable'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
