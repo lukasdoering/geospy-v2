@@ -17,10 +17,25 @@ import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 export class GoodThingsDigestPanel extends Panel {
   private cardElements: HTMLElement[] = [];
   private summaryAbort: AbortController | null = null;
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'digest', title: '5 Good Things', trackActivity: false });
     setTrustedHtml(this.content, trustedHtml('<p class="digest-placeholder">Loading today\u2019s digest\u2026</p>', "legacy direct innerHTML migration"));
+    this.content.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('.digest-card-map[data-lat]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      const lat = Number(btn.dataset.lat);
+      const lon = Number(btn.dataset.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return;
+      this.onLocationClick?.(lat, lon);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
   }
 
   /**
@@ -52,6 +67,15 @@ export class GoodThingsDigestPanel extends Panel {
       const item = top5[i]!;
       const card = document.createElement('div');
       card.className = 'digest-card';
+      const hasLocation =
+        item.lat !== undefined &&
+        item.lon !== undefined &&
+        Number.isFinite(item.lat) &&
+        Number.isFinite(item.lon) &&
+        !(item.lat === 0 && item.lon === 0);
+      const mapHtml = hasLocation
+        ? `<button type="button" class="digest-card-map" data-lat="${item.lat}" data-lon="${item.lon}" title="Show on map" aria-label="Show story location on map">Map</button>`
+        : '';
       setTrustedHtml(card, trustedHtml(`
         <span class="digest-card-number">${i + 1}</span>
         <div class="digest-card-body">
@@ -59,6 +83,7 @@ export class GoodThingsDigestPanel extends Panel {
             ${escapeHtml(item.title)}
           </a>
           <span class="digest-card-source">${escapeHtml(item.source)}</span>
+          ${mapHtml}
           <p class="digest-card-summary digest-card-summary--loading">${escapeHtml(t('components.goodThingsDigest.summarizing'))}</p>
         </div>
       `, "legacy direct innerHTML migration"));

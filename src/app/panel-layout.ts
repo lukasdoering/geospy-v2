@@ -2538,6 +2538,10 @@ export class PanelLayoutManager implements AppModule {
 
       this.lazyImportedPanel('digest', () => import('@/components/GoodThingsDigestPanel'), 'GoodThingsDigestPanel', (GoodThingsDigestPanel) => {
         const p = new GoodThingsDigestPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
         this.ctx.digestPanel = p;
         return p;
       });
