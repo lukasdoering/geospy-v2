@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Öppna landsöversikt",
-    "copyCoordinates": "Kopiera koordinater"
+    "copyCoordinates": "Kopiera koordinater",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Realtidsinstrumentpanel för global underrättelse",

@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "국가 개요 열기",
-    "copyCoordinates": "좌표 복사"
+    "copyCoordinates": "좌표 복사",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — 실시간 글로벌 인텔리전스 대시보드",

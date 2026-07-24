@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Landenoverzicht openen",
-    "copyCoordinates": "Coördinaten kopiëren"
+    "copyCoordinates": "Coördinaten kopiëren",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Real-Time Global Intelligence Dashboard",

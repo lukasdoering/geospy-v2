@@ -3110,7 +3110,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Otwórz przegląd kraju",
-    "copyCoordinates": "Kopiuj współrzędne"
+    "copyCoordinates": "Kopiuj współrzędne",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Tablica bieżącej analizy globalnej",
