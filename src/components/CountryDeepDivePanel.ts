@@ -99,6 +99,20 @@ function truncateDisruptionLabel(eventType: string, shortDescription: string): s
   return base.slice(0, DISRUPTION_LABEL_MAX_LEN - 1) + '…';
 }
 
+/** Map energy open-* CustomEvents to the panel that listens for them. */
+function panelIdForEnergyDetailEvent(eventName: string): string | null {
+  switch (eventName) {
+    case 'energy:open-pipeline-detail':
+      return 'pipeline-status';
+    case 'energy:open-storage-facility-detail':
+      return 'storage-facility-map';
+    case 'energy:open-fuel-shortage-detail':
+      return 'fuel-shortages';
+    default:
+      return null;
+  }
+}
+
 export class CountryDeepDivePanel implements CountryBriefPanel {
   private panel: HTMLElement;
   private content: HTMLElement;
@@ -1416,7 +1430,16 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       row.addEventListener('click', () => {
         if (!it.id) return;
         try {
-          window.dispatchEvent(new CustomEvent(it.event, { detail: it.detail }));
+          // Enable the destination drawer first — same contract as
+          // EnergyDisruptionsPanel — so open-* detail isn't lost when the
+          // pipeline/storage/shortage panel is off or still lazy-mounting.
+          const panelId = panelIdForEnergyDetailEvent(it.event);
+          if (panelId) {
+            window.dispatchEvent(new CustomEvent('enable-panel', { detail: { panelId } }));
+          }
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent(it.event, { detail: it.detail }));
+          }, 80);
         } catch { /* Non-browser runtime no-op */ }
       });
       section.append(row);
