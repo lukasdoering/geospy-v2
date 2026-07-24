@@ -28,6 +28,12 @@ function markDismissed(): void {
   }
 }
 
+export function flatHintCopy(satellitesEnabled: boolean): string {
+  return satellitesEnabled
+    ? 'Live orbits on 3D globe · Right-click / Cmd+Shift+O for overhead passes'
+    : 'Right-click or Cmd+Shift+O for overhead passes · Switch to 3D for live orbits';
+}
+
 export function syncSatellitesFlatHint(
   satellitesEnabled: boolean,
   map: SatellitesFlatHintHost | null | undefined,
@@ -44,6 +50,8 @@ export function syncSatellitesFlatHint(
     return;
   }
   if (existing) {
+    const textEl = existing.querySelector('.geospy-satellites-flat-hint-text');
+    if (textEl) textEl.textContent = flatHintCopy(satellitesEnabled);
     existing.classList.add('visible');
     return;
   }
@@ -55,9 +63,7 @@ export function syncSatellitesFlatHint(
 
   const text = document.createElement('span');
   text.className = 'geospy-satellites-flat-hint-text';
-  text.textContent = satellitesEnabled
-    ? 'Live orbits on 3D globe · Right-click / Cmd+Shift+O for overhead passes'
-    : 'Right-click or Cmd+Shift+O for overhead passes · Switch to 3D for live orbits';
+  text.textContent = flatHintCopy(satellitesEnabled);
 
   const switchBtn = document.createElement('button');
   switchBtn.type = 'button';

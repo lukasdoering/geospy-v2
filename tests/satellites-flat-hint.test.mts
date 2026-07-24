@@ -10,7 +10,15 @@ describe('satellites flat-map coherence hint', () => {
     assert.match(src, /geospy-satellites-flat-hint-dismissed/);
     assert.match(src, /switchToGlobe/);
     assert.match(src, /Live orbits on 3D globe/);
+    assert.match(src, /flatHintCopy/);
+    assert.match(src, /textEl\.textContent = flatHintCopy/);
     assert.match(src, /document\.body\.appendChild/);
+  });
+
+  it('refreshes copy when satellitesEnabled flips on an existing hint', async () => {
+    const { flatHintCopy } = await import('../src/components/SatellitesFlatHint.ts');
+    assert.match(flatHintCopy(true), /Live orbits on 3D globe/);
+    assert.match(flatHintCopy(false), /Switch to 3D for live orbits/);
   });
 
   it('wires hint sync into map layer + dimension handlers', () => {
