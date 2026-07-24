@@ -195,7 +195,10 @@ export class FuelShortagePanel extends Panel {
       const live = await getSupplyChainClient().listFuelShortages({ country: '', product: '', severity: '' });
       if (!this.element?.isConnected) return;
       if (live.upstreamUnavailable || !live.shortages?.length) {
-        this.showError('Fuel shortage registry unavailable', () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Fuel shortage registry unavailable</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;

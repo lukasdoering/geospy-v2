@@ -149,7 +149,12 @@ export class EarningsCalendarPanel extends Panel {
       const resp = await client.listEarningsCalendar({ fromDate, toDate });
 
       if (resp.unavailable || !resp.earnings?.length) {
-        if (!this._hasData) this.showError(t('components.earningsCalendar.errors.noData'), () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('components.earningsCalendar.errors.noData'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 

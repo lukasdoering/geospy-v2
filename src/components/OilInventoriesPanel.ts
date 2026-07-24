@@ -267,7 +267,10 @@ export class OilInventoriesPanel extends Panel {
     }
 
     if (parts.length === 0) {
-      this.showError('Oil inventory data unavailable', () => void this.fetchData(), 300);
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Oil inventory data unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
