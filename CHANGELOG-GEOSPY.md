@@ -86,6 +86,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Energy Risk Hormuz tile opens chokepoint; Cross-Source Signals theater cards focus the map
 - Calm empties: Prediction markets empty state + Daily Market Brief unavailable
 - Supply Chain chokepoint Map button; Oil Inventories IEA country chips focus the map
+- Calm empties batch: Big Mac, Grocery Basket, Fuel Prices, FAO, Fear & Greed, FSI load failures
 - Calm empties: GDELT Intel load failure, Tech Events error, Defense Patents error
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles

@@ -74,6 +74,7 @@ const focusedTests = [
   'tests/calm-empty-pred-brief.test.mts',
   'tests/calm-empty-gdelt.test.mts',
   'tests/supply-oil-map-focus.test.mts',
+  'tests/calm-empty-markets-batch3.test.mts',
 ];
 
 function run(cmd, args, label) {

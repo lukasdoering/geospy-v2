@@ -46,7 +46,10 @@ export class FuelPricesPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedMarketData'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
