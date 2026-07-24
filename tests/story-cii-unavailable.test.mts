@@ -32,6 +32,10 @@ describe('story CII unavailable state', () => {
     const source = readFileSync(resolve(root, 'src/services/story-renderer.ts'), 'utf8')
       .replace("import type { StoryData } from './story-data';", '')
       .replace(
+        "import { BRAND } from '@/config/brand';",
+        "const BRAND = { name: 'GeoSpy', nameUpper: 'GEOSPY', tagline: 'Real-Time Global Intelligence Dashboard' };",
+      )
+      .replace(
         "import { getLocale, t } from './i18n';",
         "const getLocale = () => 'en-US'; const t = (key: string) => key === 'common.unavailable' ? 'UNAVAILABLE' : key;",
       );
@@ -74,6 +78,10 @@ describe('story CII unavailable state', () => {
   it('marks every share template unavailable without claiming score, level, or trend', async () => {
     const source = readFileSync(resolve(root, 'src/services/story-share.ts'), 'utf8')
       .replace("import type { StoryData } from './story-data';", '')
+      .replace(
+        "import { BRAND } from '@/config/brand';",
+        "const BRAND = { name: 'GeoSpy', nameUpper: 'GEOSPY', tagline: 'Real-Time Global Intelligence Dashboard' };",
+      )
       .replace("import { toFlagEmoji } from '@/utils/country-flag';", "const toFlagEmoji = () => '';" )
       .replace("import { getCanonicalApiOrigin } from '@/services/runtime';", "const getCanonicalApiOrigin = () => 'https://worldmonitor.app';");
     const { shareTexts } = await importSource(source) as {
