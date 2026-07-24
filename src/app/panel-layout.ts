@@ -1892,7 +1892,13 @@ export class PanelLayoutManager implements AppModule {
       });
       return p;
     });
-    this.lazyDefaultPanel('consumer-prices', () => import('@/components/ConsumerPricesPanel'), 'ConsumerPricesPanel');
+    this.lazyImportedPanel('consumer-prices', () => import('@/components/ConsumerPricesPanel'), 'ConsumerPricesPanel', (ConsumerPricesPanel) => {
+      const p = new ConsumerPricesPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
 
     this.lazyImportedPanel('trade-policy', () => import('@/components/TradePolicyPanel'), 'TradePolicyPanel', (TradePolicyPanel) => {
       const p = new TradePolicyPanel();

@@ -24,6 +24,7 @@ import {
   type RetailerSpread,
 } from '@/services/consumer-prices';
 import { getAllCountriesInflation, type CountryInflationRow } from '@/services/imf-country-data';
+import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
 
 type TabId = 'overview' | 'categories' | 'movers' | 'spread' | 'health' | 'world';
 
@@ -125,6 +126,7 @@ export class ConsumerPricesPanel extends Panel {
   private inflationFilter = '';
   private settings: PanelSettings = loadSettings();
   private loading = false; // tracks in-flight fetch to avoid duplicates
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   // CMD+K deep-link: switch to the requested tab (e.g. World) when opened via
   // the `panel:consumer-prices@world` command. Bound once so destroy() can drop it.
@@ -146,10 +148,22 @@ export class ConsumerPricesPanel extends Panel {
     });
 
     this.content.addEventListener('click', (e) => this.handleClick(e));
+    this.content.addEventListener('keydown', (e) => this.handleKeydown(e));
     this.content.addEventListener('input', (e) => this.handleInput(e));
     if (typeof window !== 'undefined') {
       window.addEventListener(OPEN_TAB_EVENT, this.openTabHandler);
     }
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveFuelShortageMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public destroy(): void {
@@ -203,7 +217,21 @@ export class ConsumerPricesPanel extends Panel {
       this.settings.categoryFilter = null;
       saveSettings(this.settings);
       this.render();
+      return;
     }
+
+    const countryRow = target.closest<HTMLElement>('[data-cp-country]');
+    if (countryRow?.dataset.cpCountry) {
+      this.focusCountry(countryRow.dataset.cpCountry);
+    }
+  }
+
+  private handleKeydown(e: KeyboardEvent): void {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const countryRow = (e.target as HTMLElement | null)?.closest<HTMLElement>('[data-cp-country]');
+    if (!countryRow?.dataset.cpCountry) return;
+    e.preventDefault();
+    this.focusCountry(countryRow.dataset.cpCountry);
   }
 
   private handleInput(e: Event): void {
@@ -456,7 +484,7 @@ export class ConsumerPricesPanel extends Panel {
     return visible.map((r) => {
       const cls = inflationSeverityClass(r.inflationPct);
       return `
-        <tr class="cp-global-row">
+        <tr class="cp-global-row cp-global-row-clickable" data-cp-country="${escapeHtml(r.iso2)}" role="button" tabindex="0" title="Show on map">
           <td class="cp-global-flag">${escapeHtml(r.name)}</td>
           <td class="cp-infl-yoy ${cls}">${fmtInflation(r.inflationPct)}</td>
           <td class="cp-infl-eop">${fmtInflation(r.cpiEopPct)}</td>
