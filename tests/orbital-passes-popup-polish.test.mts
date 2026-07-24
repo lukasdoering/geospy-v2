@@ -45,6 +45,15 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(text, /4m/);
   });
 
+  it('builds an overhead share URL with lat/lon/overhead=1', async () => {
+    const { buildOverheadShareUrl } = await import('../src/components/OrbitalPassesPopup.ts');
+    const url = buildOverheadShareUrl(40.7128, -74.006, 'https://example.test/app?foo=1');
+    const params = new URL(url).searchParams;
+    assert.equal(params.get('lat'), '40.7128');
+    assert.equal(params.get('lon'), '-74.0060');
+    assert.equal(params.get('overhead'), '1');
+  });
+
   it('formats prefs-aware empty detail and settings summary', async () => {
     const {
       defaultOverheadEmptyDetail,

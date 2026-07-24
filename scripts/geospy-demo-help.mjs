@@ -17,6 +17,7 @@ Validate:
 Try:
   • Tip → Try now (first visit)
   • Right-click map → Predict Overhead Passes
+  • Share button on popup → ?overhead=1 deep link
   • Cmd/Ctrl+K → "overhead" or "last overhead"
   • Cmd/Ctrl+Shift+O → passes at map center
   • Settings → Satellites (elevation / window)

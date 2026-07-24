@@ -17,6 +17,7 @@ const focusedTests = [
   'tests/satellite-overhead-passes.test.mts',
   'tests/satellites-flat-hint.test.mts',
   'tests/renewable-fallback-disclose.test.mts',
+  'tests/urlState.test.mts',
 ];
 
 function run(cmd, args, label) {

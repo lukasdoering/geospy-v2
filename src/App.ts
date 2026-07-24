@@ -151,7 +151,9 @@ export class App {
   private pendingDeepLinkExpanded = false;
   private pendingDeepLinkStoryCode: string | null = null;
   private pendingDeepLinkChokepoint: string | null = null;
+  private pendingDeepLinkOverhead: { lat: number; lon: number } | null = null;
   private chokepointDeepLinkTimer: number | null = null;
+  private overheadDeepLinkTimer: number | null = null;
 
   private panelLayout: PanelLayoutManager;
   private dataLoader: DataLoaderManager;
@@ -1589,6 +1591,7 @@ export class App {
     this.pendingDeepLinkCountry = initState.country ?? null;
     this.pendingDeepLinkExpanded = initState.expanded === true;
     this.pendingDeepLinkChokepoint = initState.chokepoint ?? null;
+    this.pendingDeepLinkOverhead = initState.overhead ?? null;
     const earlyParams = new URLSearchParams(window.location.search);
     this.pendingDeepLinkStoryCode = earlyParams.get('c') ?? null;
     this.eventHandlers.setupUrlStateSync();
@@ -1816,6 +1819,10 @@ export class App {
       window.clearTimeout(this.chokepointDeepLinkTimer);
       this.chokepointDeepLinkTimer = null;
     }
+    if (this.overheadDeepLinkTimer !== null) {
+      window.clearTimeout(this.overheadDeepLinkTimer);
+      this.overheadDeepLinkTimer = null;
+    }
 
     // Destroy all modules in reverse order
     for (let i = this.modules.length - 1; i >= 0; i--) {
@@ -2031,6 +2038,25 @@ export class App {
         this.state.map?.enableLayer('waterways');
         this.state.map?.openChokepoint(deepLinkChokepoint);
         this.eventHandlers.syncUrlState();
+      }, DEEP_LINK_INITIAL_DELAY_MS);
+    }
+
+    // GeoSpy: ?overhead=1&lat=&lon= or ?overhead=lat,lon — open pass prediction.
+    const deepLinkOverhead = this.pendingDeepLinkOverhead;
+    this.pendingDeepLinkOverhead = null;
+    if (deepLinkOverhead) {
+      trackDeeplinkOpened('overhead', `${deepLinkOverhead.lat},${deepLinkOverhead.lon}`);
+      this.overheadDeepLinkTimer = window.setTimeout(() => {
+        this.overheadDeepLinkTimer = null;
+        if (this.state.isDestroyed) return;
+        const screenX = Math.round(window.innerWidth * 0.55);
+        const screenY = Math.round(window.innerHeight * 0.35);
+        void this.countryIntel.predictOverheadPasses(
+          deepLinkOverhead.lat,
+          deepLinkOverhead.lon,
+          screenX,
+          screenY,
+        );
       }, DEEP_LINK_INITIAL_DELAY_MS);
     }
   }
