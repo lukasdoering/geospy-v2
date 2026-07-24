@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
 import { attributionFooterHtml, ATTRIBUTION_FOOTER_CSS } from '@/utils/attribution-footer';
+import { resolvePipelineMapFocus } from '@/utils/energy-asset-map-focus';
 
 import type {
   ListPipelinesResponse,
@@ -177,9 +178,11 @@ export class PipelineStatusPanel extends Panel {
   // alongside getPipelineDetail. undefined = not yet fetched;
   // empty array = fetched and no events on file.
   private detailEvents: EnergyDisruptionEntry[] | undefined = undefined;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
   private openDetailHandler = (ev: Event): void => {
     const id = (ev as CustomEvent<{ pipelineId?: string }>).detail?.pipelineId;
     if (!id || !this.element?.isConnected) return;
+    this.focusPipeline(id);
     void this.loadDetail(id);
   };
 
@@ -200,6 +203,18 @@ export class PipelineStatusPanel extends Panel {
     if (typeof window !== 'undefined') {
       window.addEventListener('energy:open-pipeline-detail', this.openDetailHandler);
     }
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusPipeline(pipelineId: string): void {
+    if (!this.onMapFocus) return;
+    const pipeline = this.data?.pipelines?.find(p => p.id === pipelineId);
+    const focus = resolvePipelineMapFocus(pipeline?.startPoint, pipeline?.endPoint);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public destroy(): void {
@@ -381,6 +396,7 @@ export class PipelineStatusPanel extends Panel {
         .pp-table td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .pp-table tr.pp-row { cursor: pointer; }
         .pp-table tr.pp-row:hover td { background: rgba(255,255,255,0.03); }
+        .pp-table tr.pp-row:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: -2px; }
         .pp-name { font-weight: 600; color: var(--text, #eee); }
         .pp-sub  { font-size: 9px; color: var(--text-dim, #888); text-transform: uppercase; letter-spacing: 0.04em; }
         .pp-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -397,10 +413,19 @@ export class PipelineStatusPanel extends Panel {
     `, 'legacy Panel.setContent() migration'));
 
     const table = this.element?.querySelector('.pp-table') as HTMLTableElement | null;
-    table?.querySelectorAll<HTMLTableRowElement>('tr.pp-row').forEach(tr => {
+    const activate = (tr: HTMLTableRowElement): void => {
       const id = tr.dataset.pipelineId;
       if (!id) return;
-      tr.addEventListener('click', () => void this.loadDetail(id));
+      this.focusPipeline(id);
+      void this.loadDetail(id);
+    };
+    table?.querySelectorAll<HTMLTableRowElement>('tr.pp-row').forEach(tr => {
+      tr.addEventListener('click', () => activate(tr));
+      tr.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(tr);
+      });
     });
     const closeBtn = this.element?.querySelector<HTMLButtonElement>('.pp-drawer-close');
     closeBtn?.addEventListener('click', () => this.closeDetail());
@@ -410,7 +435,7 @@ export class PipelineStatusPanel extends Panel {
     const commodity = p.commodityType === 'gas' ? '⛽' : '🛢️';
     const route = `${escapeHtml(p.fromCountry)} → ${escapeHtml(p.toCountry)}`;
     return `
-      <tr class="pp-row" data-pipeline-id="${escapeHtml(p.id)}">
+      <tr class="pp-row pp-row-clickable" data-pipeline-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="Show on map">
         <td>
           <div class="pp-name">${commodity} ${escapeHtml(p.name)}</div>
           <div class="pp-sub">${escapeHtml(p.operator || '')}</div>
