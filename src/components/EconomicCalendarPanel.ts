@@ -151,7 +151,12 @@ export class EconomicCalendarPanel extends Panel {
       return true;
     } catch (err) {
       if (this.isAbortError(err)) return false;
-      if (!this._hasData) this.showError('Failed to load economic calendar.', () => void this.fetchData());
+      if (!this._hasData) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Economic calendar unavailable</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

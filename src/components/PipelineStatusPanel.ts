@@ -280,7 +280,10 @@ export class PipelineStatusPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Pipeline registry error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Pipeline registry unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
