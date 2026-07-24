@@ -12,6 +12,7 @@ import {
 } from '@/services/infrastructure-cascade';
 import type { CascadeResult, CascadeImpactLevel, InfrastructureNode } from '@/types';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 
 type NodeFilter = 'all' | 'cable' | 'pipeline' | 'port' | 'chokepoint';
@@ -22,6 +23,7 @@ export class CascadePanel extends Panel {
   private cascadeResult: CascadeResult | null = null;
   private filter: NodeFilter = 'cable';
   private onSelectCallback: ((nodeId: string | null) => void) | null = null;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -31,6 +33,12 @@ export class CascadePanel extends Panel {
       trackActivity: true,
       infoTooltip: t('components.cascade.infoTooltip'),
     });
+    if (!document.getElementById('cascade-country-clickable-style')) {
+      const style = document.createElement('style');
+      style.id = 'cascade-country-clickable-style';
+      style.textContent = '.cascade-country-clickable{cursor:pointer}.cascade-country-clickable:hover{filter:brightness(1.08)}.cascade-country-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
+      document.head.appendChild(style);
+    }
     this.setupDelegatedListeners();
     this.init();
   }
@@ -139,14 +147,20 @@ export class CascadePanel extends Panel {
     const { source, countriesAffected, redundancies } = this.cascadeResult;
 
     const countriesHtml = countriesAffected.length > 0
-      ? countriesAffected.map(c => `
-          <div class="cascade-country" style="border-left: 3px solid ${this.getImpactColor(c.impactLevel)}">
+      ? countriesAffected.map(c => {
+          const code = (c.country || c.countryName || '').trim();
+          const attrs = code
+            ? ` class="cascade-country cascade-country-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+            : ' class="cascade-country"';
+          return `
+          <div${attrs} style="border-left: 3px solid ${this.getImpactColor(c.impactLevel)}">
             <span class="cascade-emoji">${this.getImpactEmoji(c.impactLevel)}</span>
             <span class="cascade-country-name">${escapeHtml(c.countryName)}</span>
             <span class="cascade-impact">${t(`components.cascade.impactLevels.${c.impactLevel}`)}</span>
             ${c.affectedCapacity > 0 ? `<span class="cascade-capacity">${t('components.cascade.capacityPercent', { percent: String(Math.round(c.affectedCapacity * 100)) })}</span>` : ''}
           </div>
-        `).join('')
+        `;
+        }).join('')
       : `<div class="empty-state">${t('components.cascade.noCountryImpacts')}</div>`;
 
     const redundanciesHtml = redundancies && redundancies.length > 0
@@ -225,7 +239,22 @@ export class CascadePanel extends Panel {
 
       if (target.closest('.cascade-analyze-btn')) {
         this.runAnalysis();
+        return;
       }
+
+      const country = target.closest<HTMLElement>('.cascade-country-clickable');
+      if (country?.dataset.country) {
+        this.focusCountry(country.dataset.country);
+      }
+    });
+
+    this.content.addEventListener('keydown', (e: Event) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const country = (e.target as HTMLElement).closest<HTMLElement>('.cascade-country-clickable');
+      if (!country?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(country.dataset.country);
     });
 
     this.content.addEventListener('change', (e: Event) => {
@@ -260,6 +289,17 @@ export class CascadePanel extends Panel {
       this.filter = nodeType;
     }
     this.runAnalysis();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public onSelect(callback: (nodeId: string | null) => void): void {
