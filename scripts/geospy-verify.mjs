@@ -104,5 +104,5 @@ run(process.execPath, [resolve(root, 'scripts/geospy-smoke-check.mjs')], 'geospy
 run(tsxBin, ['--test', '--test-concurrency=1', ...focusedTests], 'focused GeoSpy tests');
 
 console.log('\nGeoSpy verify OK');
-console.log('  smoke + overhead/markets/renewable focused tests passed');
+console.log('  smoke + focused GeoSpy product-surface tests passed');
 console.log('  demo branch: cursor/geospy-working-demo-4151');
