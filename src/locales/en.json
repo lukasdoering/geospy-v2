@@ -1,9 +1,9 @@
 {
   "shell": {
-    "documentTitle": "World Monitor — Real-Time Global Intelligence Dashboard",
-    "metaDescription": "Real-time global intelligence platform. Featured in WIRED. Used by 2M+ people across 190 countries. Conflicts, markets, military, OSINT in one view.",
+    "documentTitle": "GeoSpy — Real-Time Global Intelligence Dashboard",
+    "metaDescription": "GeoSpy real-time global intelligence dashboard. Conflicts, markets, military, climate, and OSINT in one live map. AGPL fork of WorldMonitor.",
     "offlineTitle": "You're Offline",
-    "offlineMessage": "World Monitor requires an internet connection for real-time intelligence data.",
+    "offlineMessage": "GeoSpy requires an internet connection for real-time intelligence data.",
     "offlineRetry": "Retry"
   },
   "widgets": {
@@ -680,7 +680,7 @@
       }
     },
     "settingsWindow": {
-      "shellTitle": "World Monitor Settings",
+      "shellTitle": "GeoSpy Settings",
       "shellSearchPlaceholder": "Search settings...",
       "shellCancel": "Cancel",
       "shellSaveClose": "Save & Close",
@@ -1899,7 +1899,11 @@
       "infoTooltip": "<strong>Disaster Cascade</strong> Detects converging natural disaster and infrastructure signals:<ul><li>Correlates earthquakes, wildfires, floods, and weather extremes</li><li>Tracks cascading effects on infrastructure and supply chains</li><li>Highlights regions with compounding disaster risk</li></ul>Click a card to zoom to the affected region."
     },
     "markets": {
-      "infoTooltip": "<strong>Markets</strong> Real-time stock indices, equities, and crypto prices. Customize your watchlist with the Watchlist button. Sparklines show recent price trend."
+      "infoTooltip": "<strong>Markets</strong> Real-time stock indices, equities, and crypto prices. Customize your watchlist with the Watchlist button. Sparklines show recent price trend.",
+      "chart": {
+        "title": "{{symbol}} price chart",
+        "close": "Close chart"
+      }
     },
     "heatmap": {
       "infoTooltip": "<strong>Sector Heatmap</strong> S&P 500 sector performance at a glance. Color intensity reflects the magnitude of daily change. Green = gains, Red = losses."
@@ -3162,7 +3166,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Open Country Brief",
-    "copyCoordinates": "Copy Coordinates"
+    "copyCoordinates": "Copy Coordinates",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "auth": {
     "signIn": "Sign In",
