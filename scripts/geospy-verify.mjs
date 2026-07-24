@@ -21,6 +21,7 @@ const focusedTests = [
   'tests/list-satellites-celestrak.test.mts',
   'tests/markets-chart-hint.test.mts',
   'tests/next-overhead-chip.test.mts',
+  'tests/disease-panel-polish.test.mts',
 ];
 
 function run(cmd, args, label) {

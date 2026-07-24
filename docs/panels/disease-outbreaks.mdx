@@ -10,8 +10,9 @@ The **Disease Outbreaks** panel shows active outbreak alerts worldwide — confi
 A severity-ranked list of active outbreak events. Each row shows the disease, the affected country/region, the alert level, the case count (when reported), and a relative timestamp. The list is sorted by severity (alerts first) and then by recency.
 
 - **Alert-level pills** at the top let you filter by severity: `ALERT` (red), `WARNING` (orange), `WATCH` (yellow). Click a pill to toggle the filter; click again to clear.
-- **Search** — free-text match against country / region / disease. Lowercased substring match.
-- **Source link in-row** — each row renders the upstream source name as an inline link (sanitised URL, `target="_blank"`). Clicking the source-name link opens the upstream advisory. The row itself has no click handler — only the inline link is active.
+- **Search** — free-text match against country / region / disease (search field above the pills). Lowercased substring match; severity filter and search can be combined.
+- **Source link in-row** — each row renders the upstream source name as an inline link (sanitised URL, `target="_blank"`). Clicking the source-name link opens the upstream advisory.
+- **Row → map** — click a row (outside the source link) to center the map on the outbreak coords or country centroid and enable the disease layer when needed. Location line falls back to `countryCode` when title extraction left `location` empty.
 
 Panel id is `disease-outbreaks`; canonical component is `src/components/DiseaseOutbreaksPanel.ts`.
 

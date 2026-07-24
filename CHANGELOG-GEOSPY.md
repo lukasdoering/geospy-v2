@@ -14,6 +14,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Prefs footer opens Settings → Satellites; tip auto-hide no longer permanently dismisses
 - Flat-map hint **Predict passes** CTA; live URL keeps `?overhead=1` while popup is open
 - Persistent **Next overhead** chip from last predicted location
+- Disease Outbreaks: working search, location fallback, row click → map focus
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
 - Satellites layer default-on (full variant)

@@ -1966,7 +1966,17 @@ export class PanelLayoutManager implements AppModule {
       return ucdpEventsPanel;
     });
 
-    this.lazyDefaultPanel('disease-outbreaks', () => import('@/components/DiseaseOutbreaksPanel'), 'DiseaseOutbreaksPanel');
+    this.lazyImportedPanel('disease-outbreaks', () => import('@/components/DiseaseOutbreaksPanel'), 'DiseaseOutbreaksPanel', (DiseaseOutbreaksPanel) => {
+      const p = new DiseaseOutbreaksPanel();
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        // Surface disease pins when jumping from the panel.
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.diseaseOutbreaks) {
+          this.callbacks.applyMapLayerChange?.('diseaseOutbreaks', true, 'programmatic');
+        }
+      });
+      return p;
+    });
     this.lazyDefaultPanel('social-velocity', () => import('@/components/SocialVelocityPanel'), 'SocialVelocityPanel');
     this.lazyDefaultPanel('wsb-ticker-scanner', () => import('@/components/WsbTickerScannerPanel'), 'WsbTickerScannerPanel');
 
