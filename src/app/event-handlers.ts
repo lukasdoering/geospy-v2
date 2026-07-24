@@ -34,6 +34,11 @@ import {
   showToast,
 } from '@/utils';
 import { clearPanelColSpans, clearPanelSpans } from '@/utils/panel-storage';
+import { syncSatellitesFlatHint } from '@/components/SatellitesFlatHint';
+import {
+  getActiveOverheadShareLocation,
+  OVERHEAD_POPUP_CHANGE_EVENT,
+} from '@/components/OrbitalPassesPopup';
 import {
   IDLE_PAUSE_MS,
   DEFAULT_MAP_LAYERS,
@@ -199,6 +204,7 @@ export interface EventHandlerCallbacks {
   refreshCiiAfterFocalPointsReady?: () => void;
   stopLayerActivity?: (layer: keyof MapLayers) => void;
   mountLiveNewsIfReady?: () => void;
+  predictOverheadPassesAtMapCenter?: () => void;
 }
 
 export class EventHandlerManager implements AppModule {
@@ -506,6 +512,11 @@ export class EventHandlerManager implements AppModule {
         if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'k') {
           e.preventDefault();
           this.callbacks.openSearch({ toggle: true });
+        }
+        // GeoSpy: Cmd/Ctrl+Shift+O → overhead passes at map center
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'o') {
+          e.preventDefault();
+          this.callbacks.predictOverheadPassesAtMapCenter?.();
         }
       };
       document.addEventListener('keydown', this.boundSearchKeyHandler);
@@ -1227,6 +1238,11 @@ export class EventHandlerManager implements AppModule {
       this.debouncedWebcamReload();
     });
 
+    // Keep ?overhead=1 in the live URL while the prediction popup is open.
+    window.addEventListener(OVERHEAD_POPUP_CHANGE_EVENT, () => {
+      this.syncUrlState();
+    });
+
     // Skip the immediate sync only when applyInitialUrlState() will start an
     // async flyTo that makes getCenter() return stale intermediate coordinates.
     // Two cases qualify:
@@ -1260,6 +1276,7 @@ export class EventHandlerManager implements AppModule {
     this.ctx.mapLayers[layer] = enabled;
     saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
     this.syncUrlState();
+    this.syncSatellitesFlatHint();
 
     const sourceIds = LAYER_TO_SOURCE[layer];
     if (sourceIds) {
@@ -1294,7 +1311,11 @@ export class EventHandlerManager implements AppModule {
   getShareUrl(): string | null {
     if (!this.ctx.map) return null;
     const state = this.ctx.map.getState();
-    const center = this.ctx.map.getCenter();
+    const mapCenter = this.ctx.map.getCenter();
+    const overheadShare = getActiveOverheadShareLocation();
+    const center = overheadShare
+      ? { lat: overheadShare.lat, lon: overheadShare.lon }
+      : mapCenter;
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const briefPage = this.ctx.countryBriefPage;
     const isCountryVisible = briefPage?.isVisible() ?? false;
@@ -1307,6 +1328,7 @@ export class EventHandlerManager implements AppModule {
       country: isCountryVisible ? (briefPage?.getCode() ?? undefined) : undefined,
       expanded: isCountryVisible && briefPage?.getIsMaximized?.() ? true : undefined,
       chokepoint: !isCountryVisible ? (this.ctx.activeChokepoint ?? undefined) : undefined,
+      overhead: Boolean(overheadShare),
     });
   }
 
@@ -2204,7 +2226,19 @@ export class EventHandlerManager implements AppModule {
           this.ctx.mapLayers = { ...this.ctx.mapLayers, resilienceScore: false };
           saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
         }
+        this.syncSatellitesFlatHint();
       });
+    });
+    // Initial coherence tip for default-on satellites on flat map.
+    // Retry a few times — map mode / layer hydration can lag the first paint.
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 1500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 3500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 6000);
+  }
+
+  private syncSatellitesFlatHint(): void {
+    syncSatellitesFlatHint(!!this.ctx.mapLayers.satellites, this.ctx.map, {
+      onPredictPasses: () => this.callbacks.predictOverheadPassesAtMapCenter?.(),
     });
   }
 

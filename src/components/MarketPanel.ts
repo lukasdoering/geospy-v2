@@ -6,11 +6,38 @@ import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { miniSparkline } from '@/utils/sparkline';
 import { SITE_VARIANT } from '@/config';
 import { createWatchlistButton } from './watchlist-modal';
+import { openMarketChartModal } from './market-chart-modal';
+
+function hasPlottableSeries(stock: MarketData): boolean {
+  return Array.isArray(stock.sparkline) && stock.sparkline.filter((v) => Number.isFinite(v)).length >= 2;
+}
 
 export class MarketPanel extends Panel {
+  private _markets: MarketData[] = [];
+
   constructor() {
     super({ id: 'markets', title: t('panels.markets'), infoTooltip: t('components.markets.infoTooltip') });
     this.header.appendChild(createWatchlistButton());
+
+    // Delegated once on the persistent content element (renderMarkets only swaps
+    // innerHTML): click or Enter/Space on a plottable ticker opens its terminal chart.
+    const openFromEvent = (target: HTMLElement): void => {
+      const row = target.closest<HTMLElement>('[data-market-chart]');
+      if (!row) return;
+      const idx = Number(row.dataset.marketChart);
+      const stock = this._markets[idx];
+      if (stock) openMarketChartModal(stock);
+    };
+    this.content.addEventListener('click', (e) => openFromEvent(e.target as HTMLElement));
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        const row = (e.target as HTMLElement).closest('[data-market-chart]');
+        if (row) {
+          e.preventDefault();
+          openFromEvent(e.target as HTMLElement);
+        }
+      }
+    });
   }
 
   public renderMarkets(data: MarketData[], rateLimited?: boolean): void {
@@ -19,10 +46,19 @@ export class MarketPanel extends Panel {
       return;
     }
 
-    const html = data
-      .map(
-        (stock) => `
-      <div class="market-item">
+    this._markets = data;
+    const hasChartable = data.some(hasPlottableSeries);
+    const hint = hasChartable
+      ? `<div class="market-chart-hint" role="note" data-testid="market-chart-hint">${escapeHtml(t('components.markets.chartHint'))}</div>`
+      : '';
+    const html = hint + data
+      .map((stock, idx) => {
+        const clickable = hasPlottableSeries(stock);
+        const attrs = clickable
+          ? ` class="market-item market-item-clickable" data-market-chart="${idx}" role="button" tabindex="0" aria-label="${t('components.markets.chart.title', { symbol: escapeHtml(stock.display) })}"`
+          : ' class="market-item"';
+        return `
+      <div${attrs}>
         <div class="market-info">
           <span class="market-name">${escapeHtml(stock.name)}</span>
           <span class="market-symbol">${escapeHtml(stock.display)}</span>
@@ -33,8 +69,8 @@ export class MarketPanel extends Panel {
           <span class="market-change ${getChangeClass(stock.change!)}">${formatChange(stock.change!)}</span>
         </div>
       </div>
-    `
-      )
+    `;
+      })
       .join('');
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
