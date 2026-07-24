@@ -9,6 +9,7 @@
 // auth-state subscription below also self-invalidates on any id
 // transition as defence in depth.
 
+import { BRAND } from '@/config/brand';
 import { getClerkToken } from '@/services/clerk';
 import { getAuthState, subscribeAuthState } from '@/services/auth-state';
 
@@ -106,11 +107,11 @@ export type ShareResult = 'shared' | 'copied' | 'blocked' | 'error';
 
 export async function shareReferral(profile: ReferralProfile): Promise<ShareResult> {
   const url = profile.shareUrl;
-  const text = 'Get geopolitical intelligence in a daily editorial brief. Join me on WorldMonitor:';
+  const text = `Get geopolitical intelligence in a daily editorial brief. Join me on ${BRAND.name}:`;
   // Web Share — mobile primary path.
   if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
     try {
-      await navigator.share({ title: 'WorldMonitor', text, url });
+      await navigator.share({ title: BRAND.name, text, url });
       return 'shared';
     } catch (err) {
       // User dismissed the sheet or the browser denied — fall through
