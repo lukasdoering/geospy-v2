@@ -83,6 +83,8 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Cross-Source Signals** — theater-labeled cards focus the map when the theater resolves
 - **Supply Chain** — expanded chokepoint cards expose a Map button that opens the chokepoint
 - **Oil Inventories** — IEA country chips under the bar chart focus the map
+- **Renewable Energy** — regional breakdown rows focus the map
+- **Energy Risk Overview** — Hormuz / EU Gas / Active disruptions tiles focus the map
 
 ## Implementation note
 
