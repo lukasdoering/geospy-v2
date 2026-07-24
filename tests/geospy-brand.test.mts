@@ -75,6 +75,17 @@ describe('GeoSpy brand config', () => {
     assert.doesNotMatch(embed, /World Monitor Live Map Embed/);
   });
 
+  it('brands Pro landing page hero chrome as GeoSpy', () => {
+    const pro = readFileSync(new URL('../public/pro/index.html', import.meta.url), 'utf8');
+    assert.match(pro, /<title>GeoSpy Pro/);
+    assert.match(pro, /og:site_name" content="GeoSpy"/);
+    assert.match(pro, /<h1>GeoSpy Pro — From Noise to Signal<\/h1>/);
+    assert.match(pro, /<h3>GeoSpy Pro<\/h3>/);
+    assert.match(pro, /<h2>What GeoSpy Tracks<\/h2>/);
+    assert.doesNotMatch(pro, /<title>World Monitor Pro/);
+    assert.doesNotMatch(pro, /<h1>World Monitor Pro — From Noise to Signal<\/h1>/);
+  });
+
   it('brands Latest Brief and Settings API/MCP chrome as GeoSpy', () => {
     const brief = readFileSync(new URL('../src/components/LatestBriefPanel.ts', import.meta.url), 'utf8');
     assert.match(brief, /latest-brief-cover-title' \}, 'GeoSpy'/);
