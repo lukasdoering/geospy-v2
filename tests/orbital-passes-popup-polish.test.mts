@@ -75,6 +75,10 @@ describe('OrbitalPassesPopup polish', () => {
     const app = readFileSync(new URL('../src/App.ts', import.meta.url), 'utf8');
     assert.match(app, /predictOverheadPassesAtMapCenter:\s*\(\)\s*=>\s*this\.countryIntel\.predictOverheadPassesAtMapCenter\(\)/);
 
+    const handlers = readFileSync(new URL('../src/app/event-handlers.ts', import.meta.url), 'utf8');
+    assert.match(handlers, /key\.toLowerCase\(\) === 'o'/);
+    assert.match(handlers, /predictOverheadPassesAtMapCenter/);
+
     const intel = readFileSync(new URL('../src/app/country-intel.ts', import.meta.url), 'utf8');
     assert.match(intel, /predictOverheadPassesAtMapCenter\(/);
     assert.match(intel, /geospy-overhead-passes-tip-dismissed/);
