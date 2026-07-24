@@ -2340,7 +2340,16 @@ export class PanelLayoutManager implements AppModule {
         return p;
       }),
     );
-    this.lazyDefaultPanel('windy-webcams', () => import('@/components/PinnedWebcamsPanel'), 'PinnedWebcamsPanel');
+    this.lazyPanel('windy-webcams', () =>
+      this.importPanel('windy-webcams', () => import('@/components/PinnedWebcamsPanel'), 'PinnedWebcamsPanel', (PinnedWebcamsPanel) => {
+        const p = new PinnedWebcamsPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 7);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
+        return p;
+      }),
+    );
 
     this.lazyPanel('events', () =>
       this.importPanel(
