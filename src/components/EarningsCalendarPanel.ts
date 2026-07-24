@@ -161,7 +161,13 @@ export class EarningsCalendarPanel extends Panel {
       this.render(resp.earnings as EarningsEntry[]);
       return true;
     } catch (e) {
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : t('components.earningsCalendar.errors.failedToLoad'), () => void this.fetchData());
+      if (!this._hasData) {
+        const msg = e instanceof Error ? e.message : t('components.earningsCalendar.errors.failedToLoad');
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

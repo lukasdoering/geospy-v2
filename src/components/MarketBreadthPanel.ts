@@ -224,7 +224,13 @@ export class MarketBreadthPanel extends Panel {
       this.renderPanel();
       return true;
     } catch (e) {
-      if (!this.data) this.showError(e instanceof Error ? e.message : t('common.failedToLoad'), () => void this.fetchData());
+      if (!this.data) {
+        const msg = e instanceof Error ? e.message : t('common.failedToLoad');
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }
