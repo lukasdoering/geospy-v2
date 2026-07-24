@@ -8,6 +8,8 @@ npm run geospy:demo
 git checkout cursor/geospy-working-demo-4151
 ```
 
+Quick start guide: [GEOSPY.md](GEOSPY.md).
+
 Upstream WorldMonitor contribution docs remain the baseline for architecture, Sebuf, and data-source workflows.
 
 ---
