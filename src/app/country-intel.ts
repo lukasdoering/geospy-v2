@@ -210,9 +210,67 @@ export class CountryIntelManager implements AppModule {
       });
       showMapContextMenu(payload.screenX, payload.screenY, items);
     });
+
+    this.maybeShowOverheadPassesTip();
   }
 
-  private async predictOverheadPasses(lat: number, lon: number, screenX: number, screenY: number): Promise<void> {
+  /** Predict overhead passes at the current map center (Cmd+K / tip CTA). */
+  public predictOverheadPassesAtMapCenter(): void {
+    const center = this.ctx.map?.getCenter?.();
+    if (!center) {
+      this.showToast('Map center unavailable. Pan the map and try again.');
+      return;
+    }
+    const screenX = Math.round(window.innerWidth * 0.55);
+    const screenY = Math.round(window.innerHeight * 0.35);
+    void this.predictOverheadPasses(center.lat, center.lon, screenX, screenY);
+  }
+
+  private maybeShowOverheadPassesTip(): void {
+    try {
+      if (localStorage.getItem('geospy-overhead-passes-tip-dismissed') === '1') return;
+    } catch {
+      return;
+    }
+    // Defer so the map shell is interactive before the tip appears.
+    window.setTimeout(() => {
+      if (this.ctx.isDestroyed) return;
+      try {
+        if (localStorage.getItem('geospy-overhead-passes-tip-dismissed') === '1') return;
+      } catch {
+        return;
+      }
+      const tip = document.createElement('div');
+      tip.className = 'geospy-overhead-tip';
+      tip.setAttribute('role', 'status');
+      const strong = document.createElement('strong');
+      strong.textContent = 'GeoSpy tip';
+      tip.append(strong, document.createTextNode(' — Right-click the map → Predict Overhead Passes '));
+      const dismissBtn = document.createElement('button');
+      dismissBtn.type = 'button';
+      dismissBtn.className = 'geospy-overhead-tip-dismiss';
+      dismissBtn.setAttribute('aria-label', 'Dismiss tip');
+      dismissBtn.textContent = 'Got it';
+      const dismiss = () => {
+        tip.remove();
+        try {
+          localStorage.setItem('geospy-overhead-passes-tip-dismissed', '1');
+        } catch {
+          /* ignore quota / private mode */
+        }
+      };
+      dismissBtn.addEventListener('click', dismiss);
+      tip.append(dismissBtn);
+      document.body.appendChild(tip);
+      requestAnimationFrame(() => tip.classList.add('visible'));
+      window.setTimeout(dismiss, 12_000);
+    }, 2500);
+  }
+
+  public async predictOverheadPasses(lat: number, lon: number, screenX: number, screenY: number): Promise<void> {
+    const retry = () => {
+      void this.predictOverheadPasses(lat, lon, screenX, screenY);
+    };
     showOrbitalPassesPopup(screenX, screenY, lat, lon, [], { loading: true });
     try {
       const { predictOverheadPassesAt } = await import('@/services/satellites');
@@ -230,6 +288,7 @@ export class CountryIntelManager implements AppModule {
         error: catalogMissing
           ? 'Satellite catalog unavailable right now. Try again in a moment.'
           : 'Could not compute overhead passes. Try again in a moment.',
+        onRetry: retry,
       });
     }
   }
