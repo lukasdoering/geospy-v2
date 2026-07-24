@@ -3380,7 +3380,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Otvori Sažetak Zemlje",
-    "copyCoordinates": "Kopiraj Koordinate"
+    "copyCoordinates": "Kopiraj Koordinate",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "auth": {
     "signIn": "Prijava",

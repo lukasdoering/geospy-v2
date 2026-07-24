@@ -3162,7 +3162,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Open Country Brief",
-    "copyCoordinates": "Copy Coordinates"
+    "copyCoordinates": "Copy Coordinates",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "auth": {
     "signIn": "Sign In",
