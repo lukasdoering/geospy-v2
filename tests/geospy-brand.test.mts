@@ -24,4 +24,11 @@ describe('GeoSpy brand config', () => {
     assert.match(offline, /GeoSpy requires an internet connection/);
     assert.doesNotMatch(offline, /World Monitor/);
   });
+
+  it('does not claim upstream WIRED/2M metrics as GeoSpy facts in index.html', () => {
+    const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+    assert.doesNotMatch(html, /GeoSpy[\s\S]{0,80}Used by 2M\+/);
+    assert.match(html, /AGPL fork of WorldMonitor|AGPL fork of <a[^>]*>WorldMonitor/i);
+    assert.match(html, /name="description" content="GeoSpy is a real-time global intelligence dashboard/);
+  });
 });
