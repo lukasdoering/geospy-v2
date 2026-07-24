@@ -50,6 +50,14 @@ function toSatellite(item: SatelliteCacheItem): Satellite {
   };
 }
 
+const SAR_NAME_RE =
+  /\b(SAR|RADARSAT|COSMO[- ]?SKYMED|TERRASAR|TANDEM-X|SENTINEL-1|ALOS-2|ALOS-4|BIOMASS|RISAT|ICEYE|CAPELLA|UMBRA|NOVASAR|SAOCOM|PAZ|CSG-\d)\b/i;
+
+function inferSensorType(name: string, fallback: string): string {
+  if (SAR_NAME_RE.test(name)) return 'sar';
+  return fallback;
+}
+
 /** Parse classic 3-line TLE text into Satellite messages. */
 export function parseTleCatalog(
   text: string,
@@ -74,7 +82,7 @@ export function parseTleCatalog(
       id: norad,
       name,
       country: defaults.country,
-      type: defaults.type,
+      type: inferSensorType(name, defaults.type),
       alt: 0,
       velocity: 0,
       inclination: 0,
