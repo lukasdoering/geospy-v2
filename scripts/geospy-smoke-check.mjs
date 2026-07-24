@@ -33,6 +33,8 @@ mustInclude('src/components/OrbitalPassesPopup.ts', 'buildOverheadPassesSummaryL
 mustInclude('src/components/SatellitesFlatHint.ts', 'geospy-satellites-flat-hint', 'flat-map hint');
 mustInclude('src/services/overhead-pass-settings.ts', 'geospy-overhead-min-elevation', 'overhead prefs storage');
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes'", 'Cmd+K overhead command');
+mustInclude('src/config/commands.ts', "id: 'view:overhead-passes-last'", 'Cmd+K last-location command');
+mustInclude('src/app/country-intel.ts', 'geospy-overhead-last-location', 'last location persistence');
 mustInclude('src/app/event-handlers.ts', "key.toLowerCase() === 'o'", 'Cmd+Shift+O hotkey');
 mustInclude('src/config/variants/full.ts', 'satellites: true', 'satellites default-on');
 mustInclude('public/offline.html', 'GeoSpy - Offline', 'offline title');
