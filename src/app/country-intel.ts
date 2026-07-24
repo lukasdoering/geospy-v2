@@ -41,6 +41,7 @@ import { collectStoryData } from '@/services/story-data';
 import { hasPremiumAccess } from '@/services/panel-gating';
 import { getAuthState, subscribeAuthState } from '@/services/auth-state';
 import { showMapContextMenu } from '@/components/MapContextMenu';
+import { showOrbitalPassesPopup } from '@/components/OrbitalPassesPopup';
 import { BETA_MODE } from '@/config/beta';
 import { mlWorker } from '@/services/ml-worker';
 import { isHeadlineMemoryEnabled } from '@/services/ai-flow-settings';
@@ -201,8 +202,33 @@ export class CountryIntelManager implements AppModule {
         });
       }
       items.push({ label: t('contextMenu.copyCoordinates'), action: () => navigator.clipboard.writeText(`${payload.lat.toFixed(5)}, ${payload.lon.toFixed(5)}`).catch(() => {}) });
+      items.push({
+        label: t('contextMenu.predictOverheadPasses'),
+        action: () => {
+          void this.predictOverheadPasses(payload.lat, payload.lon, payload.screenX, payload.screenY);
+        },
+      });
       showMapContextMenu(payload.screenX, payload.screenY, items);
     });
+  }
+
+  private async predictOverheadPasses(lat: number, lon: number, screenX: number, screenY: number): Promise<void> {
+    showOrbitalPassesPopup(screenX, screenY, lat, lon, [], { loading: true });
+    try {
+      const { predictOverheadPassesAt } = await import('@/services/satellites');
+      const passes = await predictOverheadPassesAt(lat, lon, {
+        windowMinutes: 180,
+        stepSeconds: 60,
+        minElevationDeg: 20,
+        limit: 12,
+      });
+      showOrbitalPassesPopup(screenX, screenY, lat, lon, passes);
+    } catch (err) {
+      console.error('[satellites] overhead pass prediction failed', err);
+      showOrbitalPassesPopup(screenX, screenY, lat, lon, [], {
+        error: 'Could not load satellite TLEs. Try again in a moment.',
+      });
+    }
   }
 
   private async ensureCountryBriefPage(): Promise<boolean> {

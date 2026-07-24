@@ -3162,7 +3162,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "देश संक्षिप्त विवरण खोलें",
-    "copyCoordinates": "निर्देशांक कॉपी करें"
+    "copyCoordinates": "निर्देशांक कॉपी करें",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "auth": {
     "signIn": "साइन इन करें",

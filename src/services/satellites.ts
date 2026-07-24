@@ -1,6 +1,5 @@
-// TODO: Phase 2 — Orbital Surveillance Analysis Panel
-// - Overhead Pass Prediction: compute next pass times over user-selected locations
-//   (hotspots, conflict zones, bases). "GAOFEN-12 will be overhead Tartus in 14 min"
+// Phase 2 — Orbital Surveillance (in progress)
+// ✅ Overhead Pass Prediction: predictNextPasses / predictOverheadPassesAt
 // - Revisit Time Analysis: how often a location is observed by hostile/friendly sats
 // - Imaging Window Alerts: notify when SAR/optical sats are overhead a watched region
 // - Sensor Swath Visualization: show ground coverage cone (FOV-based) not just nadir dot
@@ -61,6 +60,34 @@ export interface SatRecEntry {
   meta: { noradId: string; name: string; type: string; country: string };
 }
 
+export interface OverheadPass {
+  noradId: string;
+  name: string;
+  type: string;
+  country: string;
+  /** Acquisition of signal — first sample above the elevation threshold (ms). */
+  aosMs: number;
+  /** Loss of signal — last sample above the elevation threshold (ms). */
+  losMs: number;
+  /** Peak elevation during the pass, degrees above horizon. */
+  maxElevationDeg: number;
+  /** Timestamp of peak elevation (ms). */
+  maxElevationMs: number;
+}
+
+export interface PredictPassesOptions {
+  /** Look-ahead window in minutes (default 180). */
+  windowMinutes?: number;
+  /** Sample step in seconds (default 60). */
+  stepSeconds?: number;
+  /** Minimum elevation to count as an overhead pass, degrees (default 20). */
+  minElevationDeg?: number;
+  /** Max passes to return after sorting by AOS (default 12). */
+  limit?: number;
+  /** Optional clock override for tests. */
+  nowMs?: number;
+}
+
 let cachedData: SatelliteTLE[] | null = null;
 let cachedAt = 0;
 const CACHE_TTL = 10 * 60 * 1000;
@@ -69,6 +96,9 @@ let failures = 0;
 let cooldownUntil = 0;
 const MAX_FAILURES = 3;
 const COOLDOWN_MS = 10 * 60 * 1000;
+
+/** Mean motion below this (rad/min) is treated as MEO/GEO and skipped for overhead passes. */
+const LEO_MEAN_MOTION_MIN = 0.03;
 
 export async function fetchSatelliteTLEs(): Promise<SatelliteTLE[] | null> {
   const now = Date.now();
@@ -186,4 +216,134 @@ export function getSatelliteStatus(): string {
   if (Date.now() < cooldownUntil) return 'cooldown';
   if (failures > 0) return 'degraded';
   return 'ok';
+}
+
+function elevationAt(
+  lib: SatelliteLib,
+  satrec: SatRec,
+  observer: { latitude: number; longitude: number; height: number },
+  when: Date,
+): number | null {
+  const { gstime, propagate, eciToEcf, ecfToLookAngles } = lib;
+  try {
+    const pv = propagate(satrec, when);
+    if (!pv || !pv.position || typeof pv.position === 'boolean') return null;
+    const gmst = gstime(when);
+    const ecf = eciToEcf(pv.position, gmst);
+    const look = ecfToLookAngles(observer, ecf);
+    const elevDeg = look.elevation * (180 / Math.PI);
+    return Number.isFinite(elevDeg) ? elevDeg : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Predict upcoming overhead passes for a ground point using already-initialized
+ * SGP4 records. Skips non-LEO mean-motion objects. Pure / sync once satLib is loaded.
+ */
+export function predictNextPasses(
+  lat: number,
+  lng: number,
+  satRecs: SatRecEntry[],
+  options: PredictPassesOptions = {},
+): OverheadPass[] {
+  if (!satLib || satRecs.length === 0) return [];
+  if (!Number.isFinite(lat) || !Number.isFinite(lng)) return [];
+
+  const windowMinutes = options.windowMinutes ?? 180;
+  const stepSeconds = options.stepSeconds ?? 60;
+  const minElevationDeg = options.minElevationDeg ?? 20;
+  const limit = options.limit ?? 12;
+  const nowMs = options.nowMs ?? Date.now();
+  const endMs = nowMs + windowMinutes * 60_000;
+  const stepMs = stepSeconds * 1000;
+
+  const observer = {
+    latitude: satLib.degreesToRadians(lat),
+    longitude: satLib.degreesToRadians(lng),
+    height: 0,
+  };
+
+  const passes: OverheadPass[] = [];
+
+  for (const { satrec, meta } of satRecs) {
+    // Mean motion (rad/min): LEO imaging sats are well above this floor.
+    if (!(satrec.no > LEO_MEAN_MOTION_MIN)) continue;
+
+    let inPass = false;
+    let aosMs = 0;
+    let losMs = 0;
+    let maxElev = -Infinity;
+    let maxElevMs = 0;
+
+    for (let t = nowMs; t <= endMs; t += stepMs) {
+      const elev = elevationAt(satLib, satrec, observer, new Date(t));
+      if (elev == null) {
+        if (inPass) {
+          passes.push({
+            ...meta,
+            aosMs,
+            losMs,
+            maxElevationDeg: maxElev,
+            maxElevationMs: maxElevMs,
+          });
+          inPass = false;
+          maxElev = -Infinity;
+        }
+        continue;
+      }
+
+      if (elev >= minElevationDeg) {
+        if (!inPass) {
+          inPass = true;
+          aosMs = t;
+        }
+        losMs = t;
+        if (elev > maxElev) {
+          maxElev = elev;
+          maxElevMs = t;
+        }
+      } else if (inPass) {
+        passes.push({
+          ...meta,
+          aosMs,
+          losMs,
+          maxElevationDeg: maxElev,
+          maxElevationMs: maxElevMs,
+        });
+        inPass = false;
+        maxElev = -Infinity;
+      }
+    }
+
+    if (inPass) {
+      passes.push({
+        ...meta,
+        aosMs,
+        losMs,
+        maxElevationDeg: maxElev,
+        maxElevationMs: maxElevMs,
+      });
+    }
+  }
+
+  passes.sort((a, b) => a.aosMs - b.aosMs || b.maxElevationDeg - a.maxElevationDeg);
+  return passes.slice(0, limit);
+}
+
+/**
+ * Fetch TLEs (using the shared client cache), initialize SGP4, and predict
+ * overhead passes for a map click / POI. Safe to call with the satellites layer off.
+ */
+export async function predictOverheadPassesAt(
+  lat: number,
+  lng: number,
+  options: PredictPassesOptions = {},
+): Promise<OverheadPass[]> {
+  const tles = await fetchSatelliteTLEs();
+  if (!tles || tles.length === 0) return [];
+  const satRecs = await initSatRecs(tles);
+  // ensureSatelliteLib resolved inside initSatRecs
+  return predictNextPasses(lat, lng, satRecs, options);
 }
