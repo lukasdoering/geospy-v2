@@ -93,7 +93,13 @@ export class HormuzPanel extends Panel {
       this.bindTooltip();
       return true;
     } catch (e) {
-      this.showError(e instanceof Error ? e.message : t('components.hormuzTracker.errors.failedToLoad'), () => void this.fetchData());
+      {
+        const msg = e instanceof Error ? e.message : t('components.hormuzTracker.errors.failedToLoad');
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }
