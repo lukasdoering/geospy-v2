@@ -242,7 +242,10 @@ export class LatestBriefPanel extends Panel {
         return;
       }
       const message = err instanceof Error ? err.message : 'Brief unavailable — try again shortly.';
-      this.showError(message, () => { void this.refresh(); });
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(message)}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     } finally {
       this.refreshing = false;
       this.inflightAbort = null;
