@@ -239,7 +239,7 @@ export function showOrbitalPassesPopup(
     });
     headerActions.append(refreshBtn);
   }
-  if (!options.loading && !options.error) {
+  if (!options.loading) {
     const shareBtn = el('button', 'orbital-passes-copy', 'Share');
     shareBtn.type = 'button';
     shareBtn.setAttribute('aria-label', 'Copy share link for these coordinates');
