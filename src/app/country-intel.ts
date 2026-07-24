@@ -306,7 +306,14 @@ export class CountryIntelManager implements AppModule {
       dismissBtn.addEventListener('click', dismiss);
       tip.append(tryBtn, dismissBtn);
       document.body.appendChild(tip);
-      requestAnimationFrame(() => tip.classList.add('visible'));
+      requestAnimationFrame(() => {
+        tip.classList.add('visible');
+        try {
+          tryBtn.focus();
+        } catch {
+          /* ignore */
+        }
+      });
       window.setTimeout(dismiss, 12_000);
     }, 2500);
   }
