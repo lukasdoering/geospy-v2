@@ -2238,7 +2238,13 @@ export class PanelLayoutManager implements AppModule {
       this.importPanel('grocery-basket', () => import('@/components/GroceryBasketPanel'), 'GroceryBasketPanel', (GroceryBasketPanel) => new GroceryBasketPanel()),
     );
     this.lazyPanel('bigmac', () =>
-      this.importPanel('bigmac', () => import('@/components/BigMacPanel'), 'BigMacPanel', (BigMacPanel) => new BigMacPanel()),
+      this.importPanel('bigmac', () => import('@/components/BigMacPanel'), 'BigMacPanel', (BigMacPanel) => {
+        const p = new BigMacPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('fuel-prices', () =>
       this.importPanel('fuel-prices', () => import('@/components/FuelPricesPanel'), 'FuelPricesPanel', (FuelPricesPanel) => new FuelPricesPanel()),
@@ -2303,6 +2309,9 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('national-debt', () => import('@/components/NationalDebtPanel'), 'NationalDebtPanel', (NationalDebtPanel) => {
       const p = new NationalDebtPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       void p.refresh();
       return p;
     });

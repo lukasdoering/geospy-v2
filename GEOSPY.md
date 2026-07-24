@@ -60,6 +60,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Sanctions Pressure** — country/entry row click/keyboard focuses the country
 - **Trade Policy** — restriction/barrier card click/keyboard focuses the reporting country
 - **Global Procurement** — tender card click/keyboard focuses the country (ISO2)
+- **Big Mac Index / National Debt** — country row click/keyboard focuses the map
 
 ## Docs
 
