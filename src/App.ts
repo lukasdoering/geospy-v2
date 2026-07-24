@@ -1085,6 +1085,7 @@ export class App {
             });
           },
           enablePanel: (panelId) => this.eventHandlers.enablePanelById(panelId),
+          predictOverheadPassesAtMapCenter: () => this.countryIntel.predictOverheadPassesAtMapCenter(),
         });
         manager.init();
         manager.updateFlightSource(this.latestSearchAdsb, this.latestSearchMilitary);
