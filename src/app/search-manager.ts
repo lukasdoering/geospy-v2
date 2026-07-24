@@ -38,6 +38,8 @@ export interface SearchManagerCallbacks {
   openCountryBriefByCode: (code: string, country: string) => void;
   /** Enables a currently-disabled panel (CMD+K "Add"). Returns false if blocked (unknown / free-tier cap). */
   enablePanel: (panelId: string) => boolean;
+  /** Predict LEO overhead passes at the current map center (GeoSpy). */
+  predictOverheadPassesAtMapCenter: () => void;
 }
 
 export class SearchManager implements AppModule {
@@ -587,6 +589,8 @@ export class SearchManager implements AppModule {
             explorer.setMap(this.ctx.map);
             explorer.open();
           });
+        } else if (action === 'overhead-passes') {
+          this.callbacks.predictOverheadPassesAtMapCenter();
         }
         break;
 
