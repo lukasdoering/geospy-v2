@@ -12,7 +12,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Popup polish: duration, type badges, copy, Retry/Refresh, revisit median + SAR/optical counts, testids, prefs footer, AOS/LOS, a11y
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
 - Satellites layer default-on (full variant)
-- Markets expandable terminal price chart
+- Markets expandable terminal price chart (in-panel click hint)
 - `npm run geospy:smoke` / `npm run geospy:demo` helpers
 
 ### Reliability / trust / security (selected upstream ports)
