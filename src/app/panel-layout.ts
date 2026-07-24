@@ -1796,10 +1796,28 @@ export class PanelLayoutManager implements AppModule {
       return p;
     });
     this.lazyPanel('pipeline-status', () =>
-      this.importPanel('pipeline-status', () => import('@/components/PipelineStatusPanel'), 'PipelineStatusPanel', (PipelineStatusPanel) => new PipelineStatusPanel()),
+      this.importPanel('pipeline-status', () => import('@/components/PipelineStatusPanel'), 'PipelineStatusPanel', (PipelineStatusPanel) => {
+        const p = new PipelineStatusPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.pipelines) {
+            this.callbacks.applyMapLayerChange?.('pipelines', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('storage-facility-map', () =>
-      this.importPanel('storage-facility-map', () => import('@/components/StorageFacilityMapPanel'), 'StorageFacilityMapPanel', (StorageFacilityMapPanel) => new StorageFacilityMapPanel()),
+      this.importPanel('storage-facility-map', () => import('@/components/StorageFacilityMapPanel'), 'StorageFacilityMapPanel', (StorageFacilityMapPanel) => {
+        const p = new StorageFacilityMapPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.storageFacilities) {
+            this.callbacks.applyMapLayerChange?.('storageFacilities', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('fuel-shortages', () =>
       this.importPanel('fuel-shortages', () => import('@/components/FuelShortagePanel'), 'FuelShortagePanel', (FuelShortagePanel) => {
