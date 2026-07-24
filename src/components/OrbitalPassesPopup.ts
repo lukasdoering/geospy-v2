@@ -131,6 +131,18 @@ export function defaultOverheadEmptyDetail(
   return `No LEO imaging passes above ${settings.minElevationDeg}° elevation in the next ${settings.windowMinutes / 60} hours.`;
 }
 
+export function buildOverheadShareUrl(
+  lat: number,
+  lng: number,
+  href: string = typeof window !== 'undefined' ? window.location.href : 'https://localhost/',
+): string {
+  const url = new URL(href);
+  url.searchParams.set('lat', lat.toFixed(4));
+  url.searchParams.set('lon', lng.toFixed(4));
+  url.searchParams.set('overhead', '1');
+  return url.toString();
+}
+
 export function buildOverheadPassesClipboardText(
   lat: number,
   lng: number,
@@ -216,6 +228,24 @@ export function showOrbitalPassesPopup(
       options.onRefresh?.();
     });
     headerActions.append(refreshBtn);
+  }
+  if (!options.loading && !options.error) {
+    const shareBtn = el('button', 'orbital-passes-copy', 'Share');
+    shareBtn.type = 'button';
+    shareBtn.setAttribute('aria-label', 'Copy share link for these coordinates');
+    shareBtn.setAttribute('data-testid', 'orbital-passes-share');
+    shareBtn.title = 'Copy share link (?overhead=1)';
+    shareBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const text = buildOverheadShareUrl(lat, lng);
+      void navigator.clipboard.writeText(text).then(() => {
+        shareBtn.textContent = 'Copied';
+        setTimeout(() => {
+          if (shareBtn.isConnected) shareBtn.textContent = 'Share';
+        }, 1200);
+      }).catch(() => {});
+    });
+    headerActions.append(shareBtn);
   }
   if (!options.loading && !options.error && passes.length > 0) {
     const copyBtn = el('button', 'orbital-passes-copy', 'Copy');

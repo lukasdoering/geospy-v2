@@ -33,6 +33,9 @@ mustInclude('src/components/OrbitalPassesPopup.ts', 'buildOverheadPassesSummaryL
 mustInclude('src/components/OrbitalPassesPopup.ts', 'orbital-passes-popup', 'popup testid');
 mustInclude('src/components/OrbitalPassesPopup.ts', 'aria-modal', 'popup aria-modal');
 mustInclude('src/components/OrbitalPassesPopup.ts', 'orbital-passes-prefs', 'prefs footer testid');
+mustInclude('src/components/OrbitalPassesPopup.ts', 'buildOverheadShareUrl', 'overhead share URL helper');
+mustInclude('src/utils/urlState.ts', 'parseOverheadParam', 'overhead deep-link parser');
+mustInclude('src/App.ts', 'pendingDeepLinkOverhead', 'overhead deep-link wiring');
 mustInclude('src/components/SatellitesFlatHint.ts', 'geospy-satellites-flat-hint', 'flat-map hint');
 mustInclude('src/services/overhead-pass-settings.ts', 'geospy-overhead-min-elevation', 'overhead prefs storage');
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes'", 'Cmd+K overhead command');
