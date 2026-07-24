@@ -49,6 +49,11 @@ describe('GeoSpy brand config', () => {
     assert.match(analyst, /title: 'GeoSpy Analyst'/);
     assert.match(analyst, /# GeoSpy Analyst Session/);
     assert.doesNotMatch(analyst, /WM Analyst/);
+
+    assert.match(en, /Requires a GeoSpy license key/);
+    assert.match(en, /a single GeoSpy license unlocks everything/);
+    assert.doesNotMatch(en, /Requires a World Monitor license key/);
+    assert.match(shell, /Requires a GeoSpy license key/);
   });
 
   it('brands settings and embed entry HTML as GeoSpy', () => {

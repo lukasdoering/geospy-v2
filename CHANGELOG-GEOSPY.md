@@ -32,6 +32,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Next overhead chip: empty-window CTA to tune elevation in Settings
 - Chat Analyst panel title/export: GeoSpy Analyst (not WM)
 - Geo Hubs / Tech Hubs: keyboard map focus + calm empty state (not error)
+- Tech Events: fix dead map-pin CustomEvent — wire setCenter + enable techEvents layer; Cmd+K techevent flies to coords
+- Locked-panel / runtime-config copy: GeoSpy license (not World Monitor)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

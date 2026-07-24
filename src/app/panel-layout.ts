@@ -2157,7 +2157,16 @@ export class PanelLayoutManager implements AppModule {
         'events',
         () => import('@/components/TechEventsPanel'),
         'TechEventsPanel',
-        (TechEventsPanel) => new TechEventsPanel('events', () => this.ctx.allNews),
+        (TechEventsPanel) => {
+          const p = new TechEventsPanel('events', () => this.ctx.allNews);
+          p.setLocationClickHandler((lat: number, lon: number) => {
+            this.ctx.map?.setCenter(lat, lon, 5);
+            if (this.ctx.mapLayers && !this.ctx.mapLayers.techEvents) {
+              this.callbacks.applyMapLayerChange?.('techEvents', true, 'programmatic');
+            }
+          });
+          return p;
+        },
       ),
     );
     this.lazyImportedPanel('internet-disruptions', () => import('@/components/InternetDisruptionsPanel'), 'InternetDisruptionsPanel', (InternetDisruptionsPanel) => {

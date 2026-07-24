@@ -389,11 +389,26 @@ export class SearchManager implements AppModule {
         setTimeout(() => { this.ctx.map?.setCenter(ecosystem.lat, ecosystem.lon, 4); }, 300);
         break;
       }
-      case 'techevent':
+      case 'techevent': {
+        const event = result.data as { coords?: { lat?: number; lng?: number; virtual?: boolean } };
         this.ctx.map?.setView('global');
         this.ctx.map?.enableLayer('techEvents');
         this.ctx.mapLayers.techEvents = true;
+        const lat = event?.coords?.lat;
+        const lng = event?.coords?.lng;
+        if (
+          event?.coords
+          && !event.coords.virtual
+          && typeof lat === 'number'
+          && typeof lng === 'number'
+          && Number.isFinite(lat)
+          && Number.isFinite(lng)
+          && !(lat === 0 && lng === 0)
+        ) {
+          setTimeout(() => { this.ctx.map?.setCenter(lat, lng, 5); }, 300);
+        }
         break;
+      }
       case 'techhq': {
         const hq = result.data as typeof TECH_HQS[0];
         this.ctx.map?.setView('global');

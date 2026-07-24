@@ -37,6 +37,7 @@ const focusedTests = [
   'tests/settings-satellites-command.test.mts',
   'tests/strategic-map-a11y.test.mts',
   'tests/hubs-map-a11y.test.mts',
+  'tests/tech-events-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
