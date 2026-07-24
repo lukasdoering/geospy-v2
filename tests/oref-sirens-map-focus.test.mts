@@ -1,7 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { OREF_MAP_FOCUS } from '../src/components/OrefSirensPanel.ts';
+import { OREF_MAP_FOCUS } from '../src/utils/oref-map-focus.ts';
 
 describe('oref sirens map focus', () => {
   it('exports Tel Aviv focus coords', () => {
@@ -16,6 +16,7 @@ describe('oref sirens map focus', () => {
     assert.match(panel, /tabindex="0"/);
     assert.match(panel, /keydown/);
     assert.match(panel, /setLocationClickHandler/);
+    assert.match(panel, /oref-map-focus/);
 
     const layout = readFileSync(new URL('../src/app/panel-layout.ts', import.meta.url), 'utf8');
     assert.match(layout, /oref-sirens/);

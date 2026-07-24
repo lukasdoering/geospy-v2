@@ -3,13 +3,11 @@ import { joinSafeHtml, safeHtml, type SafeHtml } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { fetchOrefHistory } from '@/services/oref-alerts';
 import type { OrefAlertsResponse, OrefAlert, OrefHistoryEntry } from '@/services/oref-alerts';
+import { OREF_MAP_FOCUS } from '@/utils/oref-map-focus';
 
 const MAX_HISTORY_WAVES = 50;
 const ONE_HOUR_MS = 60 * 60 * 1000;
 const HISTORY_TTL = 3 * 60 * 1000;
-
-/** Default map focus for Israel Home Front Command alerts (no per-zone geocode overnight). */
-export const OREF_MAP_FOCUS = { lat: 32.0853, lon: 34.7818 } as const;
 
 export class OrefSirensPanel extends Panel {
   private alerts: OrefAlert[] = [];
