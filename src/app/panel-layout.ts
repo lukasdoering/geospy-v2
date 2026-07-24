@@ -2189,7 +2189,11 @@ export class PanelLayoutManager implements AppModule {
       'forecast',
       () => import('@/components/ForecastPanel'),
       'ForecastPanel',
-      undefined,
+      (p) => {
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+      },
       _lockPanels ? ['AI-powered geopolitical forecasts', 'Cross-domain cascade predictions', 'Prediction market calibration'] : undefined,
     );
 

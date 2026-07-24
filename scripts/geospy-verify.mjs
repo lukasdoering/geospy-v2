@@ -69,6 +69,7 @@ const focusedTests = [
   'tests/calm-empty-debt-gulf-climate.test.mts',
   'tests/airline-intel-map-focus.test.mts',
   'tests/country-name-aliases.test.mts',
+  'tests/forecast-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
