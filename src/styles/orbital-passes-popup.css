@@ -1,0 +1,199 @@
+.orbital-passes-popup {
+  position: fixed;
+  z-index: 10000;
+  width: 300px;
+  max-height: min(420px, 70vh);
+  overflow: auto;
+  background: var(--panel-bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  color: var(--text-primary);
+  font-size: 0.82rem;
+}
+
+.orbital-passes-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--panel-bg);
+}
+
+.orbital-passes-title {
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  font-size: 0.72rem;
+  color: var(--accent);
+}
+
+.orbital-passes-coords {
+  margin-top: 2px;
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.orbital-passes-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.orbital-passes-close,
+.orbital-passes-copy,
+.orbital-passes-retry {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 4px;
+}
+
+.orbital-passes-close {
+  font-size: 1.1rem;
+  padding: 0 2px;
+}
+
+.orbital-passes-copy:hover,
+.orbital-passes-close:hover,
+.orbital-passes-retry:hover {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--border) 55%, transparent);
+}
+
+.orbital-passes-retry {
+  margin-top: 10px;
+  border: 1px solid var(--border);
+  color: var(--accent);
+}
+
+.orbital-passes-empty {
+  padding: 14px 12px;
+  color: var(--muted);
+  line-height: 1.4;
+}
+
+.orbital-passes-loading {
+  padding: 10px 12px 12px;
+}
+
+.orbital-passes-skeleton {
+  height: 10px;
+  border-radius: 4px;
+  margin-bottom: 8px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--border) 40%, transparent) 0%,
+    color-mix(in srgb, var(--border) 80%, transparent) 50%,
+    color-mix(in srgb, var(--border) 40%, transparent) 100%
+  );
+  background-size: 200% 100%;
+  animation: orbital-passes-shimmer 1.1s ease-in-out infinite;
+}
+
+.orbital-passes-skeleton:nth-child(2) { width: 85%; }
+.orbital-passes-skeleton:nth-child(3) { width: 70%; margin-bottom: 12px; }
+
+@keyframes orbital-passes-shimmer {
+  0% { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+
+.orbital-passes-name-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.orbital-passes-type {
+  flex-shrink: 0;
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.orbital-passes-type--sar {
+  color: #7dd3fc;
+  border-color: color-mix(in srgb, #7dd3fc 45%, var(--border));
+}
+
+.orbital-passes-type--optical {
+  color: #86efac;
+  border-color: color-mix(in srgb, #86efac 45%, var(--border));
+}
+
+.orbital-passes-type--military {
+  color: #fca5a5;
+  border-color: color-mix(in srgb, #fca5a5 45%, var(--border));
+}
+
+.orbital-passes-summary {
+  padding: 8px 12px 4px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  letter-spacing: 0.02em;
+}
+
+.orbital-passes-list {
+  list-style: none;
+  margin: 0;
+  padding: 4px 0 8px;
+}
+
+.orbital-passes-row {
+  padding: 8px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.orbital-passes-row:hover,
+.orbital-passes-row:focus-visible {
+  background: color-mix(in srgb, var(--border) 35%, transparent);
+  outline: none;
+}
+
+.orbital-passes-row:last-child {
+  border-bottom: 0;
+}
+
+.orbital-passes-name {
+  font-weight: 600;
+  min-width: 0;
+}
+
+.orbital-passes-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  color: var(--muted);
+  font-size: 0.74rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.orbital-passes-prefs {
+  padding: 8px 12px 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  position: sticky;
+  bottom: 0;
+  background: var(--panel-bg);
+}
