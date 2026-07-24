@@ -68,6 +68,8 @@ export interface OrbitalPassesPopupOptions {
   error?: string;
   /** Invoked when the user clicks Retry after an error. */
   onRetry?: () => void;
+  /** Optional empty-state copy when there are zero passes. */
+  emptyDetail?: string;
 }
 
 export function showOrbitalPassesPopup(
@@ -147,7 +149,12 @@ export function showOrbitalPassesPopup(
     }
     popup.append(errBox);
   } else if (passes.length === 0) {
-    popup.append(el('div', 'orbital-passes-empty', 'No LEO imaging passes above 20° elevation in the next 3 hours.'));
+    popup.append(el(
+      'div',
+      'orbital-passes-empty',
+      options.emptyDetail
+        || 'No LEO imaging passes above 20° elevation in the next 3 hours.',
+    ));
   } else {
     const list = el('ul', 'orbital-passes-list');
     const nowMs = Date.now();

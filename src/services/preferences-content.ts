@@ -217,6 +217,41 @@ export function renderPreferences(host: PreferencesHost): PreferencesResult {
 
   html += `</div></details>`;
 
+  // ── GeoSpy satellites / overhead passes ──
+  const overhead = getOverheadPassSettings();
+  html += `<details class="wm-pref-group">`;
+  html += `<summary>Satellites</summary>`;
+  html += `<div class="wm-pref-group-content">`;
+  html += `
+    <div class="ai-flow-toggle-row">
+      <div class="ai-flow-toggle-label">Minimum elevation</div>
+      <div class="ai-flow-toggle-desc">Ignore overhead passes below this elevation angle</div>
+    </div>`;
+  html += `<select class="unified-settings-select" id="us-overhead-elevation">`;
+  for (const opt of [
+    { value: '10', label: '10° (more passes)' },
+    { value: '20', label: '20° (default)' },
+    { value: '30', label: '30° (high quality)' },
+  ]) {
+    html += `<option value="${opt.value}"${String(overhead.minElevationDeg) === opt.value ? ' selected' : ''}>${opt.label}</option>`;
+  }
+  html += `</select>`;
+  html += `
+    <div class="ai-flow-toggle-row">
+      <div class="ai-flow-toggle-label">Look-ahead window</div>
+      <div class="ai-flow-toggle-desc">How far ahead to search for LEO imaging passes</div>
+    </div>`;
+  html += `<select class="unified-settings-select" id="us-overhead-window">`;
+  for (const opt of [
+    { value: '180', label: '3 hours' },
+    { value: '360', label: '6 hours' },
+    { value: '720', label: '12 hours' },
+  ]) {
+    html += `<option value="${opt.value}"${String(overhead.windowMinutes) === opt.value ? ' selected' : ''}>${opt.label}</option>`;
+  }
+  html += `</select>`;
+  html += `</div></details>`;
+
   // ── Intelligence group ──
   html += `<details class="wm-pref-group">`;
   html += `<summary>${t('preferences.intelligence')}</summary>`;
@@ -436,6 +471,14 @@ export function renderPreferences(host: PreferencesHost): PreferencesResult {
         }
         if (target.id === 'us-font-family') {
           setFontFamily(target.value as FontFamily);
+          return;
+        }
+        if (target.id === 'us-overhead-elevation') {
+          setOverheadMinElevationDeg(Number(target.value) as OverheadMinElevationDeg);
+          return;
+        }
+        if (target.id === 'us-overhead-window') {
+          setOverheadWindowMinutes(Number(target.value) as OverheadWindowMinutes);
           return;
         }
         if (target.id === 'us-map-provider') {
