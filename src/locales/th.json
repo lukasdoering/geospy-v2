@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "เปิดภาพรวมประเทศ",
-    "copyCoordinates": "คัดลอกพิกัด"
+    "copyCoordinates": "คัดลอกพิกัด",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — แดชบอร์ดข่าวกรรมการระดับโลกแบบเรียลไทม์",

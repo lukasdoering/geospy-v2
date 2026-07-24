@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Άνοιγμα επισκόπησης χώρας",
-    "copyCoordinates": "Αντιγραφή συντεταγμένων"
+    "copyCoordinates": "Αντιγραφή συντεταγμένων",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Πίνακας Ελέγχου Παγκόσμιας Νοημοσύνης σε Πραγματικό Χρόνο",

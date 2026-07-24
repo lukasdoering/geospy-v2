@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Ülke özetini aç",
-    "copyCoordinates": "Koordinatları kopyala"
+    "copyCoordinates": "Koordinatları kopyala",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Gerçek Zamanlı Küresel İstihbarat Paneli",
