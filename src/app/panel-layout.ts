@@ -1888,7 +1888,13 @@ export class PanelLayoutManager implements AppModule {
     this.lazyDefaultPanel('global-procurement', () => import('@/components/GlobalProcurementPanel'), 'GlobalProcurementPanel');
     this.lazyDefaultPanel('consumer-prices', () => import('@/components/ConsumerPricesPanel'), 'ConsumerPricesPanel');
 
-    this.lazyDefaultPanel('trade-policy', () => import('@/components/TradePolicyPanel'), 'TradePolicyPanel');
+    this.lazyImportedPanel('trade-policy', () => import('@/components/TradePolicyPanel'), 'TradePolicyPanel', (TradePolicyPanel) => {
+      const p = new TradePolicyPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
     this.lazyImportedPanel('sanctions-pressure', () => import('@/components/SanctionsPressurePanel'), 'SanctionsPressurePanel', (SanctionsPressurePanel) => {
       const p = new SanctionsPressurePanel();
       p.setLocationClickHandler((lat: number, lon: number) => {
