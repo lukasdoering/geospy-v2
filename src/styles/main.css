@@ -10647,6 +10647,15 @@ a.prediction-link:hover {
   text-align: left;
 }
 
+.radiation-row-clickable {
+  cursor: pointer;
+}
+
+.radiation-row-clickable:focus-visible {
+  outline: 1px solid var(--accent, #3d7eff);
+  outline-offset: -1px;
+}
+
 .radiation-row {
   cursor: pointer;
 }

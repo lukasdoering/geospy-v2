@@ -20,6 +20,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Internet Disruptions: outage/anomaly row → map focus
 - Security Advisories: country/title search
 - Population Exposure: card click → map focus
+- Radiation Watch: keyboard-accessible row → map focus
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
