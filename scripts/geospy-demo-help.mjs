@@ -12,24 +12,27 @@ Checkout and run:
 
 Validate:
   npm run geospy:smoke
-  npm run geospy:verify
+  npm run geospy:verify   # 82 focused product tests
 
 Try overhead (differentiator):
   • Tip → Try now / flat hint → Predict passes
   • Right-click map → Predict Overhead Passes
   • Share / live URL keeps ?overhead=1 while popup open
   • Cmd/Ctrl+K → "overhead" · Cmd/Ctrl+Shift+O
-  • Settings → Satellites (or prefs footer on popup)
-  • Next-pass chip after you close the popup
+  • Settings → Satellites (prefs footer, or Cmd/Ctrl+K → Settings → Satellites)
+  • Next-pass chip after you close the popup (empty window → tune elevation)
 
 Try other polish:
   • Markets / Commodities / Crypto → click sparkline chart
-  • Disease Outbreaks / Satellite Fires / Internet Disruptions → row click focuses map
-  • Security Advisories → search + click card to focus country on map
+  • Disease / Fires / Internet / Population / Radiation → row/card → map
+  • Security Advisories → search + click card to focus country
   • UCDP / Climate / Displacement / Radiation → click enables matching layer
   • Thermal Escalation → search region/status, then click/keyboard → map
-  • Cmd/Ctrl+K → “Settings → Satellites” for overhead elevation prefs
-  • Next-overhead chip empty window → “tune elevation” opens Settings
+  • Strategic Risk/Posture, Geo/Tech Hubs, GCC Investments → keyboard → map
+  • Chokepoint Status chip / Hormuz Tracker “Show on map” → chokepoint
+  • Tech Events 📍 pin → map + techEvents layer
+  • OREF Sirens row → Tel Aviv focus
+  • Cmd/Ctrl+K → “GeoSpy Analyst” / “Settings → Satellites”
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 `);
