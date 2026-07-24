@@ -40,6 +40,7 @@ const focusedTests = [
   'tests/tech-events-map-focus.test.mts',
   'tests/oref-sirens-map-focus.test.mts',
   'tests/investments-chokepoint-map.test.mts',
+  'tests/hormuz-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {

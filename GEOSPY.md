@@ -49,6 +49,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **OREF Sirens** — alert/history row focuses Israel (Tel Aviv)
 - **GCC Investments** — keyboard-accessible row → map focus
 - **Chokepoint Status** — chip opens the chokepoint on the map
+- **Hormuz Tracker** — Show on map opens Hormuz Strait
 
 ## Docs
 

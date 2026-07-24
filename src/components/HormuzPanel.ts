@@ -61,9 +61,20 @@ function renderChart(chart: HormuzChart, idx: number): string {
 export class HormuzPanel extends Panel {
   private data: HormuzTrackerData | null = null;
   private tooltipBound = false;
+  private onMapFocus?: () => void;
 
   constructor() {
     super({ id: 'hormuz-tracker', title: t('components.hormuzTracker.title'), showCount: false, infoTooltip: t('components.hormuzTracker.infoTooltip') });
+    this.content.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-role="hz-show-map"]');
+      if (!btn) return;
+      e.preventDefault();
+      this.onMapFocus?.();
+    });
+  }
+
+  public setMapFocusHandler(handler: () => void): void {
+    this.onMapFocus = handler;
   }
 
   public async fetchData(): Promise<boolean> {
@@ -124,9 +135,10 @@ export class HormuzPanel extends Panel {
     const html = `
       <div style="padding:12px 14px;position:relative">
         <div class="hz-tip" style="position:fixed;pointer-events:none;background:rgba(15,17,26,0.95);border:1px solid rgba(255,255,255,0.15);border-radius:4px;padding:3px 8px;font-size:10px;color:#fff;white-space:nowrap;z-index:9999;opacity:0;transition:opacity 0.08s;letter-spacing:0.02em"></div>
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
           <span style="background:${sColor};color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:0.08em">${d.status.toUpperCase()}</span>
           ${dateStr}
+          <button type="button" data-role="hz-show-map" data-testid="hormuz-show-on-map" title="Show Hormuz Strait on map" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer">Show on map</button>
         </div>
         <div>${charts}</div>
         <div style="margin-top:4px;font-size:9px;color:var(--text-dim)">

@@ -2244,7 +2244,13 @@ export class PanelLayoutManager implements AppModule {
     this.lazyDefaultPanel('liquidity-shifts', () => import('@/components/LiquidityShiftsPanel'), 'LiquidityShiftsPanel');
     this.lazyDefaultPanel('positioning-247', () => import('@/components/PositioningPanel'), 'PositioningPanel');
     this.lazyDefaultPanel('gold-intelligence', () => import('@/components/GoldIntelligencePanel'), 'GoldIntelligencePanel');
-    this.lazyDefaultPanel('hormuz-tracker', () => import('@/components/HormuzPanel'), 'HormuzPanel');
+    this.lazyImportedPanel('hormuz-tracker', () => import('@/components/HormuzPanel'), 'HormuzPanel', (HormuzPanel) => {
+      const p = new HormuzPanel();
+      p.setMapFocusHandler(() => {
+        this.ctx.map?.openChokepoint?.('hormuz_strait');
+      });
+      return p;
+    });
     this.lazyDefaultPanel('etf-flows', () => import('@/components/ETFFlowsPanel'), 'ETFFlowsPanel');
     this.lazyDefaultPanel('stablecoins', () => import('@/components/StablecoinPanel'), 'StablecoinPanel');
 
