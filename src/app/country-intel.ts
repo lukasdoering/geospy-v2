@@ -325,7 +325,7 @@ export class CountryIntelManager implements AppModule {
       const catalogMissing = err instanceof Error && err.message === 'SATELLITE_CATALOG_UNAVAILABLE';
       showOrbitalPassesPopup(screenX, screenY, lat, lon, [], {
         error: catalogMissing
-          ? 'Satellite catalog unavailable right now. Try again in a moment.'
+          ? 'Satellite catalog unavailable right now. Use Refresh, or try Cmd/Ctrl+Shift+O again in a moment.'
           : 'Could not compute overhead passes. Try again in a moment.',
         onRetry: retry,
         onRefresh: retry,
