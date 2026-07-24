@@ -69,6 +69,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Tech Readiness: ranking row click/keyboard → country map focus (ISO3)
 - Economic Calendar: event row click/keyboard → country map focus + calm empty
 - Market Breadth / Social Velocity / Climate News: calm empty when no data
+- Macro Indicators: Show on map → US/EU/China focus + calm empty
+- Fear & Greed / FSI / Gold / National Debt: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

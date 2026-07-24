@@ -318,7 +318,10 @@ export class NationalDebtPanel extends Panel {
 
   private render(): void {
     if (this.entries.length === 0) {
-      this.showError('No data available');
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">No data available</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 

@@ -67,8 +67,10 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **AI Regulation** — countries tab card click/keyboard focuses the country
 - **Tech Readiness** — ranking row click/keyboard focuses the country (ISO3)
 - **Economic Calendar** — event row click/keyboard focuses the country (skips EU aggregates)
+- **Macro Indicators** — “Show on map” focuses US / Euro Area (DE) / China for the active tab
 - **FAO Food Price Index** — calm empty when no chart points (not a red error)
 - **Market Breadth / Social Velocity / Climate News** — calm empty when no data
+- **Fear & Greed / FSI / Gold / National Debt / Macro** — calm empty when unavailable
 
 ## Implementation note
 

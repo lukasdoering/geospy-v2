@@ -122,7 +122,12 @@ export class FSIPanel extends Panel {
       }
 
       if (fsiValue <= 0) {
-        if (!this._hasData) this.showError(t('components.fsi.errors.unavailable'), () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('components.fsi.errors.unavailable'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 

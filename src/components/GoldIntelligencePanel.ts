@@ -162,7 +162,12 @@ export class GoldIntelligencePanel extends Panel {
       const data: GoldIntelligenceData = await resp.json();
 
       if (data.unavailable) {
-        if (!this._hasData) this.showError('Gold data unavailable', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">Gold data unavailable</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 
