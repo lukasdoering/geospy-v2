@@ -13,7 +13,7 @@ export const BRAND = {
   tagline: 'Real-Time Global Intelligence Dashboard',
   documentTitle: 'GeoSpy — Real-Time Global Intelligence Dashboard',
   description:
-    'GeoSpy is a real-time global intelligence dashboard — geopolitics, military, markets, climate, and OSINT on one live map. Fork of WorldMonitor.',
+    'GeoSpy is a real-time global intelligence dashboard — geopolitics, military, markets, climate, and OSINT on one live map. AGPL fork of WorldMonitor.',
   githubUrl: 'https://github.com/lukasdoering/geospy-v2',
   upstreamName: 'WorldMonitor',
   upstreamUrl: 'https://github.com/koala73/worldmonitor',
