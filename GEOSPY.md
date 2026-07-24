@@ -78,6 +78,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Economic (BIS)** — policy rate / real EER / credit-to-GDP country cards focus the map
 - **Gold Intelligence** — central-bank reserve holders/buyers/sellers focus the map
 - **Airline Intel** — ops airport rows and tracking positions focus the map
+- **AI Forecasts** — country-region rows expose a Map chip that focuses the map
 
 ## Implementation note
 
