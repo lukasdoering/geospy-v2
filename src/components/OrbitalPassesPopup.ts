@@ -123,6 +123,8 @@ export interface OrbitalPassesPopupOptions {
   error?: string;
   /** Invoked when the user clicks Retry after an error. */
   onRetry?: () => void;
+  /** Invoked when the user clicks Refresh on a finished result/empty state. */
+  onRefresh?: () => void;
   /** Optional empty-state copy when there are zero passes. */
   emptyDetail?: string;
 }
@@ -152,6 +154,17 @@ export function showOrbitalPassesPopup(
     el('div', 'orbital-passes-coords', `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`),
   );
   const headerActions = el('div', 'orbital-passes-header-actions');
+  if (!options.loading && options.onRefresh) {
+    const refreshBtn = el('button', 'orbital-passes-copy', 'Refresh');
+    refreshBtn.type = 'button';
+    refreshBtn.setAttribute('aria-label', 'Refresh overhead passes');
+    refreshBtn.title = 'Refresh';
+    refreshBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      options.onRefresh?.();
+    });
+    headerActions.append(refreshBtn);
+  }
   if (!options.loading && !options.error && passes.length > 0) {
     const copyBtn = el('button', 'orbital-passes-copy', 'Copy');
     copyBtn.type = 'button';
