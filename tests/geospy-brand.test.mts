@@ -127,4 +127,20 @@ describe('GeoSpy brand config', () => {
     assert.match(renderer, /fillText\(BRAND\.tagline/);
     assert.doesNotMatch(renderer, /WORLDMONITOR\.APP/);
   });
+
+  it('brands referral share, WebMCP search copy, and license-key label as GeoSpy', () => {
+    const referral = readFileSync(new URL('../src/services/referral.ts', import.meta.url), 'utf8');
+    assert.match(referral, /Join me on \$\{BRAND\.name\}:/);
+    assert.match(referral, /title: BRAND\.name/);
+    assert.doesNotMatch(referral, /Join me on WorldMonitor/);
+    assert.doesNotMatch(referral, /title: 'WorldMonitor'/);
+
+    const webmcp = readFileSync(new URL('../src/services/webmcp.ts', import.meta.url), 'utf8');
+    assert.match(webmcp, /entities tracked by GeoSpy/);
+    assert.doesNotMatch(webmcp, /entities tracked by World Monitor/);
+
+    const settings = readFileSync(new URL('../src/services/settings-constants.ts', import.meta.url), 'utf8');
+    assert.match(settings, /WORLDMONITOR_API_KEY: 'GeoSpy License Key'/);
+    assert.doesNotMatch(settings, /World Monitor License Key/);
+  });
 });
