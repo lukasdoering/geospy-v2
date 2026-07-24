@@ -257,6 +257,11 @@ export function renderPreferences(host: PreferencesHost): PreferencesResult {
     html += `<option value="${opt.value}"${String(overhead.windowMinutes) === opt.value ? ' selected' : ''}>${opt.label}</option>`;
   }
   html += `</select>`;
+  html += `
+    <div class="ai-flow-toggle-desc" style="margin-top:10px">
+      Shortcuts: right-click the map · Cmd/Ctrl+K “overhead” · Cmd/Ctrl+Shift+O at map center.
+      Live orbital tracks render on the 3D globe; overhead-pass prediction works in any map mode.
+    </div>`;
   html += `</div></details>`;
 
   // ── Intelligence group ──
