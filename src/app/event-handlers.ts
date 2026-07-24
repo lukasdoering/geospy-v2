@@ -200,6 +200,7 @@ export interface EventHandlerCallbacks {
   refreshCiiAfterFocalPointsReady?: () => void;
   stopLayerActivity?: (layer: keyof MapLayers) => void;
   mountLiveNewsIfReady?: () => void;
+  predictOverheadPassesAtMapCenter?: () => void;
 }
 
 export class EventHandlerManager implements AppModule {
@@ -507,6 +508,11 @@ export class EventHandlerManager implements AppModule {
         if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'k') {
           e.preventDefault();
           this.callbacks.openSearch({ toggle: true });
+        }
+        // GeoSpy: Cmd/Ctrl+Shift+O → overhead passes at map center
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'o') {
+          e.preventDefault();
+          this.callbacks.predictOverheadPassesAtMapCenter?.();
         }
       };
       document.addEventListener('keydown', this.boundSearchKeyHandler);
