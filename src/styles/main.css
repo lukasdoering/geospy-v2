@@ -4229,6 +4229,49 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   transform: translateX(-50%) translateY(0);
 }
 
+/* GeoSpy first-run tip for overhead-pass prediction */
+.geospy-overhead-tip {
+  position: fixed;
+  bottom: 32px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: var(--surface-active);
+  color: var(--text-secondary);
+  padding: 12px 16px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  font-size: 13px;
+  z-index: 10002;
+  opacity: 0;
+  transition: opacity 0.3s, transform 0.3s;
+  pointer-events: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  max-width: min(520px, calc(100vw - 24px));
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.28);
+}
+
+.geospy-overhead-tip.visible {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.geospy-overhead-tip-dismiss {
+  flex-shrink: 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--accent);
+  border-radius: 4px;
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.geospy-overhead-tip-dismiss:hover {
+  background: color-mix(in srgb, var(--border) 50%, transparent);
+}
+
 /* Story Modal */
 .story-modal-overlay {
   position: fixed;
