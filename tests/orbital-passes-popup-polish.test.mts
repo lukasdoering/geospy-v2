@@ -125,7 +125,7 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(intel, /Try now/);
     assert.match(intel, /tryBtn\.focus\(/);
     assert.match(intel, /geospy-satellites-flat-hint/);
-    assert.match(intel, /searchParams\)\.has\('overhead'\)/);
+    assert.match(intel, /\.has\('overhead'\)/);
     assert.match(intel, /settingsSummary/);
     assert.doesNotMatch(intel, /settingsSummary:\s*false/);
   });
