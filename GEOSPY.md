@@ -51,6 +51,10 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Chokepoint Status** — chip opens the chokepoint on the map
 - **Hormuz Tracker** — Show on map opens Hormuz Strait
 - **Infrastructure Cascade** — select/analyze focuses the asset on the map
+- **Fuel Shortage Registry** — row click/keyboard focuses the country + enables shortage pins
+- **Pipeline Status / Storage Atlas** — row click/keyboard focuses the asset + enables energy layers
+- **Energy Disruptions** — row click/keyboard flies to the asset from cached coords, then opens the drawer
+- **Country Deep Dive energy atlas / map energy layers** — enable destination panels before open-detail
 
 ## Docs
 
