@@ -324,10 +324,11 @@ export class CountryIntelManager implements AppModule {
     };
     this.rememberOverheadLocation(lat, lon);
     showOrbitalPassesPopup(screenX, screenY, lat, lon, [], { loading: true });
+    const { getOverheadPassSettings } = await import('@/services/overhead-pass-settings');
+    const prefs = getOverheadPassSettings();
+    const settingsSummary = `Threshold ${prefs.minElevationDeg}° · window ${prefs.windowMinutes / 60}h · Settings → Satellites`;
     try {
       const { predictOverheadPassesAt } = await import('@/services/satellites');
-      const { getOverheadPassSettings } = await import('@/services/overhead-pass-settings');
-      const prefs = getOverheadPassSettings();
       const passes = await predictOverheadPassesAt(lat, lon, {
         windowMinutes: prefs.windowMinutes,
         stepSeconds: 60,
@@ -336,7 +337,7 @@ export class CountryIntelManager implements AppModule {
       });
       showOrbitalPassesPopup(screenX, screenY, lat, lon, passes, {
         emptyDetail: `No LEO imaging passes above ${prefs.minElevationDeg}° elevation in the next ${prefs.windowMinutes / 60} hours.`,
-        settingsSummary: `Threshold ${prefs.minElevationDeg}° · window ${prefs.windowMinutes / 60}h · Settings → Satellites`,
+        settingsSummary,
         onRefresh: retry,
       });
     } catch (err) {
@@ -348,7 +349,7 @@ export class CountryIntelManager implements AppModule {
           : 'Could not compute overhead passes. Try again in a moment.',
         onRetry: retry,
         onRefresh: retry,
-        settingsSummary: false,
+        settingsSummary,
       });
     }
   }
