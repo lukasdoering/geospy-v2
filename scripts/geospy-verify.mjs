@@ -88,6 +88,7 @@ const focusedTests = [
   'tests/species-comeback-map-focus.test.mts',
   'tests/regional-intel-map-focus.test.mts',
   'tests/live-webcams-map-focus.test.mts',
+  'tests/pinned-webcams-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {

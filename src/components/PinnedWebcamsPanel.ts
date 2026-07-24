@@ -6,6 +6,7 @@ import {
   unpinWebcam,
   toggleWebcam,
   onPinnedChange,
+  type PinnedWebcam,
 } from '../services/webcams/pinned-store';
 
 const MAX_SLOTS = 4;
@@ -18,11 +19,52 @@ function buildPlayerUrl(webcamId: string, playerUrl?: string): string {
 
 export class PinnedWebcamsPanel extends Panel {
   private unsubscribe: (() => void) | null = null;
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'windy-webcams', title: t('panels.windyWebcams'), className: 'panel-wide', closable: true });
     this.unsubscribe = onPinnedChange(() => this.render());
+    this.content.addEventListener('click', (e) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('button, a, iframe')) return;
+      const el = target.closest<HTMLElement>('[data-webcam-lat][data-webcam-lng]');
+      if (!el) return;
+      this.focusCamCoords(el.dataset.webcamLat, el.dataset.webcamLng);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const target = e.target as HTMLElement;
+      if (target.closest('button, a, iframe')) return;
+      const el = target.closest<HTMLElement>('[data-webcam-lat][data-webcam-lng]');
+      if (!el) return;
+      e.preventDefault();
+      this.focusCamCoords(el.dataset.webcamLat, el.dataset.webcamLng);
+    });
     this.render();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
+  }
+
+  private focusCamCoords(latRaw?: string, lngRaw?: string): void {
+    if (!this.onLocationClick || latRaw == null || lngRaw == null) return;
+    const lat = Number(latRaw);
+    const lng = Number(lngRaw);
+    if (!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+    if (lat === 0 && lng === 0) return;
+    this.onLocationClick(lat, lng);
+  }
+
+  private applyGeoAttrs(el: HTMLElement, cam: PinnedWebcam): void {
+    if (!Number.isFinite(cam.lat) || !Number.isFinite(cam.lng)) return;
+    if (cam.lat === 0 && cam.lng === 0) return;
+    el.dataset.webcamLat = String(cam.lat);
+    el.dataset.webcamLng = String(cam.lng);
+    el.classList.add('pinned-webcam-map-focus');
+    el.setAttribute('role', 'button');
+    el.tabIndex = 0;
+    el.title = `Show ${cam.title || cam.webcamId} on map`;
   }
 
   private render(): void {
@@ -58,7 +100,19 @@ export class PinnedWebcamsPanel extends Panel {
         const titleSpan = document.createElement('span');
         titleSpan.className = 'pinned-webcam-title';
         titleSpan.textContent = cam.title || cam.webcamId;
+        this.applyGeoAttrs(titleSpan, cam);
         labelBar.appendChild(titleSpan);
+
+        const mapBtn = document.createElement('button');
+        mapBtn.type = 'button';
+        mapBtn.className = 'pinned-webcam-map';
+        mapBtn.textContent = 'Map';
+        mapBtn.title = `Show ${cam.title || cam.webcamId} on map`;
+        mapBtn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          this.focusCamCoords(String(cam.lat), String(cam.lng));
+        });
+        labelBar.appendChild(mapBtn);
 
         const toggleBtn = document.createElement('button');
         toggleBtn.className = 'pinned-webcam-toggle';
@@ -101,6 +155,7 @@ export class PinnedWebcamsPanel extends Panel {
         const row = document.createElement('div');
         row.className = 'pinned-webcam-row';
         if (cam.active) row.classList.add('pinned-webcam-row--active');
+        this.applyGeoAttrs(row, cam);
 
         const name = document.createElement('span');
         name.className = 'pinned-webcam-row-name';

@@ -4042,6 +4042,43 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   color: #eee;
 }
 
+.pinned-webcam-title.pinned-webcam-map-focus {
+  cursor: pointer;
+}
+
+.pinned-webcam-title.pinned-webcam-map-focus:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.pinned-webcam-map {
+  background: none;
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 0.6rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 0 4px;
+  line-height: 1.4;
+  border-radius: 3px;
+}
+
+.pinned-webcam-map:hover {
+  color: #fff;
+  border-color: #fff;
+}
+
+.pinned-webcam-row.pinned-webcam-map-focus {
+  cursor: pointer;
+}
+
+.pinned-webcam-row.pinned-webcam-map-focus:focus-visible {
+  outline: 1px solid var(--accent);
+  outline-offset: -1px;
+}
+
 .pinned-webcam-toggle,
 .pinned-webcam-unpin {
   background: none;
