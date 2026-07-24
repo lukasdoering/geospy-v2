@@ -143,4 +143,22 @@ describe('GeoSpy brand config', () => {
     assert.match(settings, /WORLDMONITOR_API_KEY: 'GeoSpy License Key'/);
     assert.doesNotMatch(settings, /World Monitor License Key/);
   });
+
+  it('brands export headers and MCP grant consent copy as GeoSpy', () => {
+    const exp = readFileSync(new URL('../src/utils/export.ts', import.meta.url), 'utf8');
+    assert.match(exp, /# \$\{BRAND\.name\} Export/);
+    assert.match(exp, /This \$\{BRAND\.name\} evidence bundle/);
+    assert.match(exp, /# \$\{BRAND\.name\} Evidence Bundle/);
+    assert.match(exp, /filename = 'geospy-export'/);
+    assert.match(exp, /`geospy-\$\{timestamp\}`/);
+    assert.doesNotMatch(exp, /# WorldMonitor Export/);
+    assert.doesNotMatch(exp, /This WorldMonitor evidence bundle/);
+    assert.doesNotMatch(exp, /# WorldMonitor Evidence Bundle/);
+    assert.doesNotMatch(exp, /worldmonitor-export/);
+    assert.doesNotMatch(exp, /`worldmonitor-\$\{timestamp\}`/);
+
+    const grant = readFileSync(new URL('../src/mcp-grant-main.ts', import.meta.url), 'utf8');
+    assert.match(grant, /A GeoSpy Pro subscription is required/);
+    assert.doesNotMatch(grant, /A WorldMonitor Pro subscription is required/);
+  });
 });
