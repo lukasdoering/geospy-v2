@@ -84,6 +84,8 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Supply Chain** — expanded chokepoint Map button + critical-minerals producer chips focus the map
 - **Oil Inventories** — IEA country chips under the bar chart focus the map
 - **Renewable Energy** — regional breakdown rows focus the map
+- **Energy Complex** — IEA oil-stocks and LNG vulnerability country rows focus the map
+- **Cascade** — affected-country rows focus the map
 - **Energy Risk Overview** — Hormuz / EU Gas / Active disruptions tiles focus the map
 
 ## Implementation note

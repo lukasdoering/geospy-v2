@@ -1785,7 +1785,11 @@ export class PanelLayoutManager implements AppModule {
     this.lazyDefaultPanel('latest-brief', () => import('@/components/LatestBriefPanel'), 'LatestBriefPanel');
 
     this.lazyDefaultPanel('commodities', () => import('@/components/MarketPanel'), 'CommoditiesPanel');
-    this.lazyDefaultPanel('energy-complex', () => import('@/components/EnergyComplexPanel'), 'EnergyComplexPanel');
+    this.lazyDefaultPanel('energy-complex', () => import('@/components/EnergyComplexPanel'), 'EnergyComplexPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
     this.lazyDefaultPanel('oil-inventories', () => import('@/components/OilInventoriesPanel'), 'OilInventoriesPanel', (p) => {
       p.setLocationClickHandler((lat: number, lon: number) => {
         this.ctx.map?.setCenter(lat, lon, 4);
@@ -2023,6 +2027,9 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('cascade', () => import('@/components/CascadePanel'), 'CascadePanel', (CascadePanel) => {
       const p = new CascadePanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       p.onSelect((nodeId) => {
         if (!nodeId) return;
         if (nodeId.startsWith('chokepoint:')) {

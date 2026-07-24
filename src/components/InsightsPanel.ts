@@ -538,7 +538,10 @@ export class InsightsPanel extends Panel {
       );
     } catch (error) {
       console.error('[InsightsPanel] Error:', error);
-      this.showError();
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Insights unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
