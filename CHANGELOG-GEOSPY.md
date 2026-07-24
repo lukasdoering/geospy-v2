@@ -78,6 +78,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Insights: country focal-point cards + convergence zones click/keyboard → map focus
 - Insights story cards with a country code focus the map (click/keyboard; links still win)
 - Economic Indicators BIS country cards (policy rate / EER / credit-to-GDP) focus the map
+- Gold Intelligence CB reserve holders/movers focus the map; load failure uses calm empty
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load

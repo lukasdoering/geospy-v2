@@ -76,6 +76,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **CII** — country click/keyboard focuses the map and opens the country brief
 - **Insights** — country focal cards, convergence zones, and story cards (when a country code is present) click/keyboard focus the map
 - **Economic (BIS)** — policy rate / real EER / credit-to-GDP country cards focus the map
+- **Gold Intelligence** — central-bank reserve holders/buyers/sellers focus the map
 
 ## Implementation note
 

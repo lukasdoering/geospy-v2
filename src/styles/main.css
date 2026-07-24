@@ -10449,6 +10449,20 @@ a.prediction-link:hover {
   outline-offset: 1px;
 }
 
+.gold-cb-clickable {
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.gold-cb-clickable:hover {
+  background: color-mix(in srgb, var(--text-dim) 8%, transparent);
+}
+
+.gold-cb-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .indicator-header {
   display: flex;
   justify-content: space-between;

@@ -3,6 +3,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { toApiUrl } from '@/services/runtime';
 import { miniSparkline } from '@/utils/sparkline';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 interface CrossCurrencyPrice { currency: string; flag: string; price: number }
 interface CotCategory { longPositions: string; shortPositions: string; netPct: number; oiSharePct: number; wowNetDelta: string }
@@ -148,9 +149,34 @@ function returnChip(label: string, pct: number): string {
 
 export class GoldIntelligencePanel extends Panel {
   private _hasData = false;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'gold-intelligence', title: t('panels.goldIntelligence'), infoTooltip: t('components.goldIntelligence.infoTooltip') });
+    this.content.addEventListener('click', (e) => {
+      const row = (e.target as HTMLElement).closest('.gold-cb-clickable') as HTMLElement | null;
+      if (!row?.dataset.country) return;
+      this.focusCountry(row.dataset.country);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('.gold-cb-clickable') as HTMLElement | null;
+      if (!row?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(row.dataset.country);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<boolean> {
@@ -178,7 +204,12 @@ export class GoldIntelligencePanel extends Panel {
     } catch (e) {
       if (this.isAbortError(e)) return false;
       if (!this.element?.isConnected) return false;
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : 'Failed to load', () => void this.fetchData());
+      if (!this._hasData) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Gold data unavailable</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }
@@ -319,14 +350,24 @@ export class GoldIntelligencePanel extends Panel {
     const cb = d.cbReserves;
     if (!cb || !cb.topHolders.length) return '';
 
-    const holderRow = (h: CbHolder, rank: number) => `<div style="display:flex;justify-content:space-between;font-size:10px;padding:1px 0">
+    const holderRow = (h: CbHolder, rank: number) => {
+      const code = (h.iso3 || '').trim().toUpperCase();
+      const clickable = code
+        ? ` class="gold-cb-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+        : '';
+      return `<div${clickable} style="display:flex;justify-content:space-between;font-size:10px;padding:1px 0">
       <span style="color:var(--text-dim)">${rank}. ${escapeHtml(h.name)}</span>
       <span style="font-weight:600">${h.tonnes > 0 ? `${h.tonnes.toFixed(1)}t` : '—'}</span>
     </div>`;
+    };
     const moverRow = (m: CbMover) => {
       const color = m.deltaTonnes12m >= 0 ? '#2ecc71' : '#e74c3c';
       const sign = m.deltaTonnes12m >= 0 ? '+' : '';
-      return `<div style="display:flex;justify-content:space-between;font-size:10px;padding:1px 0">
+      const code = (m.iso3 || '').trim().toUpperCase();
+      const clickable = code
+        ? ` class="gold-cb-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+        : '';
+      return `<div${clickable} style="display:flex;justify-content:space-between;font-size:10px;padding:1px 0">
         <span style="color:var(--text-dim)">${escapeHtml(m.name)}</span>
         <span style="color:${color};font-weight:600">${sign}${m.deltaTonnes12m.toFixed(1)}t</span>
       </div>`;
