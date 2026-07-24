@@ -58,6 +58,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Energy Crisis Tracker** — policy row click/keyboard focuses the country
 - **Gulf Economies** — country quote click/keyboard focuses the map
 - **Sanctions Pressure** — country/entry row click/keyboard focuses the country
+- **Trade Policy** — restriction/barrier card click/keyboard focuses the reporting country
 
 ## Docs
 
