@@ -209,7 +209,12 @@ export class MarketBreadthPanel extends Panel {
       const client = new MarketServiceClient(getRpcBaseUrl(), { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args) });
       const resp = await client.getMarketBreadthHistory({});
       if (resp.unavailable) {
-        if (!this.data) this.showError(t('common.noDataShort'), () => void this.fetchData());
+        if (!this.data) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('common.noDataShort'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       // The RPC interface types these as `number` but the JSON wire preserves
