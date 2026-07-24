@@ -79,6 +79,7 @@ const focusedTests = [
   'tests/calm-empty-markets-batch4.test.mts',
   'tests/calm-empty-cot-liquidity.test.mts',
   'tests/calm-empty-batch5.test.mts',
+  'tests/calm-empty-news-cascade.test.mts',
 ];
 
 function run(cmd, args, label) {
