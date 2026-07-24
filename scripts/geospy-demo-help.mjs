@@ -12,7 +12,7 @@ Checkout and run:
 
 Validate:
   npm run geospy:smoke
-  npm run geospy:verify   # smoke + focused product tests (~106)
+  npm run geospy:verify   # smoke + focused product tests (~108)
 
 Try overhead (differentiator):
   • Tip → Try now / flat hint → Predict passes
