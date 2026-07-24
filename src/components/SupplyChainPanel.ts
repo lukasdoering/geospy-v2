@@ -751,8 +751,6 @@ export class SupplyChainPanel extends Panel {
         : 'sc-risk-low';
       const top3 = m.topProducers.slice(0, 3).map(p => {
         const code = (p.country || '').trim();
-        const focusable = Boolean(resolveCountryMapFocus(code) || code.length === 2 || code.length === 3);
-        // Prefer ISO codes / names that toIso2 can resolve; still render chip when code present.
         const attrs = code
           ? ` class="sc-mineral-producer" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
           : '';
