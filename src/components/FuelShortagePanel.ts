@@ -2,7 +2,7 @@ import { Panel } from './Panel';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
 import { attributionFooterHtml, ATTRIBUTION_FOOTER_CSS } from '@/utils/attribution-footer';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type {
   ListFuelShortagesResponse,
@@ -158,7 +158,7 @@ export class FuelShortagePanel extends Panel {
   private focusShortageCountry(shortageId: string, countryHint?: string): void {
     if (!this.onMapFocus) return;
     const fromList = this.data?.shortages?.find(s => s.id === shortageId)?.country;
-    const focus = resolveFuelShortageMapFocus(countryHint || fromList);
+    const focus = resolveCountryMapFocus(countryHint || fromList);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }

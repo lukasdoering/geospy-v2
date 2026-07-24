@@ -14,7 +14,7 @@ describe('fuel shortage map focus', () => {
   it('wires panel rows + layout map focus with fuelShortages layer enable', () => {
     const panel = readFileSync(new URL('../src/components/FuelShortagePanel.ts', import.meta.url), 'utf8');
     assert.match(panel, /setLocationClickHandler/);
-    assert.match(panel, /resolveFuelShortageMapFocus/);
+    assert.match(panel, /resolveCountryMapFocus/);
     assert.match(panel, /fs-row-clickable/);
     assert.match(panel, /tabindex="0"/);
     assert.match(panel, /keydown/);
