@@ -194,21 +194,41 @@ export class BreakingNewsBanner {
   }
 
   private scrollToPanel(panelId: string): void {
+    // Enable the target if it was off (EventHandlers listens for enable-panel).
+    window.dispatchEvent(new CustomEvent('enable-panel', { detail: { panelId } }));
     // Synchronous: lets the mobile category nav clear a filter that would
     // leave the target display:none (scrollIntoView would silently no-op).
     window.dispatchEvent(new CustomEvent('wm:reveal-panel', { detail: { panelId } }));
-    const panel = document.querySelector(`[data-panel="${panelId}"]`);
-    if (!panel) return;
-    panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    const prev = this.highlightTimers.get(panel);
-    if (prev) clearTimeout(prev);
-    panel.classList.remove('search-highlight');
-    void (panel as HTMLElement).offsetWidth;
-    panel.classList.add('search-highlight');
-    this.highlightTimers.set(panel, setTimeout(() => {
+
+    const highlight = (panel: Element): void => {
+      panel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      const prev = this.highlightTimers.get(panel);
+      if (prev) clearTimeout(prev);
       panel.classList.remove('search-highlight');
-      this.highlightTimers.delete(panel);
-    }, 3100));
+      void (panel as HTMLElement).offsetWidth;
+      panel.classList.add('search-highlight');
+      this.highlightTimers.set(panel, setTimeout(() => {
+        panel.classList.remove('search-highlight');
+        this.highlightTimers.delete(panel);
+      }, 3100));
+    };
+
+    const existing = document.querySelector(`[data-panel="${panelId}"]`);
+    if (existing) {
+      highlight(existing);
+      return;
+    }
+    // Lazy panels may mount after enable — retry briefly before giving up.
+    const deadline = Date.now() + 2000;
+    const tick = (): void => {
+      const panel = document.querySelector(`[data-panel="${panelId}"]`);
+      if (panel) {
+        highlight(panel);
+        return;
+      }
+      if (Date.now() < deadline) window.setTimeout(tick, 50);
+    };
+    window.setTimeout(tick, 50);
   }
 
   private createAlertElement(alert: BreakingAlert): HTMLElement {

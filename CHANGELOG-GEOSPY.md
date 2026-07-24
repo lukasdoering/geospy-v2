@@ -42,6 +42,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Strategic Posture: remove noisy vessel-augment console.log spam
 - Infrastructure Cascade: wire select/analyze → map focus (chokepoint open / setCenter)
 - Strategic Risk: wire dead `enable-panel` CustomEvent → enablePanelById
+- Breaking news banner click: enable target panel (retry mount) then scroll/highlight
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

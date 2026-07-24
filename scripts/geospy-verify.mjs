@@ -43,6 +43,7 @@ const focusedTests = [
   'tests/hormuz-map-focus.test.mts',
   'tests/cascade-map-focus.test.mts',
   'tests/strategic-risk-enable-panel.test.mts',
+  'tests/breaking-news-enable-panel.test.mts',
 ];
 
 function run(cmd, args, label) {
