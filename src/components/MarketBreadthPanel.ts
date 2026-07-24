@@ -226,7 +226,10 @@ export class MarketBreadthPanel extends Panel {
 
   private renderPanel(): void {
     if (!this.data?.history?.length) {
-      this.showError(t('common.noDataShort'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noDataShort'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
