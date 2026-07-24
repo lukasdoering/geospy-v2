@@ -44,6 +44,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Strategic Risk: wire dead `enable-panel` CustomEvent → enablePanelById
 - Breaking news banner click: enable target panel (retry mount) then scroll/highlight
 - Thermal Escalation map focus also enables the natural (FIRMS) layer
+- Settings panel registry: GeoSpy Analyst (not WM Analyst)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

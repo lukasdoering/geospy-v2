@@ -58,6 +58,10 @@ describe('GeoSpy brand config', () => {
     const commands = readFileSync(new URL('../src/config/commands.ts', import.meta.url), 'utf8');
     assert.match(commands, /Panel: GeoSpy Analyst/);
     assert.doesNotMatch(commands, /Panel: WM Analyst/);
+
+    const panels = readFileSync(new URL('../src/config/panels.ts', import.meta.url), 'utf8');
+    assert.match(panels, /'chat-analyst': \{ name: 'GeoSpy Analyst'/);
+    assert.doesNotMatch(panels, /name: 'WM Analyst'/);
   });
 
   it('brands settings and embed entry HTML as GeoSpy', () => {
