@@ -18,12 +18,38 @@ import type {
 } from '@/services/renewable-energy-data';
 import { getCSSColor } from '@/utils';
 import { replaceChildren } from '@/utils/dom-utils';
+import { resolveTheaterMapFocus } from '@/utils/theater-map-focus';
 
 export class RenewableEnergyPanel extends Panel {
   private source: RenewableEnergyDataSource = 'hydrated';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'renewable', title: 'Renewable Energy', trackActivity: false, infoTooltip: t('components.renewable.infoTooltip') });
+    this.content.addEventListener('click', (e) => {
+      const row = (e.target as HTMLElement).closest('.region-row-clickable') as HTMLElement | null;
+      if (!row?.dataset.theater) return;
+      this.focusTheater(row.dataset.theater);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('.region-row-clickable') as HTMLElement | null;
+      if (!row?.dataset.theater) return;
+      e.preventDefault();
+      this.focusTheater(row.dataset.theater);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusTheater(theater?: string): void {
+    if (!this.onMapFocus || !theater) return;
+    const focus = resolveTheaterMapFocus(theater);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   /**
@@ -280,7 +306,15 @@ export class RenewableEnergyPanel extends Panel {
     for (let i = 0; i < regions.length; i++) {
       const region = regions[i]!;
       const row = document.createElement('div');
-      row.className = 'region-row';
+      const theaterFocus = resolveTheaterMapFocus(region.name);
+      row.className = theaterFocus ? 'region-row region-row-clickable' : 'region-row';
+      if (theaterFocus) {
+        row.dataset.theater = region.name;
+        row.setAttribute('role', 'button');
+        row.tabIndex = 0;
+        row.title = 'Show on map';
+        row.style.cursor = 'pointer';
+      }
       Object.assign(row.style, {
         display: 'flex',
         alignItems: 'center',

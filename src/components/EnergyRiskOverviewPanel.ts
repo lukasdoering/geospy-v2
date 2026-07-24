@@ -83,6 +83,8 @@ export class EnergyRiskOverviewPanel extends Panel {
   private state: OverviewState = EMPTY_STATE;
   private freshnessTickHandle: ReturnType<typeof setInterval> | null = null;
   private onHormuzFocus: (() => void) | null = null;
+  private onEuGasFocus: (() => void) | null = null;
+  private onDisruptionsFocus: (() => void) | null = null;
 
   constructor() {
     super({
@@ -97,22 +99,36 @@ export class EnergyRiskOverviewPanel extends Panel {
         'others.',
     });
     this.content.addEventListener('click', (e) => {
-      const tile = (e.target as HTMLElement).closest('.ero-tile-hormuz') as HTMLElement | null;
+      const tile = (e.target as HTMLElement).closest('.ero-tile-action') as HTMLElement | null;
       if (!tile) return;
-      this.onHormuzFocus?.();
+      const action = tile.dataset.eroAction;
+      if (action === 'hormuz') this.onHormuzFocus?.();
+      else if (action === 'eu-gas') this.onEuGasFocus?.();
+      else if (action === 'disruptions') this.onDisruptionsFocus?.();
     });
     this.content.addEventListener('keydown', (e) => {
       if (!(e instanceof KeyboardEvent)) return;
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const tile = (e.target as HTMLElement).closest('.ero-tile-hormuz') as HTMLElement | null;
+      const tile = (e.target as HTMLElement).closest('.ero-tile-action') as HTMLElement | null;
       if (!tile) return;
       e.preventDefault();
-      this.onHormuzFocus?.();
+      const action = tile.dataset.eroAction;
+      if (action === 'hormuz') this.onHormuzFocus?.();
+      else if (action === 'eu-gas') this.onEuGasFocus?.();
+      else if (action === 'disruptions') this.onDisruptionsFocus?.();
     });
   }
 
   public setHormuzFocusHandler(handler: () => void): void {
     this.onHormuzFocus = handler;
+  }
+
+  public setEuGasFocusHandler(handler: () => void): void {
+    this.onEuGasFocus = handler;
+  }
+
+  public setDisruptionsFocusHandler(handler: () => void): void {
+    this.onDisruptionsFocus = handler;
   }
 
   public destroy(): void {
@@ -176,7 +192,7 @@ export class EnergyRiskOverviewPanel extends Panel {
     const status = t.value.status as HormuzTrackerData['status'];
     const color = HORMUZ_STATUS_COLOR[status] ?? '#7f8c8d';
     const label = HORMUZ_STATUS_LABEL[status] ?? t.value.status;
-    return tileHtml('Hormuz', label, color, 'class="ero-tile ero-tile-hormuz" role="button" tabindex="0" title="Show Hormuz on map"');
+    return tileHtml('Hormuz', label, color, 'class="ero-tile ero-tile-action ero-tile-hormuz" data-ero-action="hormuz" role="button" tabindex="0" title="Show Hormuz on map"');
   }
 
   private renderEuGasTile(): string {
@@ -187,7 +203,7 @@ export class EnergyRiskOverviewPanel extends Panel {
     const fill = t.value.fillPct.toFixed(0);
     // Below 30% during refill season is critical; below 50% is amber.
     const color = t.value.fillPct < 30 ? '#e74c3c' : t.value.fillPct < 50 ? '#f39c12' : '#27ae60';
-    return tileHtml('EU Gas', `${fill}%`, color);
+    return tileHtml('EU Gas', `${fill}%`, color, 'class="ero-tile ero-tile-action" data-ero-action="eu-gas" role="button" tabindex="0" title="Show Europe on map"');
   }
 
   private renderBrentTile(): string {
@@ -212,7 +228,7 @@ export class EnergyRiskOverviewPanel extends Panel {
     }
     const n = t.value.count;
     const color = n === 0 ? '#27ae60' : n < 5 ? '#f39c12' : '#e74c3c';
-    return tileHtml('Active disruptions', String(n), color);
+    return tileHtml('Active disruptions', String(n), color, 'class="ero-tile ero-tile-action" data-ero-action="disruptions" role="button" tabindex="0" title="Show disruptions on map"');
   }
 
   private renderFreshnessTile(): string {
@@ -289,12 +305,15 @@ const RISK_OVERVIEW_CSS = `
     flex-direction: column;
     justify-content: center;
   }
+  .ero-tile-action,
   .ero-tile-hormuz {
     cursor: pointer;
   }
+  .ero-tile-action:hover,
   .ero-tile-hormuz:hover {
     filter: brightness(1.08);
   }
+  .ero-tile-action:focus-visible,
   .ero-tile-hormuz:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 1px;

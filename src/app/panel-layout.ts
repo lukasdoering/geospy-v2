@@ -1863,6 +1863,12 @@ export class PanelLayoutManager implements AppModule {
         p.setHormuzFocusHandler(() => {
           this.ctx.map?.openChokepoint?.('hormuz_strait');
         });
+        p.setEuGasFocusHandler(() => {
+          this.ctx.map?.setCenter(50, 10, 3);
+        });
+        p.setDisruptionsFocusHandler(() => {
+          this.ctx.map?.setCenter(29, 48, 3);
+        });
         return p;
       }),
     );
@@ -2505,6 +2511,9 @@ export class PanelLayoutManager implements AppModule {
     if (this.shouldCreatePanel('renewable')) {
       this.lazyImportedPanel('renewable', () => import('@/components/RenewableEnergyPanel'), 'RenewableEnergyPanel', (RenewableEnergyPanel) => {
         const p = new RenewableEnergyPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 3);
+        });
         this.ctx.renewablePanel = p;
         return p;
       });
