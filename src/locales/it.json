@@ -3092,7 +3092,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Apri scheda paese",
-    "copyCoordinates": "Copia coordinate"
+    "copyCoordinates": "Copia coordinate",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Dashboard di intelligence globale in tempo reale",

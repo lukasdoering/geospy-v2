@@ -3110,7 +3110,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Открыть обзор страны",
-    "copyCoordinates": "Скопировать координаты"
+    "copyCoordinates": "Скопировать координаты",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — панель реального времени глобальной разведки",

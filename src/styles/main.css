@@ -658,7 +658,7 @@ canvas,
 .logo {
   font-weight: bold;
   font-size: 14px;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
   color: var(--accent);
 }
 
@@ -13689,7 +13689,7 @@ a.prediction-link:hover {
     display: none !important;
   }
 
-  /* Mobile: show "World Monitor" instead of "MONITOR" */
+  /* Mobile: show full GeoSpy brand instead of short logo */
   .logo {
     display: none;
   }
