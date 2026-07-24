@@ -10,6 +10,13 @@ import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { getEurostatCountryData } from '@/services/economic';
 import type { GetEurostatCountryDataResponse } from '@/services/economic';
 import { getHydratedData } from '@/services/bootstrap';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
+
+const REGION_MAP_FOCUS: Record<'us' | 'eu' | 'cn', string> = {
+  us: 'US',
+  eu: 'DE',
+  cn: 'CN',
+};
 
 let _client: EconomicServiceClient | null = null;
 async function getEconomicClient(): Promise<EconomicServiceClient> {
@@ -244,11 +251,17 @@ export class MacroTilesPanel extends Panel {
   private _eurostat: GetEurostatCountryDataResponse | null = null;
   private _estrObs: { date: string; value: number }[] = [];
   private _china: GetChinaMacroSnapshotResponse | null = null;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'macro-tiles', title: 'Macro Indicators', showCount: false, infoTooltip: t('components.macroTiles.infoTooltip') });
 
     this.content.addEventListener('click', (e) => {
+      const mapBtn = (e.target as HTMLElement).closest<HTMLElement>('[data-macro-map]');
+      if (mapBtn?.dataset.macroMap) {
+        this.focusRegion(mapBtn.dataset.macroMap as Tab);
+        return;
+      }
       const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-tab]');
       if (btn?.dataset.tab === 'us' || btn?.dataset.tab === 'eu' || btn?.dataset.tab === 'cn') {
         this._tab = btn.dataset.tab as Tab;
@@ -257,6 +270,12 @@ export class MacroTilesPanel extends Panel {
     });
     this.content.addEventListener('keydown', (e) => {
       if (!(e instanceof KeyboardEvent)) return;
+      const mapBtn = (e.target as HTMLElement).closest<HTMLElement>('[data-macro-map]');
+      if (mapBtn?.dataset.macroMap && (e.key === 'Enter' || e.key === ' ')) {
+        e.preventDefault();
+        this.focusRegion(mapBtn.dataset.macroMap as Tab);
+        return;
+      }
       const btn = (e.target as HTMLElement).closest<HTMLElement>('[role="tab"][data-tab]');
       if (!btn || !['ArrowRight', 'ArrowLeft', 'Home', 'End'].includes(e.key)) return;
       const tabs = this._availableTabs();
@@ -274,6 +293,18 @@ export class MacroTilesPanel extends Panel {
         this.content.querySelector<HTMLElement>(`[data-tab="${next}"]`)?.focus();
       });
     });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusRegion(tab: Tab): void {
+    if (!this.onMapFocus) return;
+    const code = REGION_MAP_FOCUS[tab];
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<boolean> {
@@ -316,7 +347,12 @@ export class MacroTilesPanel extends Panel {
       const hasEu = this._eurostat !== null;
       const hasChina = isChinaLaunchReady(this._china);
       if (!hasUs && !hasEu && !hasChina) {
-        if (!this._hasData) this.showError('Macro data unavailable', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">Macro data unavailable</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       if (!hasUs && this._tab === 'us') this._tab = hasChina ? 'cn' : 'eu';
@@ -347,9 +383,11 @@ export class MacroTilesPanel extends Panel {
       body = this._buildChinaBody();
     }
 
+    const mapHint = `<button type="button" data-macro-map="${this._tab}" class="macro-map-btn" title="Show on map" aria-label="Show ${labels[this._tab]} on map" style="margin-top:8px;font-size:10px;padding:4px 8px;cursor:pointer;background:transparent;border:1px solid var(--border);border-radius:4px;color:var(--text-dim)">Show on map</button>`;
+
     const labelledBy = `macro-tiles-tab-${this._tab}`;
     this.setSafeContent(
-      unsafeRawHtml(`${tabBar}<div id="macro-tiles-tabpanel" role="tabpanel" aria-labelledby="${labelledBy}">${body}</div>`, 'legacy Panel.setContent() migration'),
+      unsafeRawHtml(`${tabBar}<div id="macro-tiles-tabpanel" role="tabpanel" aria-labelledby="${labelledBy}">${body}${mapHint}</div>`, 'legacy Panel.setContent() migration'),
       afterUpdate,
     );
   }
