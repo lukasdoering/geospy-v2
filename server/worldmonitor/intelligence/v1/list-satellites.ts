@@ -37,11 +37,15 @@ function toNumber(value: number | string | undefined): number {
 }
 
 function toSatellite(item: SatelliteCacheItem): Satellite {
+  const name = item.name || '';
+  const fallback = item.type || 'optical';
   return {
     id: String(item.id || item.noradId || ''),
-    name: item.name || '',
+    name,
     country: item.country || '',
-    type: item.type || '',
+    // Re-classify by name so stale Redis seeds (e.g. SENTINEL → military) still
+    // surface correct SAR/optical badges in the overhead popup.
+    type: inferSensorType(name, fallback),
     alt: toNumber(item.alt),
     velocity: toNumber(item.velocity),
     inclination: toNumber(item.inclination),

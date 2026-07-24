@@ -12,6 +12,11 @@ export interface SatellitesFlatHintHost {
   switchToGlobe?: () => void;
 }
 
+export interface SatellitesFlatHintActions {
+  /** One-click path into overhead-pass prediction at map center. */
+  onPredictPasses?: () => void;
+}
+
 function isDismissed(): boolean {
   try {
     return localStorage.getItem(TIP_DISMISS_KEY) === '1';
@@ -37,6 +42,7 @@ export function flatHintCopy(satellitesEnabled: boolean): string {
 export function syncSatellitesFlatHint(
   satellitesEnabled: boolean,
   map: SatellitesFlatHintHost | null | undefined,
+  actions: SatellitesFlatHintActions = {},
 ): void {
   const existing = document.getElementById(HINT_ID);
   const onFlat = Boolean(map && map.isGlobeMode && !map.isGlobeMode());
@@ -52,6 +58,7 @@ export function syncSatellitesFlatHint(
   if (existing) {
     const textEl = existing.querySelector('.geospy-satellites-flat-hint-text');
     if (textEl) textEl.textContent = flatHintCopy(satellitesEnabled);
+    ensurePredictButton(existing, actions.onPredictPasses);
     existing.classList.add('visible');
     return;
   }
@@ -64,6 +71,23 @@ export function syncSatellitesFlatHint(
   const text = document.createElement('span');
   text.className = 'geospy-satellites-flat-hint-text';
   text.textContent = flatHintCopy(satellitesEnabled);
+
+  const actionsRow = document.createElement('span');
+  actionsRow.className = 'geospy-satellites-flat-hint-actions';
+
+  if (actions.onPredictPasses) {
+    const predictBtn = document.createElement('button');
+    predictBtn.type = 'button';
+    predictBtn.className = 'geospy-satellites-flat-hint-predict';
+    predictBtn.setAttribute('data-testid', 'geospy-satellites-flat-hint-predict');
+    predictBtn.setAttribute('aria-label', 'Predict overhead passes at map center');
+    predictBtn.textContent = 'Predict passes';
+    predictBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      actions.onPredictPasses?.();
+    });
+    actionsRow.append(predictBtn);
+  }
 
   const switchBtn = document.createElement('button');
   switchBtn.type = 'button';
@@ -82,6 +106,7 @@ export function syncSatellitesFlatHint(
     toggle?.querySelector('.map-dim-btn[data-mode="globe"]')?.classList.add('active');
     hint.remove();
   });
+  actionsRow.append(switchBtn);
 
   const dismissBtn = document.createElement('button');
   dismissBtn.type = 'button';
@@ -94,10 +119,35 @@ export function syncSatellitesFlatHint(
     hint.remove();
   });
 
-  hint.append(text, switchBtn, dismissBtn);
+  hint.append(text, actionsRow, dismissBtn);
   // Fixed to the viewport so map WebGL/canvas stacking cannot bury the hint.
   document.body.appendChild(hint);
   requestAnimationFrame(() => hint.classList.add('visible'));
+}
+
+function ensurePredictButton(
+  hint: HTMLElement,
+  onPredictPasses: (() => void) | undefined,
+): void {
+  const existing = hint.querySelector('.geospy-satellites-flat-hint-predict');
+  if (!onPredictPasses) {
+    existing?.remove();
+    return;
+  }
+  if (existing) return;
+  const actionsRow = hint.querySelector('.geospy-satellites-flat-hint-actions');
+  if (!actionsRow) return;
+  const predictBtn = document.createElement('button');
+  predictBtn.type = 'button';
+  predictBtn.className = 'geospy-satellites-flat-hint-predict';
+  predictBtn.setAttribute('data-testid', 'geospy-satellites-flat-hint-predict');
+  predictBtn.setAttribute('aria-label', 'Predict overhead passes at map center');
+  predictBtn.textContent = 'Predict passes';
+  predictBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    onPredictPasses();
+  });
+  actionsRow.insertBefore(predictBtn, actionsRow.firstChild);
 }
 
 export function removeSatellitesFlatHint(): void {

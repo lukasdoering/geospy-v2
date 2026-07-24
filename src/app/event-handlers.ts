@@ -36,6 +36,10 @@ import {
 import { clearPanelColSpans, clearPanelSpans } from '@/utils/panel-storage';
 import { syncSatellitesFlatHint } from '@/components/SatellitesFlatHint';
 import {
+  getActiveOverheadShareLocation,
+  OVERHEAD_POPUP_CHANGE_EVENT,
+} from '@/components/OrbitalPassesPopup';
+import {
   IDLE_PAUSE_MS,
   DEFAULT_MAP_LAYERS,
   MOBILE_DEFAULT_MAP_LAYERS,
@@ -1234,6 +1238,11 @@ export class EventHandlerManager implements AppModule {
       this.debouncedWebcamReload();
     });
 
+    // Keep ?overhead=1 in the live URL while the prediction popup is open.
+    window.addEventListener(OVERHEAD_POPUP_CHANGE_EVENT, () => {
+      this.syncUrlState();
+    });
+
     // Skip the immediate sync only when applyInitialUrlState() will start an
     // async flyTo that makes getCenter() return stale intermediate coordinates.
     // Two cases qualify:
@@ -1302,7 +1311,11 @@ export class EventHandlerManager implements AppModule {
   getShareUrl(): string | null {
     if (!this.ctx.map) return null;
     const state = this.ctx.map.getState();
-    const center = this.ctx.map.getCenter();
+    const mapCenter = this.ctx.map.getCenter();
+    const overheadShare = getActiveOverheadShareLocation();
+    const center = overheadShare
+      ? { lat: overheadShare.lat, lon: overheadShare.lon }
+      : mapCenter;
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const briefPage = this.ctx.countryBriefPage;
     const isCountryVisible = briefPage?.isVisible() ?? false;
@@ -1315,6 +1328,7 @@ export class EventHandlerManager implements AppModule {
       country: isCountryVisible ? (briefPage?.getCode() ?? undefined) : undefined,
       expanded: isCountryVisible && briefPage?.getIsMaximized?.() ? true : undefined,
       chokepoint: !isCountryVisible ? (this.ctx.activeChokepoint ?? undefined) : undefined,
+      overhead: Boolean(overheadShare),
     });
   }
 
@@ -2223,7 +2237,9 @@ export class EventHandlerManager implements AppModule {
   }
 
   private syncSatellitesFlatHint(): void {
-    syncSatellitesFlatHint(!!this.ctx.mapLayers.satellites, this.ctx.map);
+    syncSatellitesFlatHint(!!this.ctx.mapLayers.satellites, this.ctx.map, {
+      onPredictPasses: () => this.callbacks.predictOverheadPassesAtMapCenter?.(),
+    });
   }
 
   private setupMapFullscreen(mapSection: HTMLElement): void {

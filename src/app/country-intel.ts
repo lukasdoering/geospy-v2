@@ -300,8 +300,11 @@ export class CountryIntelManager implements AppModule {
       dismissBtn.className = 'geospy-overhead-tip-dismiss';
       dismissBtn.setAttribute('aria-label', 'Dismiss tip');
       dismissBtn.textContent = 'Got it';
-      const dismiss = () => {
+      const hideTip = () => {
         tip.remove();
+      };
+      const dismissPermanently = () => {
+        hideTip();
         try {
           localStorage.setItem('geospy-overhead-passes-tip-dismissed', '1');
         } catch {
@@ -309,10 +312,10 @@ export class CountryIntelManager implements AppModule {
         }
       };
       tryBtn.addEventListener('click', () => {
-        dismiss();
+        dismissPermanently();
         this.predictOverheadPassesAtMapCenter();
       });
-      dismissBtn.addEventListener('click', dismiss);
+      dismissBtn.addEventListener('click', dismissPermanently);
       tip.append(tryBtn, dismissBtn);
       document.body.appendChild(tip);
       requestAnimationFrame(() => {
@@ -323,7 +326,8 @@ export class CountryIntelManager implements AppModule {
           /* ignore */
         }
       });
-      window.setTimeout(dismiss, 12_000);
+      // Auto-hide only — do not burn first-run discoverability if the tip timed out.
+      window.setTimeout(hideTip, 12_000);
     }, delayMs);
   }
 
@@ -348,6 +352,7 @@ export class CountryIntelManager implements AppModule {
         emptyDetail: `No LEO imaging passes above ${prefs.minElevationDeg}° elevation in the next ${prefs.windowMinutes / 60} hours.`,
         settingsSummary,
         onRefresh: retry,
+        onOpenSettings: () => this.openOverheadPassSettings(),
       });
     } catch (err) {
       console.error('[satellites] overhead pass prediction failed', err);
@@ -359,8 +364,25 @@ export class CountryIntelManager implements AppModule {
         onRetry: retry,
         onRefresh: retry,
         settingsSummary,
+        onOpenSettings: () => this.openOverheadPassSettings(),
       });
     }
+  }
+
+  /** Open Settings → Satellites overhead prefs (from popup footer). */
+  private openOverheadPassSettings(): void {
+    this.ctx.unifiedSettings?.open('settings');
+    window.setTimeout(() => {
+      const elev = document.getElementById('us-overhead-elevation');
+      const group = elev?.closest('details');
+      if (group instanceof HTMLDetailsElement) group.open = true;
+      elev?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+      try {
+        (elev as HTMLSelectElement | null)?.focus();
+      } catch {
+        /* ignore */
+      }
+    }, 80);
   }
 
   private async ensureCountryBriefPage(): Promise<boolean> {

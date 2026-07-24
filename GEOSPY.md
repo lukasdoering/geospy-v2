@@ -22,10 +22,11 @@ Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 ## Try the GeoSpy differentiator (overhead passes)
 
 1. Wait for the tip → click **Try now**, or press **Cmd/Ctrl+Shift+O**
-2. Or right-click the map → **Predict Overhead Passes**
-3. Or Cmd/Ctrl+K → type `overhead`
-4. Or open a deep link: `/?lat=40.7128&lon=-74.0060&overhead=1`
-5. In the popup: Refresh / Share / Copy, SAR·Optical filters, Settings → Satellites prefs
+2. Or use the flat-map hint **Predict passes** button
+3. Or right-click the map → **Predict Overhead Passes**
+4. Or Cmd/Ctrl+K → type `overhead`
+5. Or open a deep link: `/?lat=40.7128&lon=-74.0060&overhead=1`
+6. In the popup: Refresh / Share / Copy, SAR·Optical filters; click the prefs footer to open Settings → Satellites
 
 ## Markets terminal chart
 

@@ -232,3 +232,22 @@
   bottom: 0;
   background: var(--panel-bg);
 }
+
+button.orbital-passes-prefs--action {
+  display: block;
+  width: 100%;
+  border: 0;
+  margin: 0;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+  color: var(--muted);
+  transition: color 0.15s ease, background 0.15s ease;
+}
+
+button.orbital-passes-prefs--action:hover,
+button.orbital-passes-prefs--action:focus-visible {
+  color: var(--text);
+  background: color-mix(in srgb, var(--accent, #3d7eff) 12%, var(--panel-bg));
+  outline: none;
+}

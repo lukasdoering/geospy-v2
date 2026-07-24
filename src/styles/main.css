@@ -1554,6 +1554,14 @@ canvas,
   min-width: 0;
 }
 
+.geospy-satellites-flat-hint-actions {
+  display: inline-flex;
+  flex-shrink: 0;
+  gap: 6px;
+  align-items: center;
+}
+
+.geospy-satellites-flat-hint-predict,
 .geospy-satellites-flat-hint-switch {
   flex-shrink: 0;
   border: 1px solid var(--border);
@@ -1566,6 +1574,7 @@ canvas,
   font-weight: 600;
 }
 
+.geospy-satellites-flat-hint-predict:hover,
 .geospy-satellites-flat-hint-switch:hover {
   background: color-mix(in srgb, var(--border) 45%, transparent);
 }

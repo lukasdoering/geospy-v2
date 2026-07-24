@@ -10,6 +10,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Overhead satellite pass prediction (SGP4) from map context menu
 - Discoverability: Cmd+K, Cmd/Ctrl+Shift+O, last-location rerun, first-run tip (Try now CTA), flat-map coherence hint
 - Popup polish: duration, type badges, copy, Retry/Refresh, revisit median + SAR/optical counts, testids, prefs footer, AOS/LOS, a11y, Share deep-link, SAR/Optical filters
+- Prefs footer opens Settings → Satellites; tip auto-hide no longer permanently dismisses
+- Flat-map hint **Predict passes** CTA; live URL keeps `?overhead=1` while popup is open
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
 - Satellites layer default-on (full variant)
@@ -25,6 +27,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - sharp ≥0.35 (blog-site); tauri ≥2.11.1; humanitarian health wiring
 - Renewable Energy panel discloses static fallback (parity with ProgressCharts)
 - Satellite catalog: CelesTrak TLE fallback when Redis seed is empty (local/dev)
+- SAR name classification (SENTINEL-1A etc.) on CelesTrak parse + Redis `toSatellite` + ais-relay seed
 
 ### Docs
 - README GeoSpy highlights; CONTRIBUTING fork preamble; solutions note for overhead-pass surface

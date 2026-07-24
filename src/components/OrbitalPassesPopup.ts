@@ -8,6 +8,22 @@ import {
 let activePopup: HTMLElement | null = null;
 let clickOutsideHandler: ((e: MouseEvent) => void) | null = null;
 let previouslyFocused: HTMLElement | null = null;
+/** Location for the open overhead popup — used by header Copy Link / URL sync. */
+let activeOverheadShare: { lat: number; lon: number } | null = null;
+
+export const OVERHEAD_POPUP_CHANGE_EVENT = 'geospy:overhead-popup-change';
+
+export function getActiveOverheadShareLocation(): { lat: number; lon: number } | null {
+  return activeOverheadShare;
+}
+
+function notifyOverheadPopupChange(): void {
+  try {
+    window.dispatchEvent(new CustomEvent(OVERHEAD_POPUP_CHANGE_EVENT));
+  } catch {
+    /* ignore (SSR / non-DOM) */
+  }
+}
 
 function onEscape(e: KeyboardEvent): void {
   if (e.key === 'Escape') dismissOrbitalPassesPopup();
@@ -23,12 +39,18 @@ export function dismissOrbitalPassesPopup(): void {
   if (!activePopup) {
     clearClickOutsideListener();
     document.removeEventListener('keydown', onEscape);
+    if (activeOverheadShare) {
+      activeOverheadShare = null;
+      notifyOverheadPopupChange();
+    }
     return;
   }
   activePopup.remove();
   activePopup = null;
+  activeOverheadShare = null;
   clearClickOutsideListener();
   document.removeEventListener('keydown', onEscape);
+  notifyOverheadPopupChange();
   const restore = previouslyFocused;
   previouslyFocused = null;
   if (restore && typeof restore.focus === 'function' && document.contains(restore)) {
@@ -195,6 +217,8 @@ export interface OrbitalPassesPopupOptions {
   emptyDetail?: string;
   /** Optional prefs footer (elevation / window). Defaults to current settings. */
   settingsSummary?: string | false;
+  /** Open Settings → Satellites when the prefs footer is activated. */
+  onOpenSettings?: () => void;
 }
 
 export function showOrbitalPassesPopup(
@@ -213,6 +237,9 @@ export function showOrbitalPassesPopup(
   popup.setAttribute('aria-modal', 'true');
   popup.setAttribute('aria-label', 'Overhead satellite passes');
   popup.setAttribute('data-testid', 'orbital-passes-popup');
+  popup.setAttribute('data-lat', String(lat));
+  popup.setAttribute('data-lon', String(lng));
+  activeOverheadShare = { lat, lon: lng };
 
   const clampedX = Math.min(Math.max(8, screenX), window.innerWidth - 320);
   const clampedY = Math.min(Math.max(8, screenY), window.innerHeight - 280);
@@ -411,13 +438,24 @@ export function showOrbitalPassesPopup(
   }
 
   if (!options.loading && options.settingsSummary !== false) {
-    const footer = el(
-      'div',
-      'orbital-passes-prefs',
-      options.settingsSummary ?? formatOverheadSettingsSummary(),
-    );
-    footer.setAttribute('data-testid', 'orbital-passes-prefs');
-    popup.append(footer);
+    const summaryText = options.settingsSummary ?? formatOverheadSettingsSummary();
+    if (options.onOpenSettings) {
+      const footer = el('button', 'orbital-passes-prefs orbital-passes-prefs--action');
+      footer.type = 'button';
+      footer.textContent = summaryText;
+      footer.title = 'Open Settings → Satellites';
+      footer.setAttribute('aria-label', 'Open Settings → Satellites preferences');
+      footer.setAttribute('data-testid', 'orbital-passes-prefs');
+      footer.addEventListener('click', (e) => {
+        e.stopPropagation();
+        options.onOpenSettings?.();
+      });
+      popup.append(footer);
+    } else {
+      const footer = el('div', 'orbital-passes-prefs', summaryText);
+      footer.setAttribute('data-testid', 'orbital-passes-prefs');
+      popup.append(footer);
+    }
   }
 
   clickOutsideHandler = () => dismissOrbitalPassesPopup();
@@ -430,6 +468,7 @@ export function showOrbitalPassesPopup(
   document.addEventListener('keydown', onEscape);
   document.body.appendChild(popup);
   activePopup = popup;
+  notifyOverheadPopupChange();
   // Focus the close control so Escape + screen readers have a clear entry point.
   requestAnimationFrame(() => {
     if (closeBtn.isConnected) closeBtn.focus();

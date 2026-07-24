@@ -38,4 +38,13 @@ describe('listSatellites CelesTrak TLE parse', () => {
     assert.equal(sats.find((s) => s.id === '31698')?.type, 'sar'); // TERRASAR-X
     assert.equal(sats.find((s) => s.id === '25544')?.type, 'optical'); // ISS stays optical
   });
+
+  it('reclassifies Redis seed types by name and seeds SENTINEL-1 as SAR', async () => {
+    const { readFileSync } = await import('node:fs');
+    const handler = readFileSync(new URL('../server/worldmonitor/intelligence/v1/list-satellites.ts', import.meta.url), 'utf8');
+    assert.match(handler, /type:\s*inferSensorType\(name,\s*fallback\)/);
+    const relay = readFileSync(new URL('../scripts/ais-relay.cjs', import.meta.url), 'utf8');
+    assert.match(relay, /SENTINEL-1/);
+    assert.match(relay, /type = 'sar'/);
+  });
 });

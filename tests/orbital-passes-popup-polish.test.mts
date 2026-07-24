@@ -120,6 +120,10 @@ describe('OrbitalPassesPopup polish', () => {
     const intel = readFileSync(new URL('../src/app/country-intel.ts', import.meta.url), 'utf8');
     assert.match(intel, /predictOverheadPassesAtMapCenter\(/);
     assert.match(intel, /geospy-overhead-passes-tip-dismissed/);
+    assert.match(intel, /dismissPermanently/);
+    assert.match(intel, /setTimeout\(hideTip,\s*12_000\)/);
+    assert.match(intel, /onOpenSettings/);
+    assert.match(intel, /openOverheadPassSettings/);
     assert.match(intel, /onRetry:\s*retry/);
     assert.match(intel, /geospy-overhead-tip-try/);
     assert.match(intel, /Try now/);
@@ -128,5 +132,13 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(intel, /\.has\('overhead'\)/);
     assert.match(intel, /settingsSummary/);
     assert.doesNotMatch(intel, /settingsSummary:\s*false/);
+
+    const popup = readFileSync(new URL('../src/components/OrbitalPassesPopup.ts', import.meta.url), 'utf8');
+    assert.match(popup, /getActiveOverheadShareLocation/);
+    assert.match(popup, /OVERHEAD_POPUP_CHANGE_EVENT/);
+    assert.match(popup, /orbital-passes-prefs--action/);
+
+    assert.match(handlers, /getActiveOverheadShareLocation/);
+    assert.match(handlers, /overhead:\s*Boolean\(overheadShare\)/);
   });
 });

@@ -1784,18 +1784,22 @@ const SAT_NAME_FILTERS = [
 function satClassify(name) {
   const n = name.toUpperCase();
   let type = 'military';
-  if (/COSMO-SKYMED|TERRASAR|PAZ|SAR-LUPE|YAOGAN/i.test(n)) type = 'sar';
-  else if (/WORLDVIEW|SKYSAT|PLEIADES|KOMPSAT|GAOFEN|JILIN|CARTOSAT|ZIYUAN/i.test(n)) type = 'optical';
+  // SENTINEL-1* is C-band SAR (not optical). Keep YAOGAN dual-use as sar seed.
+  if (/COSMO[- ]?SKYMED|TERRASAR|TANDEM-X|RADARSAT|SENTINEL-1|PAZ|SAR-LUPE|YAOGAN|ICEYE|CAPELLA|UMBRA|SAOCOM|NOVASAR|RISAT|ALOS-[24]|BIOMASS|CSG-\d/i.test(n)) type = 'sar';
+  else if (/WORLDVIEW|SKYSAT|PLEIADES|KOMPSAT|GAOFEN|JILIN|CARTOSAT|ZIYUAN|SENTINEL-[23]/i.test(n)) type = 'optical';
   else if (/SAPPHIRE|PRAETORIAN|USA|GOKTURK/i.test(n)) type = 'military';
 
   let country = 'OTHER';
   if (/^YAOGAN|^GAOFEN|^JILIN|^ZIYUAN/i.test(n)) country = 'CN';
   else if (/^COSMOS/i.test(n)) country = 'RU';
-  else if (/^WORLDVIEW|^SAPPHIRE|^PRAETORIAN|^USA|^SKYSAT/i.test(n)) country = 'US';
-  else if (/^SENTINEL|^COSMO-SKYMED|^TERRASAR|^SAR-LUPE|^PAZ|^PLEIADES/i.test(n)) country = 'EU';
+  else if (/^WORLDVIEW|^SAPPHIRE|^PRAETORIAN|^USA|^SKYSAT|^CAPELLA|^UMBRA|^ICEYE/i.test(n)) country = 'US';
+  else if (/^SENTINEL|^COSMO[- ]?SKYMED|^TERRASAR|^TANDEM-X|^SAR-LUPE|^PAZ|^PLEIADES|^BIOMASS/i.test(n)) country = 'EU';
+  else if (/^RADARSAT|^RCM/i.test(n)) country = 'CA';
   else if (/^KOMPSAT/i.test(n)) country = 'KR';
-  else if (/^CARTOSAT/i.test(n)) country = 'IN';
+  else if (/^CARTOSAT|^RISAT/i.test(n)) country = 'IN';
   else if (/^GOKTURK|^RASAT/i.test(n)) country = 'TR';
+  else if (/^SAOCOM/i.test(n)) country = 'AR';
+  else if (/^ALOS/i.test(n)) country = 'JP';
 
   return { type, country };
 }
