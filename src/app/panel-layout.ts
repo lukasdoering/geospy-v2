@@ -2001,7 +2001,13 @@ export class PanelLayoutManager implements AppModule {
       return p;
     });
 
-    this.lazyDefaultPanel('population-exposure', () => import('@/components/PopulationExposurePanel'), 'PopulationExposurePanel');
+    this.lazyImportedPanel('population-exposure', () => import('@/components/PopulationExposurePanel'), 'PopulationExposurePanel', (PopulationExposurePanel) => {
+      const p = new PopulationExposurePanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 5);
+      });
+      return p;
+    });
 
     this.lazyImportedPanel('security-advisories', () => import('@/components/SecurityAdvisoriesPanel'), 'SecurityAdvisoriesPanel', (SecurityAdvisoriesPanel) => {
       const p = new SecurityAdvisoriesPanel();

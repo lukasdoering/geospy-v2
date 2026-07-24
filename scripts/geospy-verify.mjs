@@ -26,6 +26,7 @@ const focusedTests = [
   'tests/satellite-fires-panel.test.mts',
   'tests/internet-disruptions-map.test.mts',
   'tests/security-advisories-search.test.mts',
+  'tests/population-exposure-map.test.mts',
 ];
 
 function run(cmd, args, label) {

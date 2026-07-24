@@ -222,6 +222,15 @@
   border-bottom: 1px solid var(--border-subtle);
 }
 
+.popexp-card-clickable {
+  cursor: pointer;
+}
+
+.popexp-card-clickable:focus-visible {
+  outline: 1px solid var(--accent, #3d7eff);
+  outline-offset: -1px;
+}
+
 .popexp-card:hover {
   background: var(--surface-hover);
 }

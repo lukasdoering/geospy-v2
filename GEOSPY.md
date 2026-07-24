@@ -38,6 +38,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Disease Outbreaks** — search + click a row to focus the map
 - **Satellite Fires** — click a region row to focus FIRMS detections
 - **Internet Disruptions** — click an outage/anomaly row to focus the map
+- **Population Exposure** — click a card to focus the event location
 - **Security Advisories** — search by country / title alongside severity pills
 
 ## Docs
