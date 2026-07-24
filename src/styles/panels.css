@@ -560,12 +560,17 @@
   color: var(--text-secondary);
 }
 
-.ucdp-row {
+.ucdp-row-clickable {
   cursor: pointer;
 }
 
-.ucdp-row:hover {
+.ucdp-row-clickable:hover {
   background: var(--surface-hover);
+}
+
+.ucdp-row-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
 }
 
 .ucdp-date {
@@ -2543,15 +2548,40 @@ body.panel-drag-active .map-bottom-grid:empty::after {
 /* Card list */
 .te-list { display: flex; flex-direction: column; }
 
+.te-filters {
+  display: flex;
+  gap: 4px;
+  margin: 0 0 6px;
+  padding: 0 4px;
+}
+
+.te-search {
+  flex: 1 1 auto;
+  min-width: 120px;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
 .te-card {
   display: flex;
   align-items: stretch;
   border-bottom: 1px solid var(--border-subtle);
-  cursor: pointer;
   transition: background 0.12s;
 }
 
-.te-card:hover { background: var(--surface-hover); }
+.te-card-clickable {
+  cursor: pointer;
+}
+
+.te-card-clickable:hover { background: var(--surface-hover); }
+.te-card-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
 .te-card:last-child { border-bottom: none; }
 
 /* Left accent bar — color set per status via modifier */

@@ -11,6 +11,7 @@ const STATUS_CLASS: Record<string, string> = {
 export class ThermalEscalationPanel extends Panel {
   private clusters: ThermalEscalationCluster[] = [];
   private fetchedAt: Date | null = null;
+  private searchQuery = '';
   private summary: ThermalEscalationWatch['summary'] = {
     clusterCount: 0,
     elevatedCount: 0,
@@ -31,12 +32,29 @@ export class ThermalEscalationPanel extends Panel {
     });
     this.showLoading(t('components.thermalEscalation.loading'));
 
-    this.content.addEventListener('click', (e) => {
-      const row = (e.target as HTMLElement).closest<HTMLElement>('.te-card');
+    const focusCard = (row: HTMLElement | null): void => {
       if (!row) return;
       const lat = Number(row.dataset.lat);
       const lon = Number(row.dataset.lon);
-      if (Number.isFinite(lat) && Number.isFinite(lon)) this.onLocationClick?.(lat, lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onLocationClick?.(lat, lon);
+      }
+    };
+    this.content.addEventListener('click', (e) => {
+      focusCard((e.target as HTMLElement).closest<HTMLElement>('.te-card[data-te-focus]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('.te-card[data-te-focus]');
+      if (!row) return;
+      e.preventDefault();
+      focusCard(row);
+    });
+    this.content.addEventListener('input', (e) => {
+      const inp = e.target as HTMLInputElement;
+      if (inp.dataset.role !== 'te-search') return;
+      this.searchQuery = inp.value;
+      this.render({ restoreSearchFocus: true });
     });
   }
 
@@ -52,25 +70,52 @@ export class ThermalEscalationPanel extends Panel {
     this.render();
   }
 
-  private render(): void {
+  private getFiltered(): ThermalEscalationCluster[] {
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return this.clusters;
+    return this.clusters.filter((c) =>
+      c.regionLabel.toLowerCase().includes(q)
+      || c.status.toLowerCase().includes(q)
+      || c.context.toLowerCase().includes(q)
+      || c.strategicRelevance.toLowerCase().includes(q),
+    );
+  }
+
+  private render(opts: { restoreSearchFocus?: boolean } = {}): void {
     if (this.clusters.length === 0) {
       this.setSafeContent(unsafeRawHtml(`<div class="panel-empty">${escapeHtml(t('components.thermalEscalation.empty'))}</div>`, 'legacy Panel.setContent() migration'));
       return;
     }
 
+    const filtered = this.getFiltered();
     const footer = this.fetchedAt && this.fetchedAt.getTime() > 0
       ? t('components.thermalEscalation.footer.updated', { time: this.fetchedAt.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) })
       : '';
+    const listHtml = filtered.length === 0
+      ? `<div class="panel-empty">No clusters match this search</div>`
+      : filtered.map(c => this.renderCard(c)).join('');
 
     this.setSafeContent(unsafeRawHtml(`
       <div class="te-panel">
         ${this.renderSummary()}
+        <div class="te-filters">
+          <input data-role="te-search" data-testid="thermal-escalation-search" type="search" class="te-search" placeholder="Search region / status" value="${escapeHtml(this.searchQuery)}" />
+        </div>
         <div class="te-list">
-          ${this.clusters.map(c => this.renderCard(c)).join('')}
+          ${listHtml}
         </div>
         ${footer ? `<div class="te-footer">${escapeHtml(footer)}</div>` : ''}
       </div>
     `, 'legacy Panel.setContent() migration'));
+
+    if (opts.restoreSearchFocus) {
+      const inp = this.content.querySelector<HTMLInputElement>('input[data-role="te-search"]');
+      if (inp) {
+        inp.focus();
+        const len = inp.value.length;
+        inp.setSelectionRange(len, len);
+      }
+    }
   }
 
   private renderSummary(): string {
@@ -122,8 +167,14 @@ export class ThermalEscalationPanel extends Panel {
 
     const age = formatAge(c.lastDetectedAt);
 
+    const focusable = Number.isFinite(c.lat) && Number.isFinite(c.lon) && !(c.lat === 0 && c.lon === 0);
+    const focusAttrs = focusable
+      ? ` data-te-focus="1" data-lat="${c.lat}" data-lon="${c.lon}" role="button" tabindex="0" title="Show on map"`
+      : '';
+    const clickableCls = focusable ? ' te-card-clickable' : '';
+
     return `
-      <div class="te-card te-card-${statusClass}" data-lat="${c.lat}" data-lon="${c.lon}">
+      <div class="te-card te-card-${statusClass}${clickableCls}"${focusAttrs}>
         <div class="te-card-accent"></div>
         <div class="te-card-body">
           <div class="te-region">${escapeHtml(c.regionLabel)}</div>

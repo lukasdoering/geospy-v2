@@ -35,6 +35,14 @@ export class UcdpEventsPanel extends Panel {
     });
     this.showLoading(t('common.loadingUcdpEvents'));
 
+    const focusRow = (row: HTMLElement | null): void => {
+      if (!row?.dataset.lat || !row.dataset.lon) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onEventClick?.(lat, lon);
+      }
+    };
     this.content.addEventListener('click', (e) => {
       const tab = (e.target as HTMLElement).closest<HTMLElement>('.panel-tab');
       if (tab?.dataset.tab) {
@@ -42,12 +50,14 @@ export class UcdpEventsPanel extends Panel {
         this.renderContent();
         return;
       }
-      const row = (e.target as HTMLElement).closest<HTMLElement>('.ucdp-row');
-      if (row) {
-        const lat = Number(row.dataset.lat);
-        const lon = Number(row.dataset.lon);
-        if (Number.isFinite(lat) && Number.isFinite(lon)) this.onEventClick?.(lat, lon);
-      }
+      focusRow((e.target as HTMLElement).closest<HTMLElement>('.ucdp-row[data-lat]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('.ucdp-row[data-lat]');
+      if (!row) return;
+      e.preventDefault();
+      focusRow(row);
     });
   }
 
@@ -124,7 +134,14 @@ export class UcdpEventsPanel extends Panel {
           : '<span class="ucdp-deaths-zero">0</span>';
         const actors = `${escapeHtml(e.side_a)} vs ${escapeHtml(e.side_b)}`;
 
-        return `<tr class="ucdp-row" data-lat="${e.latitude}" data-lon="${e.longitude}">
+        const hasCoords = Number.isFinite(e.latitude) && Number.isFinite(e.longitude)
+          && !(e.latitude === 0 && e.longitude === 0);
+        const focusAttrs = hasCoords
+          ? ` data-lat="${e.latitude}" data-lon="${e.longitude}" role="button" tabindex="0" title="Show on map"`
+          : '';
+        const clickableCls = hasCoords ? ' ucdp-row-clickable' : '';
+
+        return `<tr class="ucdp-row${clickableCls}"${focusAttrs}>
           <td class="ucdp-country">${escapeHtml(e.country)}</td>
           <td class="ucdp-deaths">${deathsHtml}</td>
           <td class="ucdp-date">${e.date_start}</td>

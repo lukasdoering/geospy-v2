@@ -24,6 +24,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Panel→map enables matching layers (UCDP, climate, displacement, radiation)
 - Displacement: guard Null Island + keyboard map focus
 - Overhead prefs footer: await/retry Settings cold-open before focusing Satellites elevation
+- Thermal Escalation: region/status search + keyboard map focus
+- UCDP Events: keyboard-accessible row → map focus
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

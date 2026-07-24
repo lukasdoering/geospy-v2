@@ -27,6 +27,7 @@ Try other polish:
   • Disease Outbreaks / Satellite Fires / Internet Disruptions → row click focuses map
   • Security Advisories → search + click card to focus country on map
   • UCDP / Climate / Displacement / Radiation → click enables matching layer
+  • Thermal Escalation → search region/status, then click/keyboard → map
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 `);

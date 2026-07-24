@@ -31,6 +31,8 @@ const focusedTests = [
   'tests/displacement-map-focus.test.mts',
   'tests/population-exposure-map.test.mts',
   'tests/radiation-watch-map.test.mts',
+  'tests/thermal-escalation-search.test.mts',
+  'tests/ucdp-events-map-a11y.test.mts',
 ];
 
 function run(cmd, args, label) {
