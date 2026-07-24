@@ -56,8 +56,8 @@ export function syncSatellitesFlatHint(
   const text = document.createElement('span');
   text.className = 'geospy-satellites-flat-hint-text';
   text.textContent = satellitesEnabled
-    ? 'Live orbits on 3D globe · Right-click any point for overhead passes'
-    : 'Right-click the map for overhead passes · Switch to 3D for live orbits';
+    ? 'Live orbits on 3D globe · Right-click / Cmd+Shift+O for overhead passes'
+    : 'Right-click or Cmd+Shift+O for overhead passes · Switch to 3D for live orbits';
 
   const switchBtn = document.createElement('button');
   switchBtn.type = 'button';
