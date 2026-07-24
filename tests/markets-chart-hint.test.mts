@@ -8,6 +8,7 @@ describe('markets / commodities terminal chart polish', () => {
     assert.match(panel, /geospy-market-chart-hint-dismissed/);
     assert.match(panel, /data-market-chart-hint-dismiss/);
     assert.match(panel, /data-commodity-chart/);
+    assert.match(panel, /data-crypto-chart/);
     assert.match(panel, /commodity-item-clickable/);
     assert.match(panel, /openMarketChartModal/);
 

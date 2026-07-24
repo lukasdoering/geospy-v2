@@ -613,8 +613,40 @@ export class CommoditiesPanel extends Panel {
 }
 
 export class CryptoPanel extends Panel {
+  private _crypto: CryptoData[] = [];
+
   constructor() {
     super({ id: 'crypto', title: t('panels.crypto'), infoTooltip: t('components.crypto.infoTooltip') });
+
+    const openFromEvent = (target: HTMLElement): void => {
+      if (target.closest('[data-market-chart-hint-dismiss]')) {
+        dismissMarketChartHint();
+        target.closest('.market-chart-hint')?.remove();
+        return;
+      }
+      const row = target.closest<HTMLElement>('[data-crypto-chart]');
+      if (!row) return;
+      const idx = Number(row.dataset.cryptoChart);
+      const coin = this._crypto[idx];
+      if (!coin) return;
+      dismissMarketChartHint();
+      this.content.querySelector('.market-chart-hint')?.remove();
+      openMarketChartModal({
+        name: coin.name,
+        display: coin.symbol,
+        price: coin.price,
+        change: coin.change,
+        sparkline: coin.sparkline,
+      });
+    };
+    this.content.addEventListener('click', (e) => openFromEvent(e.target as HTMLElement));
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('[data-crypto-chart]');
+      if (!row) return;
+      e.preventDefault();
+      openFromEvent(e.target as HTMLElement);
+    });
   }
 
   public renderCrypto(data: CryptoData[]): void {
@@ -623,10 +655,17 @@ export class CryptoPanel extends Panel {
       return;
     }
 
-    const html = data
-      .map(
-        (coin) => `
-      <div class="market-item">
+    this._crypto = data;
+    const hasChartable = data.some(hasPlottableSeries);
+    const hint = hasChartable ? marketChartHintHtml() : '';
+    const html = hint + data
+      .map((coin, idx) => {
+        const clickable = hasPlottableSeries(coin);
+        const attrs = clickable
+          ? ` class="market-item market-item-clickable" data-crypto-chart="${idx}" role="button" tabindex="0" aria-label="${t('components.markets.chart.title', { symbol: escapeHtml(coin.symbol) })}"`
+          : ' class="market-item"';
+        return `
+      <div${attrs}>
         <div class="market-info">
           <span class="market-name">${escapeHtml(coin.name)}</span>
           <span class="market-symbol">${escapeHtml(coin.symbol)}</span>
@@ -637,8 +676,8 @@ export class CryptoPanel extends Panel {
           <span class="market-change ${getChangeClass(coin.change)}">${formatChange(coin.change)}</span>
         </div>
       </div>
-    `
-      )
+    `;
+      })
       .join('');
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));

@@ -17,7 +17,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
 - Satellites layer default-on (full variant)
-- Markets expandable terminal price chart (dismissible in-panel hint; commodities parity)
+- Markets expandable terminal price chart (dismissible in-panel hint; commodities + crypto parity)
 - `npm run geospy:smoke` / `geospy:demo` / `geospy:verify` helpers
 - Embed dialog preview title uses GeoSpy brand
 

@@ -31,7 +31,7 @@ Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 
 ## Markets terminal chart
 
-Cmd/Ctrl+K → **Panel: Markets**, then click a ticker with a sparkline (dismissible in-panel hint). Commodities rows with sparklines work the same way.
+Cmd/Ctrl+K → **Panel: Markets**, then click a ticker with a sparkline (dismissible in-panel hint). Commodities and crypto rows with sparklines work the same way.
 
 ## Docs
 
