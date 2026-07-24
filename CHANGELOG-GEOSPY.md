@@ -66,6 +66,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - FAO Food Price Index: calm empty when no chart points
 - Consumer Prices World tab: inflation row click/keyboard → country map focus
 - AI Regulation countries tab: country card click/keyboard → map focus
+- Tech Readiness: ranking row click/keyboard → country map focus (ISO3)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

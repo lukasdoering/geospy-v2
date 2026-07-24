@@ -65,6 +65,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Grocery Basket** — country header click/keyboard focuses the map (calm empty when no data)
 - **Consumer Prices (World)** — inflation row click/keyboard focuses the country
 - **AI Regulation** — countries tab card click/keyboard focuses the country
+- **Tech Readiness** — ranking row click/keyboard focuses the country (ISO3)
 - **FAO Food Price Index** — calm empty when no chart points (not a red error)
 
 ## Implementation note

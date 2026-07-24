@@ -57,6 +57,7 @@ const focusedTests = [
   'tests/consumer-prices-map-focus.test.mts',
   'tests/regulation-map-focus.test.mts',
   'tests/fuel-grocery-map-focus.test.mts',
+  'tests/tech-readiness-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
