@@ -57,6 +57,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - index.html marketing links point to local `/pro` (GeoSpy Pro)
 - Energy Crisis Tracker: policy row click/keyboard → country map focus
 - Gulf Economies: country quote click/keyboard → map focus + calm empty (not error)
+- Sanctions Pressure: country/entry row click/keyboard → country map focus
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
