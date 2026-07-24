@@ -2264,7 +2264,16 @@ export class PanelLayoutManager implements AppModule {
       );
     });
 
-    this.lazyDefaultPanel('world-clock', () => import('@/components/WorldClockPanel'), 'WorldClockPanel');
+    this.lazyPanel('world-clock', () =>
+      this.importPanel('world-clock', () => import('@/components/WorldClockPanel'), 'WorldClockPanel', (WorldClockPanel) => {
+        const p = new WorldClockPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 6);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
+        return p;
+      }),
+    );
 
     this.lazyImportedPanel('airline-intel', () => import('@/components/AirlineIntelPanel'), 'AirlineIntelPanel', (AirlineIntelPanel) => {
       const panel = new AirlineIntelPanel();
