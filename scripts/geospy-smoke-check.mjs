@@ -47,6 +47,10 @@ mustInclude('src/app/event-handlers.ts', "key.toLowerCase() === 'o'", 'Cmd+Shift
 mustInclude('src/config/variants/full.ts', 'satellites: true', 'satellites default-on');
 mustInclude('public/offline.html', 'GeoSpy - Offline', 'offline title');
 mustInclude('index.html', 'GeoSpy is a real-time global intelligence dashboard', 'honest meta description');
+mustInclude('GEOSPY.md', 'cursor/geospy-working-demo-4151', 'getting-started demo checkout');
+mustInclude('GEOSPY.md', 'npm run geospy:verify', 'getting-started verify command');
+mustInclude('package.json', '"geospy:verify"', 'geospy:verify script');
+mustInclude('scripts/geospy-verify.mjs', 'focused GeoSpy tests', 'verify runner label');
 
 if (failures.length) {
   console.error('GeoSpy smoke check FAILED:');
