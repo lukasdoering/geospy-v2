@@ -46,6 +46,7 @@ const focusedTests = [
   'tests/breaking-news-enable-panel.test.mts',
   'tests/energy-disruptions-enable-panels.test.mts',
   'tests/energy-map-enable-panels.test.mts',
+  'tests/fuel-shortage-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
