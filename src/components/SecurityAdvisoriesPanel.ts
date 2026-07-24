@@ -8,6 +8,7 @@ type AdvisoryFilter = 'all' | 'critical' | 'US' | 'AU' | 'UK' | 'health';
 export class SecurityAdvisoriesPanel extends Panel {
   private advisories: SecurityAdvisory[] = [];
   private activeFilter: AdvisoryFilter = 'all';
+  private searchQuery = '';
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
   private onRefreshRequest?: () => void;
 
@@ -35,6 +36,12 @@ export class SecurityAdvisoriesPanel extends Panel {
         this.onRefreshRequest?.();
       }
     });
+    this.content.addEventListener('input', (e) => {
+      const inp = e.target as HTMLInputElement;
+      if (inp.dataset.role !== 'sa-search') return;
+      this.searchQuery = inp.value;
+      this.render({ restoreSearchFocus: true });
+    });
   }
 
   public setData(advisories: SecurityAdvisory[]): void {
@@ -50,18 +57,30 @@ export class SecurityAdvisoriesPanel extends Panel {
   }
 
   private getFiltered(): SecurityAdvisory[] {
+    let list: SecurityAdvisory[];
     switch (this.activeFilter) {
       case 'critical':
-        return this.advisories.filter(a => a.level === 'do-not-travel' || a.level === 'reconsider');
+        list = this.advisories.filter(a => a.level === 'do-not-travel' || a.level === 'reconsider');
+        break;
       case 'health':
-        return this.advisories.filter(a => a.sourceCountry === 'EU' || a.sourceCountry === 'INT');
+        list = this.advisories.filter(a => a.sourceCountry === 'EU' || a.sourceCountry === 'INT');
+        break;
       case 'US':
       case 'AU':
       case 'UK':
-        return this.advisories.filter(a => a.sourceCountry === this.activeFilter);
+        list = this.advisories.filter(a => a.sourceCountry === this.activeFilter);
+        break;
       default:
-        return this.advisories;
+        list = this.advisories;
     }
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((a) =>
+      a.title.toLowerCase().includes(q)
+      || (a.country || '').toLowerCase().includes(q)
+      || a.source.toLowerCase().includes(q)
+      || a.sourceCountry.toLowerCase().includes(q),
+    );
   }
 
   private getLevelClass(level?: SecurityAdvisory['level']): string {
@@ -109,7 +128,7 @@ export class SecurityAdvisoriesPanel extends Panel {
     return date.toLocaleDateString();
   }
 
-  private render(): void {
+  private render(opts: { restoreSearchFocus?: boolean } = {}): void {
     if (this.advisories.length === 0) {
       this.setSafeContent(unsafeRawHtml(`<div class="panel-empty">${t('common.noDataAvailable')}</div>`, 'legacy Panel.setContent() migration'));
       return;
@@ -140,6 +159,7 @@ export class SecurityAdvisoriesPanel extends Panel {
 
     const filtersHtml = `
       <div class="sa-filters">
+        <input data-role="sa-search" data-testid="security-advisories-search" type="search" class="sa-search" placeholder="Search country / title" value="${escapeHtml(this.searchQuery)}" />
         <button class="sa-filter ${this.activeFilter === 'all' ? 'sa-filter-active' : ''}" data-filter="all">${t('common.all')}</button>
         <button class="sa-filter ${this.activeFilter === 'critical' ? 'sa-filter-active' : ''}" data-filter="critical">${t('components.securityAdvisories.critical')}</button>
         <button class="sa-filter ${this.activeFilter === 'US' ? 'sa-filter-active' : ''}" data-filter="US">\u{1F1FA}\u{1F1F8} US</button>
@@ -188,6 +208,15 @@ export class SecurityAdvisoriesPanel extends Panel {
         ${footerHtml}
       </div>
     `, 'legacy Panel.setContent() migration'));
+
+    if (opts.restoreSearchFocus) {
+      const inp = this.content.querySelector<HTMLInputElement>('input[data-role="sa-search"]');
+      if (inp) {
+        inp.focus();
+        const len = inp.value.length;
+        inp.setSelectionRange(len, len);
+      }
+    }
   }
 
   public setRefreshHandler(handler: () => void): void {

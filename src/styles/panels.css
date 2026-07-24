@@ -982,6 +982,17 @@
   color: var(--semantic-elevated);
 }
 
+.sa-search {
+  flex: 1 1 140px;
+  min-width: 120px;
+  font-size: 11px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text);
+}
+
 .sa-filters {
   display: flex;
   gap: 2px;

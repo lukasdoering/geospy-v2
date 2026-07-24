@@ -18,6 +18,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Disease Outbreaks: working search, location fallback, row click → map focus
 - Satellite Fires: region row → map focus; clearer empty state
 - Internet Disruptions: outage/anomaly row → map focus
+- Security Advisories: country/title search
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
