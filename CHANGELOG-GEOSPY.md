@@ -71,6 +71,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Market Breadth / Social Velocity / Climate News: calm empty when no data
 - Macro Indicators: Show on map → US/EU/China focus + calm empty
 - Fear & Greed / FSI / Gold / National Debt: calm empty when unavailable
+- Pipeline / Fuel Shortage / Energy Disruptions: calm empty when registry unavailable
+- Earnings / WSB / Oil Inventories / ETF Flows / Cross-Source Signals: calm empty when no data
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

@@ -261,7 +261,10 @@ export class PipelineStatusPanel extends Panel {
       const live = await getSupplyChainClient().listPipelines({ commodityType: '' });
       if (!this.element?.isConnected) return;
       if (live.upstreamUnavailable || !live.pipelines?.length) {
-        this.showError('Pipeline registry unavailable', () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Pipeline registry unavailable</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;

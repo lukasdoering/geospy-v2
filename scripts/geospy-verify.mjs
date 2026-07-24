@@ -60,6 +60,7 @@ const focusedTests = [
   'tests/tech-readiness-map-focus.test.mts',
   'tests/econ-calendar-calm-empty.test.mts',
   'tests/macro-tiles-map-focus.test.mts',
+  'tests/more-calm-empty.test.mts',
 ];
 
 function run(cmd, args, label) {

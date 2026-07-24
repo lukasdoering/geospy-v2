@@ -188,7 +188,10 @@ export class EnergyDisruptionsPanel extends Panel {
       // match" rather than as an error. Conflating the two previously
       // showed a retry button on what was a legitimate empty state.
       if (live.upstreamUnavailable) {
-        this.showError('Energy disruptions log unavailable', () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Energy disruptions log unavailable</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;

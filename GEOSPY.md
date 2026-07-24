@@ -71,6 +71,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **FAO Food Price Index** — calm empty when no chart points (not a red error)
 - **Market Breadth / Social Velocity / Climate News** — calm empty when no data
 - **Fear & Greed / FSI / Gold / National Debt / Macro** — calm empty when unavailable
+- **Pipeline / Fuel Shortage / Energy Disruptions / Earnings / WSB / Oil / ETF / Cross-Source** — calm empty when unavailable or empty
 
 ## Implementation note
 
