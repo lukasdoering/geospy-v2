@@ -3110,7 +3110,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Otevřít přehled země",
-    "copyCoordinates": "Kopírovat souřadnice"
+    "copyCoordinates": "Kopírovat souřadnice",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Přehled reálných globálních informací",
