@@ -1026,6 +1026,7 @@ export class App {
       stopLayerActivity: (layer) => this.dataLoader.stopLayerActivity(layer),
       mountLiveNewsIfReady: () => this.panelLayout.mountLiveNewsIfReady(),
       updateFlightSource: (adsb, military) => this.updateFlightSourceIfReady(adsb, military),
+      predictOverheadPassesAtMapCenter: () => this.countryIntel.predictOverheadPassesAtMapCenter(),
     });
 
     // Wire cross-module callback: DataLoader → SearchManager
