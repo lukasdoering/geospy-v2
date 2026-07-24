@@ -161,14 +161,20 @@ async function loadModel(modelId: string): Promise<void> {
     });
 
     loadedPipelines.set(modelId, pipe);
-    loadingPromises.delete(modelId);
     console.log(`[MLWorker] Model loaded in ${Date.now() - startTime}ms: ${modelId}`);
 
     // Notify manager that model is now available (no id = unsolicited notification)
     self.postMessage({ type: 'model-loaded', modelId });
   })();
 
+  // Clear the de-dupe entry when the load settles (success or failure).
+  // Register after set() so a sync throw inside the IIFE cannot delete before insert.
+  // See koala73/worldmonitor#5425 — a rejected promise left in the map permanently
+  // disabled the model for the rest of the session.
   loadingPromises.set(modelId, loadPromise);
+  void loadPromise.finally(() => {
+    loadingPromises.delete(modelId);
+  });
   return loadPromise;
 }
 
