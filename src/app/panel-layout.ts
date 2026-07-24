@@ -2133,7 +2133,16 @@ export class PanelLayoutManager implements AppModule {
         (TechEventsPanel) => new TechEventsPanel('events', () => this.ctx.allNews),
       ),
     );
-    this.lazyDefaultPanel('internet-disruptions', () => import('@/components/InternetDisruptionsPanel'), 'InternetDisruptionsPanel');
+    this.lazyImportedPanel('internet-disruptions', () => import('@/components/InternetDisruptionsPanel'), 'InternetDisruptionsPanel', (InternetDisruptionsPanel) => {
+      const p = new InternetDisruptionsPanel();
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.outages) {
+          this.callbacks.applyMapLayerChange?.('outages', true, 'programmatic');
+        }
+      });
+      return p;
+    });
     this.lazyDefaultPanel('service-status', () => import('@/components/ServiceStatusPanel'), 'ServiceStatusPanel');
 
     this.lazyImportedPanel('tech-readiness', () => import('@/components/TechReadinessPanel'), 'TechReadinessPanel', (TechReadinessPanel) => {

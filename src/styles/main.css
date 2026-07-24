@@ -16859,6 +16859,11 @@ a.prediction-link:hover {
   gap: 3px;
 }
 .id-row:hover { background: rgba(255,255,255,.07); }
+.id-row-clickable { cursor: pointer; }
+.id-row-clickable:focus-visible {
+  outline: 1px solid var(--accent, #3d7eff);
+  outline-offset: -1px;
+}
 .id-row-header {
   display: flex;
   align-items: center;
