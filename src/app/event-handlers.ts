@@ -34,6 +34,7 @@ import {
   showToast,
 } from '@/utils';
 import { clearPanelColSpans, clearPanelSpans } from '@/utils/panel-storage';
+import { syncSatellitesFlatHint } from '@/components/SatellitesFlatHint';
 import {
   IDLE_PAUSE_MS,
   DEFAULT_MAP_LAYERS,
@@ -1260,6 +1261,7 @@ export class EventHandlerManager implements AppModule {
     this.ctx.mapLayers[layer] = enabled;
     saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
     this.syncUrlState();
+    this.syncSatellitesFlatHint();
 
     const sourceIds = LAYER_TO_SOURCE[layer];
     if (sourceIds) {
@@ -2204,8 +2206,18 @@ export class EventHandlerManager implements AppModule {
           this.ctx.mapLayers = { ...this.ctx.mapLayers, resilienceScore: false };
           saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
         }
+        this.syncSatellitesFlatHint();
       });
     });
+    // Initial coherence tip for default-on satellites on flat map.
+    // Retry a few times — map mode / layer hydration can lag the first paint.
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 1500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 3500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 6000);
+  }
+
+  private syncSatellitesFlatHint(): void {
+    syncSatellitesFlatHint(!!this.ctx.mapLayers.satellites, this.ctx.map);
   }
 
   private setupMapFullscreen(mapSection: HTMLElement): void {
