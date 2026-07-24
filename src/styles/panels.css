@@ -2818,6 +2818,7 @@ body.panel-drag-active .map-bottom-grid:empty::after {
 .geo-hub-item-clickable,
 .tech-hub-item-clickable {
   cursor: pointer;
+  transition: background 0.15s;
 }
 
 .geo-hub-item-clickable:focus-visible,
@@ -2825,8 +2826,7 @@ body.panel-drag-active .map-bottom-grid:empty::after {
   outline: 2px solid var(--accent);
   outline-offset: -2px;
 }
-  transition: background 0.15s;
-}
+
 .geo-hub-item:hover,
 .tech-hub-item:hover {
   background: color-mix(in srgb, var(--text-dim) 6%, transparent);
