@@ -2,6 +2,7 @@
   "name": "world-monitor",
   "private": true,
   "version": "2.10.0",
+  "description": "GeoSpy — real-time global intelligence dashboard (AGPL fork of WorldMonitor)",
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
