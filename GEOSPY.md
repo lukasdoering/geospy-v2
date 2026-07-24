@@ -29,9 +29,16 @@ Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 6. In the popup: Refresh / Share / Copy, SAR·Optical filters; click the prefs footer to open Settings → Satellites
 7. After you run a prediction once, a **Next SAR/optical…** chip stays in the corner (click to reopen)
 
-## Markets terminal chart
+## Markets / commodities / crypto charts
 
-Cmd/Ctrl+K → **Panel: Markets**, then click a ticker with a sparkline (dismissible in-panel hint). Commodities and crypto rows with sparklines work the same way.
+Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker with a sparkline (dismissible in-panel hint).
+
+## Panel → map polish
+
+- **Disease Outbreaks** — search + click a row to focus the map
+- **Satellite Fires** — click a region row to focus FIRMS detections
+- **Internet Disruptions** — click an outage/anomaly row to focus the map
+- **Security Advisories** — search by country / title alongside severity pills
 
 ## Docs
 
