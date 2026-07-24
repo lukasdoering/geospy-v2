@@ -246,7 +246,10 @@ export class StorageFacilityMapPanel extends Panel {
       const live = await getSupplyChainClient().listStorageFacilities({ facilityType: '' });
       if (!this.element?.isConnected) return;
       if (live.upstreamUnavailable || !live.facilities?.length) {
-        this.showError('Storage registry unavailable', () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Storage registry unavailable</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;

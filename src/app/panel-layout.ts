@@ -1986,6 +1986,10 @@ export class PanelLayoutManager implements AppModule {
         this.callbacks.openCountryStory(code, name);
       });
       ciiPanel.setCountryClickHandler((code) => {
+        void import('@/utils/country-map-focus').then(({ resolveCountryMapFocus }) => {
+          const focus = resolveCountryMapFocus(code);
+          if (focus) this.ctx.map?.setCenter(focus.lat, focus.lon, 4);
+        });
         this.callbacks.openCountryBrief(code);
       });
       return ciiPanel;

@@ -140,7 +140,10 @@ export class GlobalProcurementPanel extends Panel {
     this.loading = false;
     this.data = null;
     this.setCount(0);
-    this.showError('Procurement opportunities are currently unavailable.', () => this.request({ ...this.filters }, false), 60);
+    this.setSafeContent(unsafeRawHtml(
+      `<div class="panel-empty">Procurement opportunities are currently unavailable.</div>`,
+      'legacy Panel.setContent() migration',
+    ));
   }
 
   public clear(): void {

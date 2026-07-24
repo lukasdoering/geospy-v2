@@ -61,6 +61,7 @@ const focusedTests = [
   'tests/econ-calendar-calm-empty.test.mts',
   'tests/macro-tiles-map-focus.test.mts',
   'tests/more-calm-empty.test.mts',
+  'tests/cii-storage-disease-calm.test.mts',
 ];
 
 function run(cmd, args, label) {

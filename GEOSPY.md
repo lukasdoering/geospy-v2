@@ -72,6 +72,8 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Market Breadth / Social Velocity / Climate News** — calm empty when no data
 - **Fear & Greed / FSI / Gold / National Debt / Macro** — calm empty when unavailable
 - **Pipeline / Fuel Shortage / Energy Disruptions / Earnings / WSB / Oil / ETF / Cross-Source** — calm empty when unavailable or empty
+- **Storage Atlas / Disease Outbreaks / Global Procurement** — calm empty when unavailable
+- **CII** — country click focuses the map and opens the country brief
 
 ## Implementation note
 
