@@ -57,6 +57,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Country Deep Dive energy atlas / map energy layers** — enable destination panels before open-detail
 - **Energy Crisis Tracker** — policy row click/keyboard focuses the country
 - **Gulf Economies** — country quote click/keyboard focuses the map
+- **Sanctions Pressure** — country/entry row click/keyboard focuses the country
 
 ## Docs
 
