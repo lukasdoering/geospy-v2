@@ -935,6 +935,28 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+[data-variant='happy'] .species-card-clickable {
+  cursor: pointer;
+}
+
+[data-variant='happy'] .species-card-clickable:focus-visible {
+  outline: 2px solid var(--accent, #6B8F5E);
+  outline-offset: 2px;
+}
+
+[data-variant='happy'] .species-map-chip {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent, #6B8F5E);
+  border: 1px solid color-mix(in srgb, var(--accent, #6B8F5E) 40%, transparent);
+  border-radius: 4px;
+}
+
 [data-variant='happy'] .species-card:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
