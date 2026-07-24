@@ -3146,7 +3146,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "فتح ملخص البلد",
-    "copyCoordinates": "نسخ الإحداثيات"
+    "copyCoordinates": "نسخ الإحداثيات",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "لوحة مراقبة الذكاء العالمي في الوقت الفعلي — World Monitor",

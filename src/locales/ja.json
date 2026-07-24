@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "国の概要を開く",
-    "copyCoordinates": "座標をコピー"
+    "copyCoordinates": "座標をコピー",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "ワールドモニター — リアルタイム グローバルインテリジェンスダッシュボード",
