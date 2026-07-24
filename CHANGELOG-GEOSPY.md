@@ -54,6 +54,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Pipeline Status / Storage Atlas: row click/keyboard → map focus + enable pipelines / storageFacilities layers
 - Energy Disruptions: row click/keyboard → map focus from cached asset coords + enable energy layers (still opens asset drawer)
 - Pro landing (`/pro`): hero/title/og chrome → GeoSpy Pro (FAQ/schema still describe upstream product facts)
+- Energy Crisis Tracker: policy row click/keyboard → country map focus
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

@@ -55,6 +55,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Pipeline Status / Storage Atlas** — row click/keyboard focuses the asset + enables energy layers
 - **Energy Disruptions** — row click/keyboard flies to the asset from cached coords, then opens the drawer
 - **Country Deep Dive energy atlas / map energy layers** — enable destination panels before open-detail
+- **Energy Crisis Tracker** — policy row click/keyboard focuses the country
 
 ## Docs
 
