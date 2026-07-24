@@ -7124,6 +7124,17 @@ body.playback-mode .status-dot {
   outline: none;
 }
 
+.market-chart-hint {
+  margin: 0 0 8px;
+  padding: 6px 8px;
+  font-size: 11px;
+  line-height: 1.35;
+  color: var(--text-dim);
+  background: var(--bg-subtle, rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--border-subtle, rgba(255, 255, 255, 0.12));
+  border-radius: 4px;
+}
+
 /* Expandable Bloomberg-terminal-style price chart (market-chart-modal.ts). */
 .market-chart-overlay {
   position: fixed;
