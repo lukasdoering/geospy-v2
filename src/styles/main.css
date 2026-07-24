@@ -3636,7 +3636,8 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
 }
 
 .webcam-region-btn,
-.webcam-view-btn {
+.webcam-view-btn,
+.webcam-map-btn {
   padding: 4px 8px;
   background: transparent;
   border: 1px solid var(--border);
@@ -3653,8 +3654,29 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   justify-content: center;
 }
 
+.webcam-map-btn {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  font-weight: 600;
+}
+
+.webcam-preview-map {
+  margin-top: 6px;
+  padding: 2px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent) 45%, transparent);
+  border-radius: 4px;
+}
+
 .webcam-region-btn:hover,
-.webcam-view-btn:hover {
+.webcam-view-btn:hover,
+.webcam-map-btn:hover {
   border-color: var(--text-dim);
   color: var(--text);
 }

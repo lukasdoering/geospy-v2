@@ -2330,7 +2330,16 @@ export class PanelLayoutManager implements AppModule {
       return new LiveNewsPanel();
     });
 
-    this.lazyDefaultPanel('live-webcams', () => import('@/components/LiveWebcamsPanel'), 'LiveWebcamsPanel');
+    this.lazyPanel('live-webcams', () =>
+      this.importPanel('live-webcams', () => import('@/components/LiveWebcamsPanel'), 'LiveWebcamsPanel', (LiveWebcamsPanel) => {
+        const p = new LiveWebcamsPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 6);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
+        return p;
+      }),
+    );
     this.lazyDefaultPanel('windy-webcams', () => import('@/components/PinnedWebcamsPanel'), 'PinnedWebcamsPanel');
 
     this.lazyPanel('events', () =>
