@@ -25,4 +25,21 @@ describe('insights focal points map focus', () => {
     assert.match(css, /\.focal-point-clickable:focus-visible/);
     assert.match(css, /\.convergence-zone-clickable/);
   });
+
+  it('wires story cards with countryCode to map focus', () => {
+    const panel = readFileSync(new URL('../src/components/InsightsPanel.ts', import.meta.url), 'utf8');
+    assert.match(panel, /insight-story-clickable/);
+    assert.match(panel, /story\.countryCode/);
+    assert.match(panel, /extractISQInput\(cluster\)\.countryCode/);
+    assert.match(
+      panel,
+      /focal-point-clickable, \.convergence-zone-clickable, \.insight-story-clickable/,
+    );
+  });
+
+  it('includes clickable insight-story styles', () => {
+    const css = readFileSync(new URL('../src/styles/main.css', import.meta.url), 'utf8');
+    assert.match(css, /\.insight-story-clickable/);
+    assert.match(css, /\.insight-story-clickable:focus-visible/);
+  });
 });
