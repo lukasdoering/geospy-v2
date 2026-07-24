@@ -225,8 +225,11 @@ export class CountryIntelManager implements AppModule {
       showOrbitalPassesPopup(screenX, screenY, lat, lon, passes);
     } catch (err) {
       console.error('[satellites] overhead pass prediction failed', err);
+      const catalogMissing = err instanceof Error && err.message === 'SATELLITE_CATALOG_UNAVAILABLE';
       showOrbitalPassesPopup(screenX, screenY, lat, lon, [], {
-        error: 'Could not load satellite TLEs. Try again in a moment.',
+        error: catalogMissing
+          ? 'Satellite catalog unavailable right now. Try again in a moment.'
+          : 'Could not compute overhead passes. Try again in a moment.',
       });
     }
   }
