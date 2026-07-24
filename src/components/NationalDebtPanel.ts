@@ -210,7 +210,10 @@ export class NationalDebtPanel extends Panel {
     } catch (err) {
       if (!this.element?.isConnected) return;
       console.error('[NationalDebtPanel] Error fetching data:', err);
-      this.showError('Failed to load national debt data');
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">National debt data unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     } finally {
       this.loading = false;
     }
