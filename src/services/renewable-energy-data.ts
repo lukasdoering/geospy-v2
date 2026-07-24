@@ -30,6 +30,18 @@ export interface RenewableEnergyData {
   regions: RegionRenewableData[];    // Regional breakdown
 }
 
+/**
+ * Where the rendered series came from. The UI surfaces a disclosure
+ * badge when `source === 'fallback'` so a degraded panel does not look
+ * like live truth (parity with ProgressCharts / #3758).
+ */
+export type RenewableEnergyDataSource = 'hydrated' | 'bootstrap' | 'fallback';
+
+export interface RenewableEnergyDataResult {
+  data: RenewableEnergyData;
+  source: RenewableEnergyDataSource;
+}
+
 // ---- Default / Empty ----
 
 // Static fallback when seed data is unavailable and no cache exists.
@@ -54,9 +66,13 @@ const FALLBACK_DATA: RenewableEnergyData = {
   ],
 };
 
+function fallbackResult(): RenewableEnergyDataResult {
+  return { data: FALLBACK_DATA, source: 'fallback' };
+}
+
 // ---- Circuit Breaker (persistent cache for instant reload) ----
 
-const renewableBreaker = createCircuitBreaker<RenewableEnergyData>({
+const renewableBreaker = createCircuitBreaker<RenewableEnergyDataResult>({
   name: 'Renewable Energy',
   cacheTtlMs: 60 * 60 * 1000, // 1h — World Bank data changes yearly
   persistCache: true,
@@ -70,10 +86,12 @@ const capacityBreaker = createCircuitBreaker<CapacitySeries[]>({
 
 // ---- Data Fetching (from Railway seed via bootstrap) ----
 
-async function fetchRenewableEnergyDataFresh(): Promise<RenewableEnergyData> {
+async function fetchRenewableEnergyDataFresh(): Promise<RenewableEnergyDataResult> {
   // 1. Try bootstrap hydration cache (first page load)
   const hydrated = getHydratedData('renewableEnergy') as RenewableEnergyData | undefined;
-  if (hydrated?.historicalData?.length) return hydrated;
+  if (hydrated?.historicalData?.length) {
+    return { data: hydrated, source: 'hydrated' };
+  }
 
   // 2. Fallback: fetch from bootstrap endpoint directly
   try {
@@ -82,20 +100,27 @@ async function fetchRenewableEnergyDataFresh(): Promise<RenewableEnergyData> {
     });
     if (resp.ok) {
       const { data } = (await resp.json()) as { data: { renewableEnergy?: RenewableEnergyData } };
-      if (data.renewableEnergy?.historicalData?.length) return data.renewableEnergy;
+      if (data.renewableEnergy?.historicalData?.length) {
+        return { data: data.renewableEnergy, source: 'bootstrap' };
+      }
     }
   } catch { /* fall through */ }
 
-  // 3. Static fallback
-  return FALLBACK_DATA;
+  // 3. Static fallback — UI must show a disclosure badge
+  return fallbackResult();
 }
 
 /**
  * Fetch renewable energy data with persistent caching.
  * Returns instantly from IndexedDB cache on subsequent loads.
+ * Never persists the static fallback so a later successful fetch can recover.
  */
-export async function fetchRenewableEnergyData(): Promise<RenewableEnergyData> {
-  return renewableBreaker.execute(() => fetchRenewableEnergyDataFresh(), FALLBACK_DATA);
+export async function fetchRenewableEnergyData(): Promise<RenewableEnergyDataResult> {
+  return renewableBreaker.execute(
+    () => fetchRenewableEnergyDataFresh(),
+    fallbackResult(),
+    { shouldCache: (result) => result.source !== 'fallback' },
+  );
 }
 
 // ========================================================================
