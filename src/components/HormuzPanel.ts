@@ -82,7 +82,10 @@ export class HormuzPanel extends Panel {
     try {
       const data = await fetchHormuzTracker();
       if (!data) {
-        this.showError(t('components.hormuzTracker.errors.unavailable'), () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(t('components.hormuzTracker.errors.unavailable'))}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return false;
       }
       this.data = data;

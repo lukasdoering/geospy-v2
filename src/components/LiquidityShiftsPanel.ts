@@ -73,7 +73,12 @@ export class LiquidityShiftsPanel extends Panel {
         .sort((a, b) => COT_PRIORITY.indexOf(a.code ?? '') - COT_PRIORITY.indexOf(b.code ?? ''));
 
       if (cotRows.length === 0 && (stocksResp.quotes?.length ?? 0) === 0) {
-        if (!this._hasData) this.showError(t('components.liquidityShifts.unavailable'), () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('components.liquidityShifts.unavailable'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 

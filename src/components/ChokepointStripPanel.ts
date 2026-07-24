@@ -100,7 +100,7 @@ export class ChokepointStripPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError(t('components.chokepointStrip.errors.unavailable'), () => void this.fetchData());
+      this.setSafeContent(safeHtml`<div class="panel-empty">${t('components.chokepointStrip.errors.unavailable')}</div>`);
     }
   }
 

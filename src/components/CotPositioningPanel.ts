@@ -79,7 +79,12 @@ export class CotPositioningPanel extends Panel {
       const client = await getMarketClient();
       const resp = await client.getCotPositioning({});
       if (resp.unavailable || !resp.instruments || resp.instruments.length === 0) {
-        if (!this._hasData) this.showError('COT data unavailable', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">COT data unavailable</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       this._hasData = true;
