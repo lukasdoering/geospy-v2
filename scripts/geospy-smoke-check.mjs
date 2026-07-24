@@ -36,6 +36,7 @@ mustInclude('src/services/overhead-pass-settings.ts', 'geospy-overhead-min-eleva
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes'", 'Cmd+K overhead command');
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes-last'", 'Cmd+K last-location command');
 mustInclude('src/app/country-intel.ts', 'geospy-overhead-last-location', 'last location persistence');
+mustInclude('src/app/country-intel.ts', 'geospy-overhead-tip-try', 'tip Try now CTA');
 mustInclude('src/app/event-handlers.ts', "key.toLowerCase() === 'o'", 'Cmd+Shift+O hotkey');
 mustInclude('src/config/variants/full.ts', 'satellites: true', 'satellites default-on');
 mustInclude('public/offline.html', 'GeoSpy - Offline', 'offline title');

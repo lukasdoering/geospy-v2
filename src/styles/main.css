@@ -4323,6 +4323,7 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   transform: translateX(-50%) translateY(0);
 }
 
+.geospy-overhead-tip-try,
 .geospy-overhead-tip-dismiss {
   flex-shrink: 0;
   border: 1px solid var(--border);
@@ -4334,8 +4335,19 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   font-size: 12px;
 }
 
+.geospy-overhead-tip-try {
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  font-weight: 600;
+}
+
+.geospy-overhead-tip-try:hover,
 .geospy-overhead-tip-dismiss:hover {
   background: color-mix(in srgb, var(--border) 50%, transparent);
+}
+
+.geospy-overhead-tip-try:hover {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
 /* Story Modal */
