@@ -1,5 +1,6 @@
 import { Panel } from './Panel';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveTheaterMapFocus } from '@/utils/theater-map-focus';
 
 interface CrossSourceSignal {
   id: string;
@@ -86,6 +87,7 @@ export class CrossSourceSignalsPanel extends Panel {
   private signals: CrossSourceSignal[] = [];
   private evaluatedAt: Date | null = null;
   private compositeCount = 0;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -97,9 +99,33 @@ export class CrossSourceSignalsPanel extends Panel {
     });
     // Inject keyframe once — used by the composite banner pulse dot
     const style = document.createElement('style');
-    style.textContent = '@keyframes cross-source-pulse-dot{0%,100%{opacity:1}50%{opacity:.15}}';
+    style.textContent = '@keyframes cross-source-pulse-dot{0%,100%{opacity:1}50%{opacity:.15}}.css-theater-clickable{cursor:pointer}.css-theater-clickable:hover{filter:brightness(1.08)}.css-theater-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
     document.head.appendChild(style);
+    this.content.addEventListener('click', (e) => {
+      const card = (e.target as HTMLElement).closest('.css-theater-clickable') as HTMLElement | null;
+      if (!card?.dataset.theater) return;
+      this.focusTheater(card.dataset.theater);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = (e.target as HTMLElement).closest('.css-theater-clickable') as HTMLElement | null;
+      if (!card?.dataset.theater) return;
+      e.preventDefault();
+      this.focusTheater(card.dataset.theater);
+    });
     this.showLoading('Loading signal data...');
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusTheater(theater?: string): void {
+    if (!this.onMapFocus || !theater) return;
+    const focus = resolveTheaterMapFocus(theater);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public setData(data: CrossSourceSignalsData): void {
@@ -146,8 +172,13 @@ export class CrossSourceSignalsPanel extends Panel {
         }</div>`
       : '';
 
+    const theaterFocus = resolveTheaterMapFocus(sig.theater);
+    const clickable = theaterFocus
+      ? ` class="css-theater-clickable" data-theater="${escapeHtml(sig.theater)}" role="button" tabindex="0" title="Show theater on map"`
+      : '';
+
     return `
-      <div style="display:flex;align-items:stretch;${cardStyle};background:rgba(255,255,255,0.02);overflow:hidden">
+      <div${clickable} style="display:flex;align-items:stretch;${cardStyle};background:rgba(255,255,255,0.02);overflow:hidden">
         <div style="width:4px;flex-shrink:0;background:${sevColor}"></div>
         <div style="display:flex;gap:10px;align-items:flex-start;padding:10px;flex:1;min-width:0">
           <div style="font-size:12px;font-weight:700;color:var(--text-dim);min-width:18px;text-align:right;flex-shrink:0;font-family:var(--font-mono);padding-top:1px">${index + 1}</div>

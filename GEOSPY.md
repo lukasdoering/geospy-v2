@@ -79,6 +79,8 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Gold Intelligence** — central-bank reserve holders/buyers/sellers focus the map
 - **Airline Intel** — ops airport rows and tracking positions focus the map
 - **AI Forecasts** — country-region rows expose a Map chip that focuses the map
+- **Energy Risk Overview** — Hormuz tile opens the Hormuz chokepoint on the map
+- **Cross-Source Signals** — theater-labeled cards focus the map when the theater resolves
 
 ## Implementation note
 

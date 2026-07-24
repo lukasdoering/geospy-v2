@@ -83,6 +83,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Airline Intel ops airports + live tracking positions focus the map
 - Expand country display-name aliases (China, Ukraine, etc.) for panel→map focus
 - AI Forecasts: Map chip focuses the map when forecast.region resolves to a country
+- Energy Risk Hormuz tile opens chokepoint; Cross-Source Signals theater cards focus the map
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
