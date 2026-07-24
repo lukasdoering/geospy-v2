@@ -18,6 +18,15 @@ npm run dev
 
 Open [localhost:3000](http://localhost:3000) (override with `DEV_PORT` in `.env.local`). The app runs with no environment variables; live data is fetched from the upstream WorldMonitor edge by default.
 
+**Recommended checkout for the fullest GeoSpy demo surface** (brand + satellites + overnight fixes):
+
+```bash
+git fetch origin
+git checkout cursor/geospy-working-demo-4151
+npm ci
+npm run dev
+```
+
 Variant-specific development:
 
 ```bash
@@ -27,6 +36,13 @@ npm run dev:commodity
 npm run dev:happy
 npm run dev:energy
 ```
+
+## GeoSpy Highlights (this fork)
+
+- **Overhead pass prediction** — right-click the map (or Cmd/Ctrl+K → “overhead passes”) to compute upcoming LEO imaging passes at that point
+- **Orbital polish** — pass duration, type badges, copy summary, retry, revisit window, and a flat-map hint that live orbits render on the 3D globe
+- **GeoSpy product chrome** — header/footer/offline branding with explicit WorldMonitor attribution; API hosts stay upstream for zero-env data
+- **Integration branch** — [`cursor/geospy-working-demo-4151`](https://github.com/lukasdoering/geospy-v2/tree/cursor/geospy-working-demo-4151) / [PR #6](https://github.com/lukasdoering/geospy-v2/pull/6)
 
 ## What It Does
 
