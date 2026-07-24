@@ -9,19 +9,33 @@
 import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import * as d3 from 'd3';
-import type { RenewableEnergyData, RegionRenewableData, CapacitySeries } from '@/services/renewable-energy-data';
+import type {
+  RenewableEnergyData,
+  RenewableEnergyDataResult,
+  RenewableEnergyDataSource,
+  RegionRenewableData,
+  CapacitySeries,
+} from '@/services/renewable-energy-data';
 import { getCSSColor } from '@/utils';
 import { replaceChildren } from '@/utils/dom-utils';
 
 export class RenewableEnergyPanel extends Panel {
+  private source: RenewableEnergyDataSource = 'hydrated';
+
   constructor() {
     super({ id: 'renewable', title: 'Renewable Energy', trackActivity: false, infoTooltip: t('components.renewable.infoTooltip') });
   }
 
   /**
    * Set data and render the full panel: gauge + sparkline + regional breakdown.
+   * Accepts either a tagged `RenewableEnergyDataResult` (preferred — carries a
+   * source tag so the panel can disclose fallback state) or raw data.
    */
-  public setData(data: RenewableEnergyData): void {
+  public setData(input: RenewableEnergyDataResult | RenewableEnergyData): void {
+    const { data, source } = 'source' in input && 'data' in input
+      ? input
+      : { data: input as RenewableEnergyData, source: 'hydrated' as RenewableEnergyDataSource };
+    this.source = source;
     replaceChildren(this.content);
 
     // Empty state
@@ -37,6 +51,10 @@ export class RenewableEnergyPanel extends Panel {
       empty.textContent = 'No renewable energy data available';
       this.content.appendChild(empty);
       return;
+    }
+
+    if (source === 'fallback') {
+      this.renderFallbackBanner();
     }
 
     const container = document.createElement('div');
@@ -77,6 +95,29 @@ export class RenewableEnergyPanel extends Panel {
     }
 
     this.content.appendChild(container);
+  }
+
+  private renderFallbackBanner(): void {
+    const banner = document.createElement('div');
+    banner.className = 'renewable-fallback-banner';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('data-source', 'fallback');
+    banner.setAttribute('data-testid', 'renewable-fallback-banner');
+    banner.title = t('components.renewable.fallbackTooltip');
+    Object.assign(banner.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      margin: '0 0 8px 0',
+      padding: '6px 8px',
+      fontSize: '11px',
+      color: 'var(--text-dim)',
+      background: 'var(--bg-subtle, rgba(255,255,255,0.04))',
+      border: '1px solid var(--border-subtle, rgba(255,255,255,0.12))',
+      borderRadius: '4px',
+    });
+    banner.textContent = t('components.renewable.fallbackBadge');
+    this.content.appendChild(banner);
   }
 
   /**
