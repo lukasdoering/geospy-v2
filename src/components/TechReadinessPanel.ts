@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import { getTechReadinessRankings, type TechReadinessScore } from '@/services/economic';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 const COUNTRY_FLAGS: Record<string, string> = {
   'USA': '🇺🇸', 'CHN': '🇨🇳', 'JPN': '🇯🇵', 'DEU': '🇩🇪', 'KOR': '🇰🇷',
@@ -22,6 +23,7 @@ export class TechReadinessPanel extends Panel {
   private rankings: TechReadinessScore[] = [];
   private loading = false;
   private lastFetch = 0;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
   private readonly REFRESH_INTERVAL = 6 * 60 * 60 * 1000; // 6 hours
   /**
    * Local backoff state for retrying after an empty/failed fetch. Without
@@ -51,6 +53,17 @@ export class TechReadinessPanel extends Panel {
       infoTooltip: t('components.techReadiness.infoTooltip'),
     });
     this.hideCountBadge();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async refresh(isRetry = false): Promise<void> {
@@ -248,8 +261,9 @@ export class TechReadinessPanel extends Panel {
       <div class="tech-readiness-list">
         ${top.map(country => {
       const scoreClass = this.getScoreClass(country.score);
+      const code = escapeHtml(country.country);
       return `
-            <div class="readiness-item ${scoreClass}" data-country="${escapeHtml(country.country)}">
+            <div class="readiness-item readiness-item-clickable ${scoreClass}" data-country="${code}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(country.countryName)} on map">
               <div class="readiness-rank">#${country.rank}</div>
               <div class="readiness-flag">${this.getFlag(country.country)}</div>
               <div class="readiness-info">
@@ -269,8 +283,25 @@ export class TechReadinessPanel extends Panel {
         <span class="readiness-source">${t('components.techReadiness.source')}</span>
         <span class="readiness-updated">${t('components.techReadiness.updated', { date: new Date(this.lastFetch).toLocaleDateString() })}</span>
       </div>
+      <style>
+        .readiness-item-clickable { cursor: pointer; }
+        .readiness-item-clickable:hover { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .readiness-item-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `;
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
+
+    const activate = (el: HTMLElement): void => {
+      this.focusCountry(el.dataset.country);
+    };
+    this.content?.querySelectorAll<HTMLElement>('.readiness-item-clickable').forEach(el => {
+      el.addEventListener('click', () => activate(el));
+      el.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(el);
+      });
+    });
   }
 }

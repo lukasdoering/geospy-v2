@@ -2314,6 +2314,9 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('tech-readiness', () => import('@/components/TechReadinessPanel'), 'TechReadinessPanel', (TechReadinessPanel) => {
       const p = new TechReadinessPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       // Only auto-refresh on variants whose bootstrap seeds techReadiness
       // (full + tech). On commodity/finance/energy the seed key is empty
       // and the 5s fetch at services/economic/index.ts:694 just times out.
