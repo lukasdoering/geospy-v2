@@ -11,12 +11,18 @@ TERRA
 SENTINEL-1A
 1 39634U 14016A   26204.71044689  .00000035  00000+0  17216-4 0  9998
 2 39634  98.1701 211.7058 0001397  88.9672 271.1688 14.59174326655345
+RADARSAT-2
+1 32382U 07061A   26204.50000000  .00000000  00000+0  00000-0 0  9998
+2 32382  98.5800 120.0000 0001000  90.0000 270.0000 14.30000000000000
+TERRASAR-X
+1 31698U 07026A   26204.50000000  .00000000  00000+0  00000-0 0  9998
+2 31698  97.4400 200.0000 0002000  80.0000 280.0000 15.19000000000000
 `;
 
 describe('listSatellites CelesTrak TLE parse', () => {
   it('parses classic 3-line TLE blocks', () => {
     const sats = parseTleCatalog(SAMPLE, { type: 'optical', country: 'INT' });
-    assert.equal(sats.length, 3);
+    assert.equal(sats.length, 5);
     assert.equal(sats[0]!.id, '25544');
     assert.equal(sats[0]!.name, 'ISS (ZARYA)');
     assert.match(sats[0]!.line1, /^1 25544/);
@@ -27,7 +33,9 @@ describe('listSatellites CelesTrak TLE parse', () => {
 
   it('classifies known SAR platforms by name', () => {
     const sats = parseTleCatalog(SAMPLE, { type: 'optical', country: 'INT' });
-    const sentinel = sats.find((s) => s.id === '39634');
-    assert.equal(sentinel?.type, 'sar');
+    assert.equal(sats.find((s) => s.id === '39634')?.type, 'sar'); // SENTINEL-1A
+    assert.equal(sats.find((s) => s.id === '32382')?.type, 'sar'); // RADARSAT-2
+    assert.equal(sats.find((s) => s.id === '31698')?.type, 'sar'); // TERRASAR-X
+    assert.equal(sats.find((s) => s.id === '25544')?.type, 'optical'); // ISS stays optical
   });
 });

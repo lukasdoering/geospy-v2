@@ -50,8 +50,9 @@ function toSatellite(item: SatelliteCacheItem): Satellite {
   };
 }
 
+// Note: SENTINEL-1A has no word boundary between "1" and "A", so allow a letter/digit suffix.
 const SAR_NAME_RE =
-  /\b(SAR|RADARSAT|COSMO[- ]?SKYMED|TERRASAR|TANDEM-X|SENTINEL-1|ALOS-2|ALOS-4|BIOMASS|RISAT|ICEYE|CAPELLA|UMBRA|NOVASAR|SAOCOM|PAZ|CSG-\d)\b/i;
+  /\b(?:SAR|RADARSAT(?:-\d+)?|COSMO[- ]?SKYMED(?:-\d+)?|TERRASAR(?:-X)?|TANDEM-X|SENTINEL-1[A-Z0-9]*|ALOS-[24]|BIOMASS|RISAT(?:-\d+[A-Z]?)?|ICEYE(?:-[A-Z0-9]+)?|CAPELLA(?:-\d+)?|UMBRA(?:-\d+)?|NOVASAR(?:-\d+)?|SAOCOM(?:-\d+[A-Z]?)?|PAZ|CSG-\d+)\b/i;
 
 function inferSensorType(name: string, fallback: string): string {
   if (SAR_NAME_RE.test(name)) return 'sar';
