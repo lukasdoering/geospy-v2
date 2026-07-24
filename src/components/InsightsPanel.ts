@@ -79,14 +79,18 @@ export class InsightsPanel extends Panel {
     this.content.addEventListener('click', (e) => {
       // Don't steal clicks on headline links
       if ((e.target as HTMLElement).closest('a')) return;
-      const card = (e.target as HTMLElement).closest<HTMLElement>('.focal-point-clickable, .convergence-zone-clickable');
+      const card = (e.target as HTMLElement).closest<HTMLElement>(
+        '.focal-point-clickable, .convergence-zone-clickable, .insight-story-clickable',
+      );
       if (!card?.dataset.country) return;
       this.focusCountry(card.dataset.country);
     });
     this.content.addEventListener('keydown', (e) => {
       if (!(e instanceof KeyboardEvent)) return;
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const card = (e.target as HTMLElement).closest<HTMLElement>('.focal-point-clickable, .convergence-zone-clickable');
+      const card = (e.target as HTMLElement).closest<HTMLElement>(
+        '.focal-point-clickable, .convergence-zone-clickable, .insight-story-clickable',
+      );
       if (!card?.dataset.country) return;
       e.preventDefault();
       this.focusCountry(card.dataset.country);
@@ -640,8 +644,14 @@ export class InsightsPanel extends Panel {
         badges.push(`<span class="insight-badge velocity ${safeThreat}">${escapeHtml(story.category)}</span>`);
       }
 
+      const storyCountry = (story.countryCode || '').trim().toUpperCase();
+      const storyClickable = storyCountry ? ' insight-story-clickable' : '';
+      const storyAttrs = storyCountry
+        ? ` data-country="${escapeHtml(storyCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show story on map"`
+        : '';
+
       return `
-        <div class="insight-story">
+        <div class="insight-story${storyClickable}"${storyAttrs}>
           <div class="insight-story-header">
             <span class="insight-sentiment-dot ${sentimentClass}"></span>
             <span class="insight-story-title">${escapeHtml(story.primaryTitle.slice(0, 100))}${story.primaryTitle.length > 100 ? '...' : ''}</span>
@@ -765,8 +775,14 @@ export class InsightsPanel extends Panel {
         badges.push(`<span class="insight-badge alert">⚠ ${t('components.insights.alert')}</span>`);
       }
 
+      const storyCountry = (this.extractISQInput(cluster).countryCode || '').trim().toUpperCase();
+      const storyClickable = storyCountry ? ' insight-story-clickable' : '';
+      const storyAttrs = storyCountry
+        ? ` data-country="${escapeHtml(storyCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show story on map"`
+        : '';
+
       return `
-        <div class="insight-story">
+        <div class="insight-story${storyClickable}"${storyAttrs}>
           <div class="insight-story-header">
             <span class="insight-sentiment-dot ${sentimentClass}"></span>
             <span class="insight-story-title">${escapeHtml(cluster.primaryTitle.slice(0, 100))}${cluster.primaryTitle.length > 100 ? '...' : ''}</span>
