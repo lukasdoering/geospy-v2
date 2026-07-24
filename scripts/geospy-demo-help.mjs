@@ -12,7 +12,7 @@ Checkout and run:
 
 Validate:
   npm run geospy:smoke
-  npm run geospy:verify   # smoke + focused product tests (~103)
+  npm run geospy:verify   # smoke + focused product tests (~106)
 
 Try overhead (differentiator):
   • Tip → Try now / flat hint → Predict passes
@@ -33,7 +33,7 @@ Try other polish:
   • Tech Events 📍 pin → map + techEvents layer
   • Infrastructure Cascade select/analyze → map focus
   • OREF Sirens row → Tel Aviv focus
-  • Fuel Shortages / Pipelines / Storage / Energy Disruptions / Energy Crisis / Gulf / Sanctions / Trade / Procurement → map
+  • Energy/trade/finance panels → row/card → map (shortages, pipelines, storage, disruptions, crisis, gulf, sanctions, trade, procurement, Big Mac, national debt)
   • Cmd/Ctrl+K → “GeoSpy Analyst” / “Settings → Satellites”
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
