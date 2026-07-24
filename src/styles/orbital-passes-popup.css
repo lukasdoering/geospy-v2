@@ -150,6 +150,41 @@
   letter-spacing: 0.02em;
 }
 
+.orbital-passes-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 4px 12px 8px;
+}
+
+.orbital-passes-filter {
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  border-radius: 4px;
+  padding: 3px 9px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.orbital-passes-filter:hover:not(:disabled) {
+  color: var(--text-primary);
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.orbital-passes-filter.is-active {
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--border));
+  background: color-mix(in srgb, var(--accent) 16%, transparent);
+}
+
+.orbital-passes-filter:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .orbital-passes-list {
   list-style: none;
   margin: 0;
