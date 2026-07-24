@@ -70,6 +70,7 @@ const focusedTests = [
   'tests/airline-intel-map-focus.test.mts',
   'tests/country-name-aliases.test.mts',
   'tests/forecast-map-focus.test.mts',
+  'tests/energy-cross-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {

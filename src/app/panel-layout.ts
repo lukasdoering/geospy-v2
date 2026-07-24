@@ -1854,7 +1854,13 @@ export class PanelLayoutManager implements AppModule {
       }),
     );
     this.lazyPanel('energy-risk-overview', () =>
-      this.importPanel('energy-risk-overview', () => import('@/components/EnergyRiskOverviewPanel'), 'EnergyRiskOverviewPanel', (EnergyRiskOverviewPanel) => new EnergyRiskOverviewPanel()),
+      this.importPanel('energy-risk-overview', () => import('@/components/EnergyRiskOverviewPanel'), 'EnergyRiskOverviewPanel', (EnergyRiskOverviewPanel) => {
+        const p = new EnergyRiskOverviewPanel();
+        p.setHormuzFocusHandler(() => {
+          this.ctx.map?.openChokepoint?.('hormuz_strait');
+        });
+        return p;
+      }),
     );
     this.lazyDefaultPanel('polymarket', () => import('@/components/PredictionPanel'), 'PredictionPanel');
 
@@ -2352,7 +2358,11 @@ export class PanelLayoutManager implements AppModule {
       return p;
     });
 
-    this.lazyDefaultPanel('cross-source-signals', () => import('@/components/CrossSourceSignalsPanel'), 'CrossSourceSignalsPanel');
+    this.lazyDefaultPanel('cross-source-signals', () => import('@/components/CrossSourceSignalsPanel'), 'CrossSourceSignalsPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
 
     this.lazyImportedPanel('geo-hubs', () => import('@/components/GeoHubsPanel'), 'GeoHubsPanel', (GeoHubsPanel) => {
       const p = new GeoHubsPanel();
