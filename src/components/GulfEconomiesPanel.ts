@@ -42,7 +42,10 @@ export class GulfEconomiesPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedMarketData'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -82,7 +85,10 @@ export class GulfEconomiesPanel extends Panel {
   private renderGulf(data: ListGulfQuotesResponse): void {
     if (!data.quotes?.length) {
       if (data.rateLimited) {
-        this.showError(t('common.rateLimitedMarket'), () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(t('common.rateLimitedMarket'))}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.setSafeContent(unsafeRawHtml(
