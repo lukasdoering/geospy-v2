@@ -133,7 +133,14 @@ export class CIIPanel extends Panel {
     // stopPropagation pattern in `bindShareButtons`).
     followHost.addEventListener('click', (e) => e.stopPropagation());
 
-    return h('div', { className: 'cii-country', dataset: { code: country.code } },
+    return h('div', {
+      className: 'cii-country cii-country-clickable',
+      dataset: { code: country.code },
+      role: 'button',
+      tabindex: '0',
+      title: 'Show on map',
+      'aria-label': `Show ${country.name} on map`,
+    },
       followHost,
       h('div', { className: 'cii-header' },
         h('span', { className: 'cii-emoji' }, emoji),
@@ -266,13 +273,19 @@ export class CIIPanel extends Panel {
   private bindShareButtons(): void {
     if (!this.onShareStory && !this.onCountryClick) return;
 
+    const activate = (el: HTMLElement): void => {
+      const code = el.dataset.code;
+      if (code && this.onCountryClick) this.onCountryClick(code);
+    };
     this.content.querySelectorAll('.cii-country').forEach(el => {
       el.addEventListener('click', (e) => {
-        const target = e.currentTarget as HTMLElement;
-        const code = target.dataset.code;
-        if (code && this.onCountryClick) {
-          this.onCountryClick(code);
-        }
+        activate(e.currentTarget as HTMLElement);
+      });
+      el.addEventListener('keydown', (e) => {
+        if (!(e instanceof KeyboardEvent)) return;
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(e.currentTarget as HTMLElement);
       });
     });
 
@@ -295,7 +308,7 @@ export class CIIPanel extends Panel {
     this.tearDownFollowButtons();
     replaceChildren(
       this.content,
-      h('div', { className: 'empty-state' }, t('common.failedCII')),
+      h('div', { className: 'panel-empty empty-state' }, t('common.failedCII')),
       this.buildMethodologyFooter(),
     );
   }

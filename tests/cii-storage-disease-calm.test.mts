@@ -8,6 +8,15 @@ describe('CII map focus + storage/disease/procurement calm empties', () => {
     assert.match(layout, /cii[\s\S]*?setCountryClickHandler[\s\S]*?resolveCountryMapFocus[\s\S]*?openCountryBrief/);
   });
 
+  it('CII rows are keyboard-activatable with calm unavailable state', () => {
+    const panel = readFileSync(new URL('../src/components/CIIPanel.ts', import.meta.url), 'utf8');
+    assert.match(panel, /cii-country-clickable/);
+    assert.match(panel, /tabindex/);
+    assert.match(panel, /keydown/);
+    assert.match(panel, /role: 'button'/);
+    assert.match(panel, /panel-empty/);
+  });
+
   it('Storage / Disease / Procurement use calm empty when unavailable', () => {
     const storage = readFileSync(new URL('../src/components/StorageFacilityMapPanel.ts', import.meta.url), 'utf8');
     const disease = readFileSync(new URL('../src/components/DiseaseOutbreaksPanel.ts', import.meta.url), 'utf8');
