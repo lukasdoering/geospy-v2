@@ -72,6 +72,7 @@ const focusedTests = [
   'tests/forecast-map-focus.test.mts',
   'tests/energy-cross-map-focus.test.mts',
   'tests/calm-empty-pred-brief.test.mts',
+  'tests/calm-empty-gdelt.test.mts',
 ];
 
 function run(cmd, args, label) {
