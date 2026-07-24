@@ -78,6 +78,7 @@ const focusedTests = [
   'tests/renewable-energy-risk-map.test.mts',
   'tests/calm-empty-markets-batch4.test.mts',
   'tests/calm-empty-cot-liquidity.test.mts',
+  'tests/calm-empty-batch5.test.mts',
 ];
 
 function run(cmd, args, label) {

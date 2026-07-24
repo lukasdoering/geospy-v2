@@ -199,7 +199,10 @@ export class EnergyDisruptionsPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Energy disruptions log error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Energy disruptions unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 

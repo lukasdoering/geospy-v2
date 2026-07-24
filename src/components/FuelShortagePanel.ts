@@ -213,7 +213,10 @@ export class FuelShortagePanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Fuel shortage registry error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Fuel shortage registry unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 

@@ -51,7 +51,13 @@ export class SocialVelocityPanel extends Panel {
       this._render();
       return true;
     } catch (e) {
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : 'Failed to load', () => void this.fetchData());
+      if (!this._hasData) {
+        const msg = e instanceof Error ? e.message : 'Failed to load';
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

@@ -91,6 +91,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Supply Chain critical-minerals top producers focus the map
 - Calm empties batch: Market Breadth, Earnings Calendar, Hormuz, Yield Curve
 - Calm empties: COT Positioning + Liquidity Shifts load failures
+- Calm empties batch5: disease/macro/calendar/social + energy registry catch paths
 - Calm empties: GDELT Intel load failure, Tech Events error, Defense Patents error
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles

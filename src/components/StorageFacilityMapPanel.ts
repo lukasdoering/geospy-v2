@@ -264,7 +264,10 @@ export class StorageFacilityMapPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Storage registry error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Storage registry unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
