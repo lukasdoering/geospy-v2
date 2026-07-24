@@ -25,7 +25,8 @@ Try overhead (differentiator):
 Try other polish:
   • Markets / Commodities / Crypto → click sparkline chart
   • Disease Outbreaks / Satellite Fires / Internet Disruptions → row click focuses map
-  • Security Advisories → search country/title
+  • Security Advisories → search + click card to focus country on map
+  • UCDP / Climate / Displacement / Radiation → click enables matching layer
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 `);
