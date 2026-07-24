@@ -12,4 +12,20 @@ describe('energy disruptions enable destination panels', () => {
     assert.match(panel, /energy:open-storage-facility-detail/);
     assert.match(panel, /setTimeout/);
   });
+
+  it('focuses the map from cached registries + wires layout layer enable', () => {
+    const panel = readFileSync(new URL('../src/components/EnergyDisruptionsPanel.ts', import.meta.url), 'utf8');
+    assert.match(panel, /setLocationClickHandler/);
+    assert.match(panel, /focusAssetOnMap/);
+    assert.match(panel, /resolvePipelineMapFocus/);
+    assert.match(panel, /resolveStorageFacilityMapFocus/);
+    assert.match(panel, /ed-row-clickable/);
+    assert.match(panel, /tabindex="0"/);
+    assert.match(panel, /handleContentKeydown/);
+
+    const layout = readFileSync(new URL('../src/app/panel-layout.ts', import.meta.url), 'utf8');
+    assert.match(layout, /energy-disruptions[\s\S]*?setLocationClickHandler/);
+    assert.match(layout, /energy-disruptions[\s\S]*?applyMapLayerChange\?\.\('pipelines'/);
+    assert.match(layout, /energy-disruptions[\s\S]*?applyMapLayerChange\?\.\('storageFacilities'/);
+  });
 });
