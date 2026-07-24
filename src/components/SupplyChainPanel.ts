@@ -12,6 +12,7 @@ import { SCENARIO_TEMPLATES } from '@/config/scenario-templates';
 import { TransitChart } from '@/utils/transit-chart';
 import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import { isFeatureAvailable } from '@/services/runtime-config';
 import { isDesktopRuntime } from '@/services/runtime';
 import { getAuthState, subscribeAuthState } from '@/services/auth-state';
@@ -48,9 +49,21 @@ export class SupplyChainPanel extends Panel {
   private scenarioPollController: AbortController | null = null;
 
   private onChokepointFocus: ((id: string) => void) | null = null;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   public setChokepointFocusHandler(handler: (id: string) => void): void {
     this.onChokepointFocus = handler;
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   constructor() {
@@ -58,7 +71,7 @@ export class SupplyChainPanel extends Panel {
     if (!document.getElementById('sc-map-focus-style')) {
       const style = document.createElement('style');
       style.id = 'sc-map-focus-style';
-      style.textContent = '.sc-map-focus{margin-left:6px;font-size:10px;padding:1px 6px;cursor:pointer;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--accent);border-radius:3px}.sc-map-focus:hover{filter:brightness(1.1)}.sc-map-focus:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
+      style.textContent = '.sc-mineral-producer{font-size:10px;padding:1px 5px;margin:0 2px 2px 0;cursor:pointer;background:rgba(255,255,255,0.05);border:1px solid var(--border);color:var(--text-dim);border-radius:3px}.sc-mineral-producer:hover{color:var(--text);border-color:var(--accent)}.sc-mineral-producer:focus-visible{outline:2px solid var(--accent);outline-offset:1px}.sc-map-focus{margin-left:6px;font-size:10px;padding:1px 6px;cursor:pointer;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--accent);border-radius:3px}.sc-map-focus:hover{filter:brightness(1.1)}.sc-map-focus:focus-visible{outline:2px solid var(--accent);outline-offset:1px}';
       document.head.appendChild(style);
     }
     this.content.addEventListener('click', (e) => {
@@ -85,6 +98,12 @@ export class SupplyChainPanel extends Panel {
         this.onChokepointFocus?.(mapBtn.dataset.chokepointMap);
         return;
       }
+      const producer = (e.target as HTMLElement).closest('.sc-mineral-producer') as HTMLElement | null;
+      if (producer?.dataset.country) {
+        e.stopPropagation();
+        this.focusCountry(producer.dataset.country);
+        return;
+      }
       const card = (e.target as HTMLElement).closest('.trade-restriction-card') as HTMLElement | null;
       if (card?.dataset.cpId) {
         const newId = this.expandedChokepoint === card.dataset.cpId ? null : card.dataset.cpId;
@@ -92,6 +111,14 @@ export class SupplyChainPanel extends Panel {
         this.expandedChokepoint = newId;
         this.render();
       }
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const producer = (e.target as HTMLElement).closest('.sc-mineral-producer') as HTMLElement | null;
+      if (!producer?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(producer.dataset.country);
     });
   }
 
@@ -722,9 +749,13 @@ export class SupplyChainPanel extends Panel {
         : m.riskRating === 'high' ? 'sc-risk-high'
         : m.riskRating === 'moderate' ? 'sc-risk-moderate'
         : 'sc-risk-low';
-      const top3 = m.topProducers.slice(0, 3).map(p =>
-        `${escapeHtml(p.country)} ${p.sharePct.toFixed(0)}%`
-      ).join(', ');
+      const top3 = m.topProducers.slice(0, 3).map(p => {
+        const code = (p.country || '').trim();
+        const attrs = code
+          ? ` class="sc-mineral-producer" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+          : '';
+        return `<button type="button"${attrs}>${escapeHtml(p.country)} ${p.sharePct.toFixed(0)}%</button>`;
+      }).join(' ');
       return `<tr>
         <td>${escapeHtml(m.mineral)}</td>
         <td>${top3}</td>

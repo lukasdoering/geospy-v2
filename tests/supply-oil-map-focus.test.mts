@@ -21,4 +21,13 @@ describe('supply chain + oil inventories map focus', () => {
     assert.match(panel, /data-country=/);
     assert.match(layout, /oil-inventories[\s\S]*?setLocationClickHandler/);
   });
+
+  it('wires Supply Chain mineral producer chips to map focus', () => {
+    const panel = readFileSync(new URL('../src/components/SupplyChainPanel.ts', import.meta.url), 'utf8');
+    const layout = readFileSync(new URL('../src/app/panel-layout.ts', import.meta.url), 'utf8');
+    assert.match(panel, /sc-mineral-producer/);
+    assert.match(panel, /setLocationClickHandler/);
+    assert.match(panel, /resolveCountryMapFocus/);
+    assert.match(layout, /supply-chain[\s\S]*?setLocationClickHandler/);
+  });
 });

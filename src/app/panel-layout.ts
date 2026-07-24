@@ -1945,6 +1945,9 @@ export class PanelLayoutManager implements AppModule {
       supplyChainPanel.setChokepointFocusHandler((id) => {
         this.ctx.map?.openChokepoint?.(id);
       });
+      supplyChainPanel.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       this.ctx.map?.setSupplyChainPanel(supplyChainPanel);
       return supplyChainPanel;
     });
