@@ -38,7 +38,12 @@ export class SocialVelocityPanel extends Panel {
     try {
       const data = await fetchSocialVelocity();
       if (!data.posts?.length) {
-        if (!this._hasData) this.showError('No signal data available', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">No signal data available</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       this._posts = [...data.posts].sort((a, b) => b.velocityScore - a.velocityScore);

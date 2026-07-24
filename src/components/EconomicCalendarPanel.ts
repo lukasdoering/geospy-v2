@@ -2,6 +2,7 @@ import type { EconomicServiceClient } from '@/generated/client/worldmonitor/econ
 import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 let _client: EconomicServiceClient | null = null;
 async function getEconomicClient(): Promise<EconomicServiceClient> {
@@ -88,18 +89,41 @@ export class EconomicCalendarPanel extends Panel {
   private _hasData = false;
   private _events: EconomicEvent[] = [];
   private _region: RegionFilter = 'all';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'economic-calendar', title: 'Economic Calendar', showCount: false, infoTooltip: t('components.economicCalendar.infoTooltip') });
     this.content.addEventListener('click', (e) => {
       const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button[data-region]');
-      if (!btn) return;
-      const region = btn.dataset.region as RegionFilter;
-      if (region && region !== this._region) {
-        this._region = region;
-        this._render();
+      if (btn) {
+        const region = btn.dataset.region as RegionFilter;
+        if (region && region !== this._region) {
+          this._region = region;
+          this._render();
+        }
+        return;
       }
+      const row = (e.target as HTMLElement).closest<HTMLElement>('tr.ec-row-clickable');
+      if (row?.dataset.country) this.focusCountry(row.dataset.country);
     });
+    this.content.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('tr.ec-row-clickable');
+      if (!row?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(row.dataset.country);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<boolean> {
@@ -112,7 +136,12 @@ export class EconomicCalendarPanel extends Panel {
       const resp = await client.getEconomicCalendar({ fromDate, toDate });
 
       if (resp.unavailable || !resp.events || resp.events.length === 0) {
-        if (!this._hasData) this.showError('Economic calendar data unavailable.', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">Economic calendar data unavailable.</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 
@@ -154,7 +183,10 @@ export class EconomicCalendarPanel extends Panel {
 
   private _render(): void {
     if (!this._hasData) {
-      this.showError('No upcoming economic events.', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">No upcoming economic events.</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -182,6 +214,12 @@ export class EconomicCalendarPanel extends Panel {
         const impactColor = IMPACT_COLORS[impact] ?? IMPACT_COLORS.low;
         const flag = COUNTRY_FLAGS[ev.country] ?? escapeHtml(ev.country);
         const isHigh = impact === 'high';
+        const code = (ev.country || '').trim().toUpperCase();
+        // Aggregate region codes (EU/EUR/EA) won't resolve at click time — still
+        // mark ISO country rows for a11y; focusCountry no-ops when unresolved.
+        const rowAttrs = code && !['EU', 'EUR', 'EA'].includes(code)
+          ? ` class="ec-row-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" style="font-size:12px;line-height:1.2;cursor:pointer"`
+          : ' style="font-size:12px;line-height:1.2"';
 
         // Right column: actual value when released, countdown otherwise
         let rightLabel: string;
@@ -194,7 +232,7 @@ export class EconomicCalendarPanel extends Panel {
           rightStyle = 'color:rgba(255,255,255,0.35);font-style:italic';
         }
 
-        bodyRows += `<tr style="font-size:12px;line-height:1.2">
+        bodyRows += `<tr${rowAttrs}>
           <td style="padding:4px 8px 4px 0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:0">
             <span style="margin-right:5px">${flag}</span><span style="font-weight:${isHigh ? 600 : 400}">${escapeHtml(ev.event)}</span>
           </td>

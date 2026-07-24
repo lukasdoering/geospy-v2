@@ -71,7 +71,7 @@ export class ClimateNewsPanel extends Panel {
 
   private renderNewsList(data: ListClimateNewsResponse): void {
     if (!data.items?.length) {
-      this.showError(t('components.climateNews.loadError'), () => void this.fetchData());
+      this.setSafeContent(safeHtml`<div class="panel-empty" role="status">${t('common.noDataAvailable')}</div>`);
       return;
     }
 
