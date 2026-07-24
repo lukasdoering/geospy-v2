@@ -69,6 +69,28 @@ describe('parseMapUrlState chokepoint param', () => {
   });
 });
 
+describe('parseMapUrlState overhead param (GeoSpy)', () => {
+  it('parses overhead=1 with lat/lon', () => {
+    const state = parseMapUrlState('?lat=40.7128&lon=-74.006&overhead=1', EMPTY_LAYERS);
+    assert.deepEqual(state.overhead, { lat: 40.7128, lon: -74.006 });
+  });
+
+  it('parses overhead=lat,lon pair', () => {
+    const state = parseMapUrlState('?overhead=51.5074,-0.1278', EMPTY_LAYERS);
+    assert.deepEqual(state.overhead, { lat: 51.5074, lon: -0.1278 });
+  });
+
+  it('rejects overhead=1 without coordinates', () => {
+    assert.equal(parseMapUrlState('?overhead=1', EMPTY_LAYERS).overhead, undefined);
+  });
+
+  it('rejects out-of-range or malformed pairs', () => {
+    assert.equal(parseMapUrlState('?overhead=99,0', EMPTY_LAYERS).overhead, undefined);
+    assert.equal(parseMapUrlState('?overhead=abc,def', EMPTY_LAYERS).overhead, undefined);
+    assert.equal(parseMapUrlState('?overhead=', EMPTY_LAYERS).overhead, undefined);
+  });
+});
+
 describe('buildMapUrl expanded param', () => {
   const base = 'https://worldmonitor.app/dashboard';
   const baseState = {
@@ -99,10 +121,12 @@ describe('buildMapUrl expanded param', () => {
     assert.equal(params.has('expanded'), false);
   });
 
-  it('includes chokepoint when present', () => {
-    const url = buildMapUrl(base, { ...baseState, chokepoint: 'hormuz_strait' });
+  it('includes overhead=1 when requested with a center', () => {
+    const url = buildMapUrl(base, { ...baseState, overhead: true });
     const params = new URL(url).searchParams;
-    assert.equal(params.get('chokepoint'), 'hormuz_strait');
+    assert.equal(params.get('overhead'), '1');
+    assert.equal(params.get('lat'), '0.0000');
+    assert.equal(params.get('lon'), '0.0000');
   });
 });
 
