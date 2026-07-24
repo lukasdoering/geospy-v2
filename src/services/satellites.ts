@@ -335,6 +335,9 @@ export function predictNextPasses(
 /**
  * Fetch TLEs (using the shared client cache), initialize SGP4, and predict
  * overhead passes for a map click / POI. Safe to call with the satellites layer off.
+ *
+ * Throws if the satellite catalog cannot be loaded (network/cooldown empty),
+ * so the UI can distinguish "catalog unavailable" from "no overhead passes".
  */
 export async function predictOverheadPassesAt(
   lat: number,
@@ -342,7 +345,9 @@ export async function predictOverheadPassesAt(
   options: PredictPassesOptions = {},
 ): Promise<OverheadPass[]> {
   const tles = await fetchSatelliteTLEs();
-  if (!tles || tles.length === 0) return [];
+  if (!tles || tles.length === 0) {
+    throw new Error('SATELLITE_CATALOG_UNAVAILABLE');
+  }
   const satRecs = await initSatRecs(tles);
   // ensureSatelliteLib resolved inside initSatRecs
   return predictNextPasses(lat, lng, satRecs, options);
