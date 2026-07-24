@@ -64,6 +64,10 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Consumer Prices (World)** — inflation row click/keyboard focuses the country
 - **AI Regulation** — countries tab card click/keyboard focuses the country
 
+## Implementation note
+
+Country panel→map focus uses `resolveCountryMapFocus` (`src/utils/country-map-focus.ts`), a Null Island–guarded centroid helper.
+
 ## Docs
 
 - [CHANGELOG-GEOSPY.md](CHANGELOG-GEOSPY.md) — fork product changelog
