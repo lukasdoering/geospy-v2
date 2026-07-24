@@ -2,6 +2,7 @@
   "name": "world-monitor",
   "private": true,
   "version": "2.10.0",
+  "description": "GeoSpy — real-time global intelligence dashboard (AGPL fork of WorldMonitor)",
   "license": "AGPL-3.0-only",
   "type": "module",
   "scripts": {
@@ -21,6 +22,10 @@
     "worktree:bootstrap": "node scripts/bootstrap-worktree.mjs",
     "worktree:bootstrap:test-only": "node scripts/bootstrap-worktree.mjs --ignore-scripts",
     "worktree:env": "node scripts/bootstrap-worktree.mjs --skip-install",
+    "uninstall:local": "node scripts/uninstall-local.mjs",
+    "geospy:smoke": "node scripts/geospy-smoke-check.mjs",
+    "geospy:demo": "node scripts/geospy-demo-help.mjs",
+    "geospy:verify": "node scripts/geospy-verify.mjs",
     "lint:md": "markdownlint-cli2 '**/*.md' '!**/node_modules/**' '!.agent/**' '!.agents/**' '!.claude/**' '!.factory/**' '!.windsurf/**' '!skills/**' '!docs/internal/**' '!docs/Docs_To_Review/**' '!docs/archive/**' '!todos/**' '!docs/plans/**' '!docs/brainstorms/**' '!docs/ideation/**'",
     "version:sync": "node scripts/sync-desktop-version.mjs",
     "version:check": "node scripts/sync-desktop-version.mjs --check",
