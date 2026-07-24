@@ -82,6 +82,7 @@ const focusedTests = [
   'tests/calm-empty-news-cascade.test.mts',
   'tests/calm-empty-strategic.test.mts',
   'tests/energy-complex-cascade-map.test.mts',
+  'tests/route-card-inert-a11y.test.mts',
 ];
 
 function run(cmd, args, label) {

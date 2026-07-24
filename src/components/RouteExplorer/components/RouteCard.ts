@@ -31,7 +31,9 @@ export function renderRouteCard(opts: RouteCardOptions): HTMLDivElement {
   card.className = `re-route-card ${statusCls} ${isActive ? 're-route-card--active' : ''}`;
   card.setAttribute('role', 'option');
   card.setAttribute('aria-selected', isActive ? 'true' : 'false');
-  card.setAttribute('tabindex', '0');
+  // Unavailable/proposed corridors are informational only — keep them out of
+  // the tab order so keyboard users don't land on inert focusable cards.
+  card.setAttribute('tabindex', isDisabled ? '-1' : '0');
   card.dataset.idx = String(index);
   card.dataset.corridorId = o.id;
 
