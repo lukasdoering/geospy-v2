@@ -20,5 +20,7 @@ describe('strategic risk / posture map a11y', () => {
     assert.match(panel, /lat === 0 && lon === 0/);
     assert.doesNotMatch(panel, /Theater clicked:/);
     assert.doesNotMatch(panel, /setLocationClickHandler called/);
+    assert.doesNotMatch(panel, /Re-augmenting with vessels/);
+    assert.doesNotMatch(panel, /Got \$\{vessels\.length\} total military vessels/);
   });
 });

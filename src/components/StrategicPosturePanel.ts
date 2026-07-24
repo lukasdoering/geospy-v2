@@ -46,7 +46,6 @@ export class StrategicPosturePanel extends Panel {
 
   private async reaugmentVessels(): Promise<void> {
     if (!this.isPanelVisible() || this.postures.length === 0) return;
-    console.log('[StrategicPosturePanel] Re-augmenting with vessels...');
     await this.augmentWithVessels();
     if (!this.element?.isConnected) return;
     this.render();
@@ -167,7 +166,6 @@ export class StrategicPosturePanel extends Panel {
     try {
       const { fetchMilitaryVessels } = await getMilitaryVesselsModule();
       const { vessels } = await fetchMilitaryVessels();
-      console.log(`[StrategicPosturePanel] Got ${vessels.length} total military vessels`);
       if (vessels.length === 0) {
         // AIS stream hasn't accumulated data yet — restore from cache
         this.restoreVesselCounts();
@@ -199,10 +197,6 @@ export class StrategicPosturePanel extends Panel {
         ).length;
         posture.totalVessels = theaterVessels.length;
 
-        if (theaterVessels.length > 0) {
-          console.log(`[StrategicPosturePanel] ${posture.shortName}: ${theaterVessels.length} vessels`, theaterVessels.map(v => v.vesselType));
-        }
-
         // Add vessel operators to byOperator
         for (const v of theaterVessels) {
           const op = v.operator || 'unknown';
@@ -215,7 +209,6 @@ export class StrategicPosturePanel extends Panel {
 
       // Recalculate posture levels now that vessels are included
       recalcPostureWithVessels(this.postures);
-      console.log('[StrategicPosturePanel] Augmented with', vessels.length, 'vessels, posture levels recalculated');
     } catch (error) {
       // Deliberate teardown of the lazy vessel runtime — leave the cached
       // posture as-is rather than logging a misleading fetch failure.
@@ -266,7 +259,6 @@ export class StrategicPosturePanel extends Panel {
           p.totalVessels = cached.totalVessels;
         }
       }
-      console.log('[StrategicPosturePanel] Restored cached vessel counts');
     } catch { /* parse error */ }
   }
 
