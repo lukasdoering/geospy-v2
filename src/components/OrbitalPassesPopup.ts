@@ -80,6 +80,17 @@ export function showOrbitalPassesPopup(
   } else {
     const list = el('ul', 'orbital-passes-list');
     const nowMs = Date.now();
+    const uniqueSats = new Set(passes.map((p) => p.noradId));
+    const windowHours = Math.max(
+      1,
+      Math.round((Math.max(...passes.map((p) => p.aosMs)) - nowMs) / 3_600_000),
+    );
+    const summary = el(
+      'div',
+      'orbital-passes-summary',
+      `${passes.length} pass${passes.length === 1 ? '' : 'es'} · ${uniqueSats.size} sat${uniqueSats.size === 1 ? '' : 's'} · next ~${windowHours}h`,
+    );
+    popup.append(summary);
     for (const p of passes) {
       const row = el('li', 'orbital-passes-row');
       row.append(el('div', 'orbital-passes-name', p.name));
