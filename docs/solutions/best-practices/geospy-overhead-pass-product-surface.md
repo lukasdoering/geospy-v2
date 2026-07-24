@@ -25,13 +25,15 @@ GeoSpy’s differentiating orbital feature (client-side SGP4 overhead-pass predi
 
 1. **Prediction API** — `predictNextPasses` / `predictOverheadPassesAt` in `src/services/satellites.ts`.
 2. **Context menu** — “Predict Overhead Passes” via `CountryIntelManager` (SVG + DeckGL + globe wired).
-3. **Cmd+K** — `view:overhead-passes` runs prediction at map center.
-4. **Popup polish** — skeleton loading, type badges, duration, copy summary, Retry, median revisit + SAR/optical counts.
+3. **Cmd+K / hotkey** — `view:overhead-passes`, last-location rerun, Cmd/Ctrl+Shift+O.
+4. **Popup polish** — skeleton loading, type badges, duration, AOS/LOS, copy/share, Retry/Refresh, prefs footer, SAR/Optical filters, a11y.
 5. **Prefs** — Settings → Satellites (min elevation 10/20/30°, look-ahead 3/6/12h).
-6. **Discoverability** — first-run tip + fixed flat-map coherence hint with Switch to 3D.
-7. **Integration** — all of the above on `cursor/geospy-working-demo-4151` (PR #6).
+6. **Discoverability** — first-run tip with **Try now**, flat-map coherence hint with Switch to 3D.
+7. **Deep links** — `?overhead=1&lat=&lon=` / `?overhead=lat,lon` + Share button (also on error states).
+8. **Integration** — all of the above on `cursor/geospy-working-demo-4151` (PR #6).
 
 ## Prevention
 
 - New map-layer defaults that behave differently across renderers need an explicit user-facing coherence hint.
 - Product-differentiating actions should appear in the command palette, not only in context menus.
+- Share/export controls should remain available on degraded/error states so users can still circulate a deep link.
