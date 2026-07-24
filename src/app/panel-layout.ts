@@ -1921,7 +1921,25 @@ export class PanelLayoutManager implements AppModule {
       return ciiPanel;
     });
 
-    this.lazyDefaultPanel('cascade', () => import('@/components/CascadePanel'), 'CascadePanel');
+    this.lazyImportedPanel('cascade', () => import('@/components/CascadePanel'), 'CascadePanel', (CascadePanel) => {
+      const p = new CascadePanel();
+      p.onSelect((nodeId) => {
+        if (!nodeId) return;
+        if (nodeId.startsWith('chokepoint:')) {
+          this.ctx.map?.openChokepoint?.(nodeId.slice('chokepoint:'.length));
+          return;
+        }
+        void import('@/services/infrastructure-cascade').then(({ buildDependencyGraph }) => {
+          const coords = buildDependencyGraph().nodes.get(nodeId)?.coordinates;
+          if (!coords || coords.length < 2) return;
+          const [lon, lat] = coords;
+          if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+            this.ctx.map?.setCenter(lat, lon, 5);
+          }
+        });
+      });
+      return p;
+    });
     this.lazyImportedPanel('satellite-fires', () => import('@/components/SatelliteFiresPanel'), 'SatelliteFiresPanel', (SatelliteFiresPanel) => {
       const p = new SatelliteFiresPanel();
       p.setRegionClickHandler((lat: number, lon: number) => {

@@ -50,6 +50,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **GCC Investments** — keyboard-accessible row → map focus
 - **Chokepoint Status** — chip opens the chokepoint on the map
 - **Hormuz Tracker** — Show on map opens Hormuz Strait
+- **Infrastructure Cascade** — select/analyze focuses the asset on the map
 
 ## Docs
 
