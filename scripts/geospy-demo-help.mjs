@@ -8,11 +8,11 @@ Checkout and run:
   git checkout cursor/geospy-working-demo-4151
   npm ci
   npm run dev
-  # → http://localhost:3000
+  # → http://localhost:3000  (use localhost, not 127.0.0.1)
 
 Validate:
   npm run geospy:smoke
-  npm run geospy:verify   # smoke + focused product tests (~108)
+  npm run geospy:verify   # smoke + focused product tests
 
 Try overhead (differentiator):
   • Tip → Try now / flat hint → Predict passes
@@ -22,18 +22,15 @@ Try overhead (differentiator):
   • Settings → Satellites (prefs footer, or Cmd/Ctrl+K → Settings → Satellites)
   • Next-pass chip after you close the popup (empty window → tune elevation)
 
-Try other polish:
-  • Markets / Commodities / Crypto → click sparkline chart
-  • Disease / Fires / Internet / Population / Radiation → row/card → map
-  • Security Advisories → search + click card to focus country
-  • UCDP / Climate / Displacement / Radiation → click enables matching layer
-  • Thermal Escalation → search region/status, then click/keyboard → map
-  • Strategic Risk/Posture, Geo/Tech Hubs, GCC Investments → keyboard → map
-  • Chokepoint Status chip / Hormuz Tracker “Show on map” → chokepoint
-  • Tech Events 📍 pin → map + techEvents layer
-  • Infrastructure Cascade select/analyze → map focus
-  • OREF Sirens row → Tel Aviv focus
-  • Energy/trade/finance panels → row/card → map (shortages, pipelines, storage, disruptions, crisis, gulf, sanctions, trade, procurement, Big Mac, fuel prices, grocery basket, national debt, tech readiness, economic calendar, macro tiles, CII)
+Try panel → map polish:
+  • Insights stories / focal / convergence → map
+  • Economic BIS · Gold CB reserves · Macro tiles · CII
+  • Airline Intel ops airports + tracking positions
+  • AI Forecasts Map chip · Renewable regions
+  • Energy Risk Hormuz / EU Gas / disruptions tiles
+  • Cross-Source theater cards · Supply Chain Map + mineral producers
+  • Oil Inventories IEA chips · Energy Complex IEA/LNG rows
+  • Cascade affected countries · Fuel/Grocery/Debt/Trade/Sanctions/…
   • Cmd/Ctrl+K → “GeoSpy Analyst” / “Settings → Satellites”
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6

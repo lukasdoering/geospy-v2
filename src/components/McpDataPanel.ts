@@ -120,7 +120,10 @@ export class McpDataPanel extends Panel {
       this.renderResult(data.result ?? {});
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      this.showError(msg);
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -253,7 +256,10 @@ export class McpDataPanel extends Panel {
         } else if (!resultHtml) {
           this.cachedWidgetHtml = null;
           this.lastJsonHash = null;
-          this.showError(t('mcp.visualizationFailed'));
+          this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(t('mcp.visualizationFailed'))}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         }
       }
     } catch (err) {
@@ -261,7 +267,10 @@ export class McpDataPanel extends Panel {
       this.cachedWidgetHtml = null;
       this.lastJsonHash = null;
       const msg = err instanceof Error ? err.message : t('mcp.visualizationFailed');
-      this.showError(msg);
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     } finally {
       clearTimeout(timeoutId);
       this.pendingHash = null;
