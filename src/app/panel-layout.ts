@@ -1832,7 +1832,20 @@ export class PanelLayoutManager implements AppModule {
       }),
     );
     this.lazyPanel('energy-disruptions', () =>
-      this.importPanel('energy-disruptions', () => import('@/components/EnergyDisruptionsPanel'), 'EnergyDisruptionsPanel', (EnergyDisruptionsPanel) => new EnergyDisruptionsPanel()),
+      this.importPanel('energy-disruptions', () => import('@/components/EnergyDisruptionsPanel'), 'EnergyDisruptionsPanel', (EnergyDisruptionsPanel) => {
+        const p = new EnergyDisruptionsPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+          // Enable both energy asset layers — disruption may be pipeline or storage.
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.pipelines) {
+            this.callbacks.applyMapLayerChange?.('pipelines', true, 'programmatic');
+          }
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.storageFacilities) {
+            this.callbacks.applyMapLayerChange?.('storageFacilities', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('energy-risk-overview', () =>
       this.importPanel('energy-risk-overview', () => import('@/components/EnergyRiskOverviewPanel'), 'EnergyRiskOverviewPanel', (EnergyRiskOverviewPanel) => new EnergyRiskOverviewPanel()),
