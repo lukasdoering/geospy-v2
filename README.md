@@ -77,6 +77,7 @@ Copyright for the WorldMonitor codebase belongs to its upstream authors. GeoSpy 
 
 ## Documentation
 
+- [GeoSpy getting started](GEOSPY.md)
 - [GeoSpy changelog](CHANGELOG-GEOSPY.md)
 - [Architecture](ARCHITECTURE.md)
 - [Agent entry point](AGENTS.md)

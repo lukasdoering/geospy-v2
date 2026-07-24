@@ -27,6 +27,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 
 ### Docs
 - README GeoSpy highlights; CONTRIBUTING fork preamble; solutions note for overhead-pass surface
+- [GEOSPY.md](GEOSPY.md) getting-started guide
 
 ## How to run
 ```bash
