@@ -6,7 +6,7 @@ describe('global procurement map focus', () => {
   it('wires tender cards with ISO2 country to map focus', () => {
     const panel = readFileSync(new URL('../src/components/GlobalProcurementPanel.ts', import.meta.url), 'utf8');
     assert.match(panel, /setLocationClickHandler/);
-    assert.match(panel, /resolveFuelShortageMapFocus/);
+    assert.match(panel, /resolveCountryMapFocus/);
     assert.match(panel, /data-procurement-country/);
     assert.match(panel, /global-procurement-card-clickable/);
     assert.match(panel, /tabindex="0"/);

@@ -2,7 +2,7 @@ import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import type { CountrySanctionsPressure, ProgramSanctionsPressure, SanctionsEntry, SanctionsPressureResult } from '@/services/sanctions-pressure';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 export class SanctionsPressurePanel extends Panel {
   private data: SanctionsPressureResult | null = null;
@@ -32,7 +32,7 @@ export class SanctionsPressurePanel extends Panel {
 
   private focusCountry(code?: string): void {
     if (!this.onMapFocus || !code) return;
-    const focus = resolveFuelShortageMapFocus(code);
+    const focus = resolveCountryMapFocus(code);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }

@@ -3,7 +3,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { getHydratedData } from '@/services/bootstrap';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type { ListBigMacPricesResponse } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import { EconomicServiceClient } from '@/services/generated-rpc-clients';
@@ -23,7 +23,7 @@ export class BigMacPanel extends Panel {
 
   private focusCountry(code?: string): void {
     if (!this.onMapFocus || !code) return;
-    const focus = resolveFuelShortageMapFocus(code);
+    const focus = resolveCountryMapFocus(code);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }

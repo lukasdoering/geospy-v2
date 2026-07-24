@@ -6,7 +6,7 @@ describe('consumer prices world tab map focus', () => {
   it('wires World inflation rows to map focus + panel-layout handler', () => {
     const panel = readFileSync(new URL('../src/components/ConsumerPricesPanel.ts', import.meta.url), 'utf8');
     assert.match(panel, /setLocationClickHandler/);
-    assert.match(panel, /resolveFuelShortageMapFocus/);
+    assert.match(panel, /resolveCountryMapFocus/);
     assert.match(panel, /data-cp-country/);
     assert.match(panel, /cp-global-row-clickable/);
     assert.match(panel, /handleKeydown/);

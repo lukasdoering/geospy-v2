@@ -1,7 +1,7 @@
 import { Panel } from './Panel';
 import { getNationalDebtData, type NationalDebtEntry } from '@/services/economic';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
-import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type SortMode = 'total' | 'gdp-ratio' | 'growth';
 
@@ -131,7 +131,7 @@ export class NationalDebtPanel extends Panel {
 
   private focusCountry(iso3?: string): void {
     if (!this.onMapFocus || !iso3) return;
-    const focus = resolveFuelShortageMapFocus(iso3);
+    const focus = resolveCountryMapFocus(iso3);
     if (!focus) return;
     this.onMapFocus(focus.lat, focus.lon);
   }
