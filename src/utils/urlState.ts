@@ -53,6 +53,8 @@ export interface ParsedMapUrlState {
   country?: string;
   expanded?: boolean;
   chokepoint?: string;
+  /** GeoSpy: open overhead-pass prediction at these coordinates. */
+  overhead?: { lat: number; lon: number };
 }
 
 const clamp = (value: number, min: number, max: number): number =>
@@ -77,6 +79,27 @@ const parseClampedFloatParam = (
   const value = rawValue ? Number.parseFloat(rawValue) : NaN;
   return Number.isFinite(value) ? clamp(value, min, max) : undefined;
 };
+
+/** Parse ?overhead=1 (with lat/lon) or ?overhead=40.7128,-74.0060 */
+export function parseOverheadParam(
+  params: URLSearchParams,
+  latFromQuery?: number,
+  lonFromQuery?: number,
+): { lat: number; lon: number } | undefined {
+  const raw = params.get('overhead');
+  if (raw == null || raw === '') return undefined;
+  if (raw === '1' || raw.toLowerCase() === 'true') {
+    if (latFromQuery == null || lonFromQuery == null) return undefined;
+    return { lat: latFromQuery, lon: lonFromQuery };
+  }
+  const parts = raw.split(',').map((p) => p.trim());
+  if (parts.length !== 2) return undefined;
+  const lat = Number.parseFloat(parts[0]!);
+  const lon = Number.parseFloat(parts[1]!);
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return undefined;
+  if (lat < -90 || lat > 90 || lon < -180 || lon > 180) return undefined;
+  return { lat, lon };
+}
 
 export function parseMapUrlState(
   search: string,
@@ -104,6 +127,8 @@ export function parseMapUrlState(
   const chokepoint = chokepointParam && /^[a-z][a-z0-9_]{1,40}$/i.test(chokepointParam.trim())
     ? chokepointParam.trim().toLowerCase()
     : undefined;
+
+  const overhead = parseOverheadParam(params, lat, lon);
 
   const layersParam = params.get('layers');
   let layers: MapLayers | undefined;
@@ -141,6 +166,7 @@ export function parseMapUrlState(
     country,
     expanded,
     chokepoint,
+    overhead,
   };
 }
 
@@ -155,6 +181,8 @@ export function buildMapUrl(
     country?: string;
     expanded?: boolean;
     chokepoint?: string;
+    /** When true with a center, append overhead=1 for GeoSpy share links. */
+    overhead?: boolean;
   }
 ): string {
   let url: URL;
@@ -188,6 +216,10 @@ export function buildMapUrl(
 
   if (state.chokepoint) {
     params.set('chokepoint', state.chokepoint);
+  }
+
+  if (state.overhead && state.center) {
+    params.set('overhead', '1');
   }
 
   url.search = params.toString();
