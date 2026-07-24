@@ -31,6 +31,7 @@ Try other polish:
   • Strategic Risk/Posture, Geo/Tech Hubs, GCC Investments → keyboard → map
   • Chokepoint Status chip / Hormuz Tracker “Show on map” → chokepoint
   • Tech Events 📍 pin → map + techEvents layer
+  • Infrastructure Cascade select/analyze → map focus
   • OREF Sirens row → Tel Aviv focus
   • Cmd/Ctrl+K → “GeoSpy Analyst” / “Settings → Satellites”
 
