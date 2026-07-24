@@ -43,6 +43,7 @@ mustInclude('src/utils/urlState.ts', 'parseOverheadParam', 'overhead deep-link p
 mustInclude('src/App.ts', 'pendingDeepLinkOverhead', 'overhead deep-link wiring');
 mustInclude('src/components/SatellitesFlatHint.ts', 'geospy-satellites-flat-hint', 'flat-map hint');
 mustInclude('src/components/SatellitesFlatHint.ts', 'Predict passes', 'flat-map Predict passes CTA');
+mustInclude('src/components/NextOverheadChip.ts', 'geospy-next-overhead-chip', 'next overhead chip');
 mustInclude('src/services/overhead-pass-settings.ts', 'geospy-overhead-min-elevation', 'overhead prefs storage');
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes'", 'Cmd+K overhead command');
 mustInclude('src/config/commands.ts', "id: 'view:overhead-passes-last'", 'Cmd+K last-location command');

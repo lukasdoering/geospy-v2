@@ -41,7 +41,8 @@ import { collectStoryData } from '@/services/story-data';
 import { hasPremiumAccess } from '@/services/panel-gating';
 import { getAuthState, subscribeAuthState } from '@/services/auth-state';
 import { showMapContextMenu } from '@/components/MapContextMenu';
-import { showOrbitalPassesPopup } from '@/components/OrbitalPassesPopup';
+import { showOrbitalPassesPopup, OVERHEAD_POPUP_CHANGE_EVENT } from '@/components/OrbitalPassesPopup';
+import { syncNextOverheadChip } from '@/components/NextOverheadChip';
 import { BETA_MODE } from '@/config/beta';
 import { mlWorker } from '@/services/ml-worker';
 import { isHeadlineMemoryEnabled } from '@/services/ai-flow-settings';
@@ -212,6 +213,29 @@ export class CountryIntelManager implements AppModule {
     });
 
     this.maybeShowOverheadPassesTip();
+    this.maybeShowNextOverheadChip();
+  }
+
+  /** Persistent next-pass chip from last predicted location (after tip/hint dismiss). */
+  private maybeShowNextOverheadChip(): void {
+    const thisOuter = this;
+    const host = {
+      get isDestroyed(): boolean {
+        return thisOuter.ctx.isDestroyed;
+      },
+      predictOverheadPasses: (lat: number, lon: number, screenX: number, screenY: number) => {
+        void thisOuter.predictOverheadPasses(lat, lon, screenX, screenY);
+      },
+    };
+    // Defer so catalog / map boot can settle; refresh when popup closes.
+    window.setTimeout(() => {
+      void syncNextOverheadChip(host);
+    }, 9000);
+    window.addEventListener(OVERHEAD_POPUP_CHANGE_EVENT, () => {
+      window.setTimeout(() => {
+        void syncNextOverheadChip(host);
+      }, 450);
+    });
   }
 
   /** Predict overhead passes at the current map center (Cmd+K / tip CTA). */

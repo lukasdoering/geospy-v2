@@ -4359,6 +4359,66 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   background: color-mix(in srgb, var(--accent) 28%, transparent);
 }
 
+/* GeoSpy: next overhead pass at last location */
+.geospy-next-overhead-chip {
+  position: fixed;
+  right: 12px;
+  bottom: 72px;
+  z-index: 10040;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  max-width: min(360px, calc(100vw - 24px));
+  padding: 4px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: color-mix(in srgb, var(--panel-bg) 94%, transparent);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
+.geospy-next-overhead-chip.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.geospy-next-overhead-chip-open {
+  flex: 1;
+  min-width: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  text-align: left;
+  cursor: pointer;
+  font-size: 12px;
+  line-height: 1.35;
+  padding: 6px 8px;
+  border-radius: 4px;
+}
+
+.geospy-next-overhead-chip-open:hover {
+  color: var(--text);
+  background: color-mix(in srgb, var(--border) 40%, transparent);
+}
+
+.geospy-next-overhead-chip-dismiss {
+  flex-shrink: 0;
+  border: 0;
+  background: transparent;
+  color: var(--muted, var(--text-dim));
+  cursor: pointer;
+  font-size: 16px;
+  line-height: 1;
+  padding: 4px 6px;
+}
+
+.geospy-next-overhead-chip-dismiss:hover {
+  color: var(--text);
+}
+
 /* Story Modal */
 .story-modal-overlay {
   position: fixed;

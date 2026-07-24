@@ -27,10 +27,11 @@ Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 4. Or Cmd/Ctrl+K → type `overhead`
 5. Or open a deep link: `/?lat=40.7128&lon=-74.0060&overhead=1`
 6. In the popup: Refresh / Share / Copy, SAR·Optical filters; click the prefs footer to open Settings → Satellites
+7. After you run a prediction once, a **Next SAR/optical…** chip stays in the corner (click to reopen)
 
 ## Markets terminal chart
 
-Cmd/Ctrl+K → **Panel: Markets**, then click a ticker with a sparkline (in-panel hint).
+Cmd/Ctrl+K → **Panel: Markets**, then click a ticker with a sparkline (dismissible in-panel hint). Commodities rows with sparklines work the same way.
 
 ## Docs
 

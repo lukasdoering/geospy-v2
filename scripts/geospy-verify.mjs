@@ -20,6 +20,7 @@ const focusedTests = [
   'tests/urlState.test.mts',
   'tests/list-satellites-celestrak.test.mts',
   'tests/markets-chart-hint.test.mts',
+  'tests/next-overhead-chip.test.mts',
 ];
 
 function run(cmd, args, label) {
