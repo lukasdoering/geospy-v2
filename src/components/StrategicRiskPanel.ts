@@ -1,5 +1,5 @@
 import { Panel } from './Panel';
-import { escapeHtml } from '@/utils/sanitize';
+import {escapeHtml, unsafeRawHtml} from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { getCSSColor } from '@/utils';
 import {
@@ -89,7 +89,10 @@ export class StrategicRiskPanel extends Panel {
       await this.refresh();
     } catch (error) {
       console.error('[StrategicRiskPanel] Init error:', error);
-      this.showError(t('common.failedRiskOverview'), () => void this.refresh());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedRiskOverview'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -141,7 +144,10 @@ export class StrategicRiskPanel extends Panel {
       this.overview = null;
       this.alerts = [];
       this.setDataBadge('unavailable');
-      this.showError(t('common.failedRiskOverview'), () => void this.refresh());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedRiskOverview'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       console.warn('[StrategicRiskPanel] Canonical backend risk scores unavailable');
       return false;
     }
@@ -493,7 +499,10 @@ export class StrategicRiskPanel extends Panel {
       this.attachEventListeners();
     } catch (e: unknown) {
       console.error('[StrategicRiskPanel] Render error:', e);
-      this.showError(t('common.failedRiskOverview'), () => this.refresh());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedRiskOverview'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
