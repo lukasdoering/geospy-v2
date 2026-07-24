@@ -683,6 +683,10 @@ export class DeckGLMap {
     if (!this.maplibreMap) return;
     const canvas = this.maplibreMap.getCanvas();
     canvas.addEventListener('contextmenu', this.handleContextMenu);
+    // Also listen on the map container: some automation / overlay stacks deliver
+    // contextmenu to the wrapper rather than the WebGL canvas, which previously
+    // fell through to the browser menu and skipped Open Country Brief / passes.
+    this.container.addEventListener('contextmenu', this.handleContextMenu);
     canvas.addEventListener('pointerdown', this.handleCountryClickPointerDown);
     canvas.addEventListener('pointermove', this.handleCountryClickPointerMove);
     canvas.addEventListener('pointerup', this.handleCountryClickPointerEnd);
@@ -696,6 +700,7 @@ export class DeckGLMap {
     this.maplibreMap.off('dragstart', this.markCountryDragGesture);
     this.maplibreMap.off('dragend', this.refreshCountryDragSuppression);
     canvas.removeEventListener('contextmenu', this.handleContextMenu);
+    this.container.removeEventListener('contextmenu', this.handleContextMenu);
     canvas.removeEventListener('pointerdown', this.handleCountryClickPointerDown);
     canvas.removeEventListener('pointermove', this.handleCountryClickPointerMove);
     canvas.removeEventListener('pointerup', this.handleCountryClickPointerEnd);

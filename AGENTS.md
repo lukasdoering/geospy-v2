@@ -1,10 +1,12 @@
 # AGENTS.md
 
-Agent entry point for WorldMonitor. Read this first, then follow links for depth.
+Agent entry point for **GeoSpy** (AGPL fork of WorldMonitor). Read this first, then follow links for depth.
 
 ## What This Project Is
 
-Real-time global intelligence dashboard. TypeScript SPA (Vite + Preact) with 163 top-level TypeScript component files, 80+ Vercel Edge API endpoint entries, a Tauri desktop app with Node.js sidecar, and a Railway relay service. Aggregates geopolitics, military, finance, climate, cyber, maritime, and aviation data across 35 freshness-tracked source groups.
+GeoSpy is a real-time global intelligence dashboard forked from WorldMonitor. TypeScript SPA (Vite + Preact) with 163 top-level TypeScript component files, 80+ Vercel Edge API endpoint entries, a Tauri desktop app with Node.js sidecar, and a Railway relay service. Aggregates geopolitics, military, finance, climate, cyber, maritime, and aviation data across 35 freshness-tracked source groups.
+
+User-facing product identity lives in `src/config/brand.ts` (`GeoSpy`). Keep upstream WorldMonitor API/host defaults so zero-env local runs still receive live data unless you intentionally point at self-hosted infra.
 
 ## Repository Map
 
