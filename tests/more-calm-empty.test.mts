@@ -21,6 +21,9 @@ describe('more calm empties for unavailable registries/markets', () => {
     assert.match(earnings, /panel-empty/);
     assert.match(wsb, /panel-empty/);
     assert.match(oil, /parts\.length === 0[\s\S]*?panel-empty/);
+    assert.match(oil, /!resp\.ok[\s\S]*?panel-empty/);
+    const breadth = readFileSync(new URL('../src/components/MarketBreadthPanel.ts', import.meta.url), 'utf8');
+    assert.match(breadth, /resp\.unavailable[\s\S]*?panel-empty/);
     assert.match(etf, /this\.error \|\| !this\.data[\s\S]*?panel-empty/);
     assert.match(css, /showFetchError[\s\S]*?panel-empty/);
     assert.match(css, /Signal aggregator is initializing[\s\S]*?panel-empty|panel-empty[\s\S]*?Signal aggregator is initializing/);
