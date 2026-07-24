@@ -38,8 +38,31 @@ const FALLBACK_IMAGE_SVG = 'data:image/svg+xml,' + encodeURIComponent(
 );
 
 export class SpeciesComebackPanel extends Panel {
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
+
   constructor() {
     super({ id: 'species', title: 'Conservation Wins', trackActivity: false, infoTooltip: t('components.conservationWins.infoTooltip') });
+    const focusCard = (card: HTMLElement | null): void => {
+      if (!card?.dataset.lat || !card.dataset.lon) return;
+      const lat = Number(card.dataset.lat);
+      const lon = Number(card.dataset.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+      this.onLocationClick?.(lat, lon);
+    };
+    this.content.addEventListener('click', (e) => {
+      focusCard((e.target as HTMLElement).closest<HTMLElement>('.species-card-clickable[data-lat]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.species-card-clickable[data-lat]');
+      if (!card) return;
+      e.preventDefault();
+      focusCard(card);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
   }
 
   /**
@@ -76,6 +99,21 @@ export class SpeciesComebackPanel extends Panel {
   private createCard(entry: SpeciesRecovery): HTMLElement {
     const card = document.createElement('div');
     card.className = 'species-card';
+    const zone = entry.recoveryZone;
+    if (
+      zone &&
+      Number.isFinite(zone.lat) &&
+      Number.isFinite(zone.lon) &&
+      !(zone.lat === 0 && zone.lon === 0)
+    ) {
+      card.classList.add('species-card-clickable');
+      card.dataset.lat = String(zone.lat);
+      card.dataset.lon = String(zone.lon);
+      card.setAttribute('role', 'button');
+      card.tabIndex = 0;
+      card.title = `Show ${zone.name} on map`;
+      card.setAttribute('aria-label', `Show ${entry.commonName} recovery zone on map`);
+    }
 
     // 1. Photo section
     card.appendChild(this.createPhotoSection(entry));
@@ -157,8 +195,17 @@ export class SpeciesComebackPanel extends Panel {
 
     const region = document.createElement('span');
     region.className = 'species-region';
-    region.textContent = entry.region;
+    const zoneName = entry.recoveryZone?.name;
+    region.textContent = zoneName ? `${entry.region} · ${zoneName}` : entry.region;
     infoDiv.appendChild(region);
+
+    if (entry.recoveryZone) {
+      const mapChip = document.createElement('span');
+      mapChip.className = 'species-map-chip';
+      mapChip.textContent = 'Map';
+      mapChip.setAttribute('aria-hidden', 'true');
+      infoDiv.appendChild(mapChip);
+    }
 
     return infoDiv;
   }

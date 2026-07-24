@@ -2511,6 +2511,10 @@ export class PanelLayoutManager implements AppModule {
 
       this.lazyImportedPanel('species', () => import('@/components/SpeciesComebackPanel'), 'SpeciesComebackPanel', (SpeciesComebackPanel) => {
         const p = new SpeciesComebackPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
         this.ctx.speciesPanel = p;
         return p;
       });

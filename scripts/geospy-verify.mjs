@@ -85,6 +85,7 @@ const focusedTests = [
   'tests/route-card-inert-a11y.test.mts',
   'tests/calm-empty-service-brief.test.mts',
   'tests/calm-empty-mcp.test.mts',
+  'tests/species-comeback-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
