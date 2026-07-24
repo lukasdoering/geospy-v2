@@ -869,6 +869,25 @@
   letter-spacing: 0.03em;
 }
 
+[data-variant="happy"] .digest-card-map {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent, #6B8F5E);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent, #6B8F5E) 40%, transparent);
+  border-radius: 4px;
+}
+
+[data-variant="happy"] .digest-card-map:hover {
+  border-color: var(--accent, #6B8F5E);
+}
+
 [data-variant="happy"] .digest-card-summary {
   font-size: 0.85rem;
   color: var(--text);
