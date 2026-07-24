@@ -74,4 +74,22 @@ describe('GeoSpy brand config', () => {
     assert.match(embed, /<title>GeoSpy Live Map Embed<\/title>/);
     assert.doesNotMatch(embed, /World Monitor Live Map Embed/);
   });
+
+  it('brands Latest Brief and Settings API/MCP chrome as GeoSpy', () => {
+    const brief = readFileSync(new URL('../src/components/LatestBriefPanel.ts', import.meta.url), 'utf8');
+    assert.match(brief, /latest-brief-cover-title' \}, 'GeoSpy'/);
+    assert.match(brief, /Share GeoSpy/);
+    assert.match(brief, /GeoSpy account/);
+    assert.match(brief, /GeoSpy Brief is included/);
+    assert.doesNotMatch(brief, /Share WorldMonitor/);
+    assert.doesNotMatch(brief, /WorldMonitor Brief is included/);
+
+    const unified = readFileSync(new URL('../src/components/UnifiedSettings.ts', import.meta.url), 'utf8');
+    assert.match(unified, /access GeoSpy data programmatically/);
+    assert.match(unified, /your GeoSpy account/);
+    assert.match(unified, /GeoSpy Pro account/);
+    assert.match(unified, /GeoSpy API plan limit upgrade/);
+    assert.doesNotMatch(unified, /access WorldMonitor data programmatically/);
+    assert.doesNotMatch(unified, /your WorldMonitor account/);
+  });
 });

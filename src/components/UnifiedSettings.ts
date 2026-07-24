@@ -1144,7 +1144,7 @@ export class UnifiedSettings {
       return;
     }
     if (notice.ctaKind === 'contact_support') {
-      window.location.href = `mailto:support@worldmonitor.app?subject=${encodeURIComponent('WorldMonitor API plan limit upgrade')}`;
+      window.location.href = `mailto:support@worldmonitor.app?subject=${encodeURIComponent('GeoSpy API plan limit upgrade')}`;
     }
   }
 
@@ -1196,7 +1196,7 @@ export class UnifiedSettings {
       return `
         <div class="panel-locked-state">
           <div class="panel-locked-icon">${upgradeIcon}</div>
-          <div class="panel-locked-desc">Create and manage API keys to access WorldMonitor data programmatically.</div>
+          <div class="panel-locked-desc">Create and manage API keys to access GeoSpy data programmatically.</div>
           <button class="panel-locked-cta api-keys-gate-btn">Upgrade to API Starter</button>
         </div>`;
     }
@@ -1205,7 +1205,7 @@ export class UnifiedSettings {
       <div class="api-keys-section">
         <div data-plan-limit-notices>${this.renderPlanLimitNotices()}</div>
         <div class="api-keys-header">
-          <p class="api-keys-desc">Create API keys to access WorldMonitor data programmatically. Keys are shown once on creation — store them securely.</p>
+          <p class="api-keys-desc">Create API keys to access GeoSpy data programmatically. Keys are shown once on creation — store them securely.</p>
         </div>
         <div class="api-keys-create-form">
           <input type="text" class="api-keys-name-input" placeholder="Key name (e.g. my-app)" maxlength="64" />
@@ -1387,7 +1387,7 @@ export class UnifiedSettings {
       return `
         <div class="panel-locked-state">
           <div class="panel-locked-icon">${upgradeIcon}</div>
-          <div class="panel-locked-desc">Connect Claude Desktop and other AI clients to your WorldMonitor account.</div>
+          <div class="panel-locked-desc">Connect Claude Desktop and other AI clients to your GeoSpy account.</div>
         </div>`;
     }
 
@@ -1395,7 +1395,7 @@ export class UnifiedSettings {
       <div class="mcp-clients-section">
         <div data-plan-limit-notices>${this.renderPlanLimitNotices()}</div>
         <div class="mcp-clients-header">
-          <p class="mcp-clients-desc">Connect Claude Desktop, Cursor, and other AI clients to your WorldMonitor account. Each client gets its own credential — revoke any time.</p>
+          <p class="mcp-clients-desc">Connect Claude Desktop, Cursor, and other AI clients to your GeoSpy account. Each client gets its own credential — revoke any time.</p>
         </div>
         <div class="mcp-clients-quota" id="usMcpQuota" aria-live="polite">${this.renderMcpQuotaText()}</div>
         <div class="mcp-clients-error" id="usMcpClientsError" style="display:none;"></div>
@@ -1532,7 +1532,7 @@ export class UnifiedSettings {
       setTrustedHtml(container, trustedHtml(`
         <div class="mcp-clients-empty">
           <div class="mcp-clients-empty-title">No connected MCP clients yet</div>
-          <div class="mcp-clients-empty-desc">To connect Claude Desktop or another AI client, paste this URL into the client's MCP server settings and sign in with your WorldMonitor Pro account:</div>
+          <div class="mcp-clients-empty-desc">To connect Claude Desktop or another AI client, paste this URL into the client's MCP server settings and sign in with your GeoSpy Pro account:</div>
           <div class="mcp-clients-empty-url">
             <code>${escapeHtml(mcpUrl)}</code>
             <button class="btn btn-secondary mcp-clients-copy-url-btn" data-copy-value="${escapeHtml(mcpUrl)}">Copy URL</button>
