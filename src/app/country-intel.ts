@@ -265,7 +265,15 @@ export class CountryIntelManager implements AppModule {
     } catch {
       return;
     }
-    // Defer so the map shell is interactive before the tip appears.
+    // Skip tip when a deep link already opens overhead passes — avoid stacking UI.
+    try {
+      if (new URLSearchParams(window.location.search).has('overhead')) return;
+    } catch {
+      /* ignore */
+    }
+    // Defer so the map shell is interactive. Wait longer when the flat-map
+    // coherence hint is also on-screen so the two don't compete.
+    const delayMs = document.getElementById('geospy-satellites-flat-hint') ? 6500 : 2500;
     window.setTimeout(() => {
       if (this.ctx.isDestroyed) return;
       try {
@@ -273,6 +281,7 @@ export class CountryIntelManager implements AppModule {
       } catch {
         return;
       }
+      if (document.querySelector('[data-testid="orbital-passes-popup"]')) return;
       const tip = document.createElement('div');
       tip.className = 'geospy-overhead-tip';
       tip.setAttribute('role', 'status');
@@ -315,7 +324,7 @@ export class CountryIntelManager implements AppModule {
         }
       });
       window.setTimeout(dismiss, 12_000);
-    }, 2500);
+    }, delayMs);
   }
 
   public async predictOverheadPasses(lat: number, lon: number, screenX: number, screenY: number): Promise<void> {
