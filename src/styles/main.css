@@ -18827,6 +18827,19 @@ a.prediction-link:hover {
   background: rgba(59, 130, 246, 0.05);
 }
 
+.focal-point-clickable {
+  cursor: pointer;
+}
+
+.focal-point-clickable:hover {
+  filter: brightness(1.08);
+}
+
+.focal-point-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .focal-point-header {
   display: flex;
   justify-content: space-between;
