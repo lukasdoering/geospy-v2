@@ -46,6 +46,9 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Thermal Escalation map focus also enables the natural (FIRMS) layer
 - Settings panel registry: GeoSpy Analyst (not WM Analyst)
 - Energy Disruptions row click: enable pipeline/storage panel before open-detail
+- Country Deep Dive energy atlas + map energy layer clicks: enable destination panels before open-detail (pipeline / storage / fuel shortages)
+- Fix hubs panel CSS orphan brace (broke Vite PostCSS / app boot)
+- Route Explorer empty/lazy states: GeoSpy brand (not WorldMonitor)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
