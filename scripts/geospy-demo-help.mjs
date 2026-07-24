@@ -33,7 +33,7 @@ Try other polish:
   • Tech Events 📍 pin → map + techEvents layer
   • Infrastructure Cascade select/analyze → map focus
   • OREF Sirens row → Tel Aviv focus
-  • Energy/trade/finance panels → row/card → map (shortages, pipelines, storage, disruptions, crisis, gulf, sanctions, trade, procurement, Big Mac, national debt)
+  • Energy/trade/finance panels → row/card → map (shortages, pipelines, storage, disruptions, crisis, gulf, sanctions, trade, procurement, Big Mac, fuel prices, grocery basket, national debt)
   • Cmd/Ctrl+K → “GeoSpy Analyst” / “Settings → Satellites”
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6

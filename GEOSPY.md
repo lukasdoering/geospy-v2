@@ -61,8 +61,11 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Trade Policy** — restriction/barrier card click/keyboard focuses the reporting country
 - **Global Procurement** — tender card click/keyboard focuses the country (ISO2)
 - **Big Mac Index / National Debt** — country row click/keyboard focuses the map
+- **Fuel Prices** — country row click/keyboard focuses the map (calm empty when no data)
+- **Grocery Basket** — country header click/keyboard focuses the map (calm empty when no data)
 - **Consumer Prices (World)** — inflation row click/keyboard focuses the country
 - **AI Regulation** — countries tab card click/keyboard focuses the country
+- **FAO Food Price Index** — calm empty when no chart points (not a red error)
 
 ## Implementation note
 
