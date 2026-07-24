@@ -16,6 +16,13 @@ import { existsSync, readFileSync, readdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import {
+  findNewBullets,
+  findRemovedBullets,
+  mergeTranslatedFeatures,
+  sameStringArray,
+} from './_product-config-helpers.mjs';
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, '..');
 
@@ -253,6 +260,9 @@ function syncLocalePricingFeaturePlaceholders(localesDir, generatedFeaturesByKey
 
   let changedFiles = 0;
   const preservedTranslations = [];
+  const appendedPlaceholders = [];
+  const trimmedPlaceholders = [];
+  const positionalTrimmedPlaceholders = [];
   for (const file of readdirSync(localesDir).filter((name) => name.endsWith('.json')).sort()) {
     const localePath = join(localesDir, file);
     const locale = readJsonFile(localePath);
@@ -275,7 +285,32 @@ function syncLocalePricingFeaturePlaceholders(localesDir, generatedFeaturesByKey
         tier.features = generatedFeatures;
         changed = true;
       } else if (!isEnglishSource && generatedFeaturesChanged && !sameStringArray(currentFeatures, generatedFeatures)) {
-        preservedTranslations.push(`${file}:pricing.tiers.${key}.features`);
+        // Translated locale diverges from generated — preserve existing translations,
+        // but append any NEW bullets from the generated English as untranslated placeholders,
+        // and trim any bullets that were removed from the English catalog (#5420).
+        const {
+          features,
+          changed: mergedChanged,
+          appendedCount,
+          trimmedCount,
+          positionalTrimmedCount,
+        } = mergeTranslatedFeatures(currentFeatures, previousGeneratedFeatures, generatedFeatures);
+
+        if (mergedChanged) {
+          tier.features = features;
+          changed = true;
+          if (appendedCount > 0) {
+            appendedPlaceholders.push(`${file}:pricing.tiers.${key}.features (+${appendedCount})`);
+          }
+          if (trimmedCount > 0) {
+            trimmedPlaceholders.push(`${file}:pricing.tiers.${key}.features (-${trimmedCount})`);
+          }
+          if (positionalTrimmedCount > 0) {
+            positionalTrimmedPlaceholders.push(`${file}:pricing.tiers.${key}.features (-${positionalTrimmedCount} positional)`);
+          }
+        } else {
+          preservedTranslations.push(`${file}:pricing.tiers.${key}.features`);
+        }
       }
     }
 
@@ -284,6 +319,28 @@ function syncLocalePricingFeaturePlaceholders(localesDir, generatedFeaturesByKey
       changedFiles += 1;
       console.log(`  ✓ ${localePath}`);
     }
+  }
+
+  if (appendedPlaceholders.length > 0) {
+    console.warn(
+      `  ⚠ appended untranslated English placeholder(s) to translated locales (${appendedPlaceholders.length}): ` +
+        appendedPlaceholders.join(', '),
+    );
+  }
+
+  if (trimmedPlaceholders.length > 0) {
+    console.warn(
+      `  ⚠ trimmed removed English placeholder(s) from translated locales (${trimmedPlaceholders.length}): ` +
+        trimmedPlaceholders.join(', '),
+    );
+  }
+
+  if (positionalTrimmedPlaceholders.length > 0) {
+    console.warn(
+      `  ⚠ positional trim applied to translated locales to match English feature count (${positionalTrimmedPlaceholders.length}): ` +
+        positionalTrimmedPlaceholders.join(', ') +
+        ' — review for dropped translations that need re-translation.',
+    );
   }
 
   if (preservedTranslations.length > 0) {
@@ -338,11 +395,4 @@ function pricingFeatureSnapshot(locale) {
       .filter(([, tier]) => tier && typeof tier === 'object' && !Array.isArray(tier) && Array.isArray(tier.features))
       .map(([key, tier]) => [key, tier.features]),
   );
-}
-
-function sameStringArray(left, right) {
-  return Array.isArray(left) &&
-    Array.isArray(right) &&
-    left.length === right.length &&
-    left.every((value, index) => value === right[index]);
 }
