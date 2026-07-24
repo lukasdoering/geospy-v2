@@ -80,6 +80,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Economic Indicators BIS country cards (policy rate / EER / credit-to-GDP) focus the map
 - Gold Intelligence CB reserve holders/movers focus the map; load failure uses calm empty
 - Calm empties: National Debt load failure, Gulf Economies catch/rate-limit, Climate News load failure
+- Airline Intel ops airports + live tracking positions focus the map
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load

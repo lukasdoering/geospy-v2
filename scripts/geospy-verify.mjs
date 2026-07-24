@@ -67,6 +67,7 @@ const focusedTests = [
   'tests/economic-bis-map-focus.test.mts',
   'tests/gold-cb-map-focus.test.mts',
   'tests/calm-empty-debt-gulf-climate.test.mts',
+  'tests/airline-intel-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
