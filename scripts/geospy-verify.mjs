@@ -71,6 +71,7 @@ const focusedTests = [
   'tests/country-name-aliases.test.mts',
   'tests/forecast-map-focus.test.mts',
   'tests/energy-cross-map-focus.test.mts',
+  'tests/calm-empty-pred-brief.test.mts',
 ];
 
 function run(cmd, args, label) {
