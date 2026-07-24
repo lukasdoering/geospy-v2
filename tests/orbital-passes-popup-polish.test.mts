@@ -39,8 +39,25 @@ describe('OrbitalPassesPopup polish', () => {
     const text = buildOverheadPassesClipboardText(40.712, -74.006, passes, now);
     assert.match(text, /GeoSpy overhead passes @ 40\.712°, -74\.006°/);
     assert.match(text, /SAT-A \(optical\/US\)/);
+    assert.match(text, /AOS /);
+    assert.match(text, /LOS /);
     assert.match(text, /max 42°/);
     assert.match(text, /4m/);
+  });
+
+  it('formats prefs-aware empty detail and settings summary', async () => {
+    const {
+      defaultOverheadEmptyDetail,
+      formatOverheadSettingsSummary,
+    } = await import('../src/components/OrbitalPassesPopup.ts');
+    assert.equal(
+      defaultOverheadEmptyDetail({ minElevationDeg: 30, windowMinutes: 360 }),
+      'No LEO imaging passes above 30° elevation in the next 6 hours.',
+    );
+    assert.equal(
+      formatOverheadSettingsSummary({ minElevationDeg: 10, windowMinutes: 720 }),
+      'Threshold 10° · window 12h · Settings → Satellites',
+    );
   });
 
   it('computes median revisit and typed summary line', async () => {

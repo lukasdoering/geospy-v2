@@ -159,6 +159,14 @@
 .orbital-passes-row {
   padding: 8px 12px;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.orbital-passes-row:hover,
+.orbital-passes-row:focus-visible {
+  background: color-mix(in srgb, var(--border) 35%, transparent);
+  outline: none;
 }
 
 .orbital-passes-row:last-child {
@@ -177,4 +185,15 @@
   color: var(--muted);
   font-size: 0.74rem;
   font-variant-numeric: tabular-nums;
+}
+
+.orbital-passes-prefs {
+  padding: 8px 12px 10px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
+  color: var(--muted);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  position: sticky;
+  bottom: 0;
+  background: var(--panel-bg);
 }

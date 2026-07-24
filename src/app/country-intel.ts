@@ -329,6 +329,7 @@ export class CountryIntelManager implements AppModule {
       });
       showOrbitalPassesPopup(screenX, screenY, lat, lon, passes, {
         emptyDetail: `No LEO imaging passes above ${prefs.minElevationDeg}° elevation in the next ${prefs.windowMinutes / 60} hours.`,
+        settingsSummary: `Threshold ${prefs.minElevationDeg}° · window ${prefs.windowMinutes / 60}h · Settings → Satellites`,
         onRefresh: retry,
       });
     } catch (err) {
@@ -340,6 +341,7 @@ export class CountryIntelManager implements AppModule {
           : 'Could not compute overhead passes. Try again in a moment.',
         onRetry: retry,
         onRefresh: retry,
+        settingsSummary: false,
       });
     }
   }
