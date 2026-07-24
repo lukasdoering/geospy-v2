@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "打开国家简报",
-    "copyCoordinates": "复制坐标"
+    "copyCoordinates": "复制坐标",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — 实时全球情报仪表板",
