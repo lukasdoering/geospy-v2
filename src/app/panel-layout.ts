@@ -2006,7 +2006,13 @@ export class PanelLayoutManager implements AppModule {
         'regional-intelligence',
         () => import('@/components/RegionalIntelligenceBoard'),
         'RegionalIntelligenceBoard',
-        (RegionalIntelligenceBoard) => new RegionalIntelligenceBoard(),
+        (RegionalIntelligenceBoard) => {
+          const p = new RegionalIntelligenceBoard();
+          p.setLocationClickHandler((lat: number, lon: number) => {
+            this.ctx.map?.setCenter(lat, lon, 3);
+          });
+          return p;
+        },
       ),
     );
 

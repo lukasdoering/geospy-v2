@@ -11,6 +11,7 @@ import { h, replaceChildren, setTrustedHtml, trustedHtml } from '@/utils/dom-uti
 import { escapeHtml } from '@/utils/sanitize';
 import { BOARD_REGIONS, DEFAULT_REGION_ID, buildBoardHtml, buildRegimeHistoryBlock, buildWeeklyBriefBlock, isLatestSequence } from './regional-intelligence-board-utils';
 import { IntelligenceServiceClient } from '@/services/generated-rpc-clients';
+import { resolveTheaterMapFocus } from '@/utils/theater-map-focus';
 
 // get-regional-snapshot + get-regime-history + get-regional-brief are
 // premium-gated. Plain globalThis.fetch skips Clerk/tester/api-key injection
@@ -41,8 +42,10 @@ const getIntelligenceClient = createLazyClient(() => new IntelligenceServiceClie
  */
 export class RegionalIntelligenceBoard extends Panel {
   private selector: HTMLSelectElement;
+  private mapBtn: HTMLButtonElement;
   private body: HTMLElement;
   private currentRegion: string = DEFAULT_REGION_ID;
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
   /**
    * Monotonically-increasing request sequence. Each `loadCurrent()` call
    * claims a new sequence before it awaits the RPC; when the response comes
@@ -97,7 +100,22 @@ export class RegionalIntelligenceBoard extends Panel {
       void this.loadCurrent();
     });
 
-    const controls = h('div', { className: 'rib-controls' }, this.selector);
+    this.mapBtn = h('button', {
+      type: 'button',
+      className: 'rib-map-btn',
+      title: 'Show region on map',
+      'aria-label': 'Show selected region on map',
+      style:
+        'margin-left:8px;padding:2px 8px;font-size:11px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;cursor:pointer;color:var(--accent);background:transparent;border:1px solid color-mix(in srgb, var(--accent) 45%, transparent);border-radius:4px;',
+    }, 'Map') as HTMLButtonElement;
+    this.mapBtn.addEventListener('click', () => this.focusCurrentRegionOnMap());
+
+    const controls = h(
+      'div',
+      { className: 'rib-controls', style: 'display:flex;align-items:center;gap:4px;padding:8px 10px 0;' },
+      this.selector,
+      this.mapBtn,
+    );
     this.body = h('div', { className: 'rib-body' });
 
     replaceChildren(this.content, h('div', { className: 'rib-shell' }, controls, this.body));
@@ -120,6 +138,18 @@ export class RegionalIntelligenceBoard extends Panel {
     this.currentRegion = regionId;
     this.selector.value = regionId;
     await this.loadCurrent();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
+  }
+
+  private focusCurrentRegionOnMap(): void {
+    if (!this.onLocationClick) return;
+    const label = BOARD_REGIONS.find((r) => r.id === this.currentRegion)?.label ?? this.currentRegion;
+    const focus = resolveTheaterMapFocus(label);
+    if (!focus) return;
+    this.onLocationClick(focus.lat, focus.lon);
   }
 
   override destroy(): void {

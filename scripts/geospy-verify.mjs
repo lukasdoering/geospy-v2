@@ -86,6 +86,7 @@ const focusedTests = [
   'tests/calm-empty-service-brief.test.mts',
   'tests/calm-empty-mcp.test.mts',
   'tests/species-comeback-map-focus.test.mts',
+  'tests/regional-intel-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
