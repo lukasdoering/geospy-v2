@@ -250,6 +250,55 @@ describe('Product catalog freshness', () => {
     }
   });
 
+  it('every translated locale has the same feature count as English for each tier (#5420)', () => {
+    const enLocale = JSON.parse(readFileSync(join(proLocalesDir, 'en.json'), 'utf8'));
+    const enTiers = enLocale?.pricing?.tiers;
+    assert.ok(enTiers && typeof enTiers === 'object', 'en.json missing pricing.tiers');
+
+    // Tiers that are intentionally not yet translated. When a locale gains one of
+    // these tiers, the count-parity assertion below enforces feature parity.
+    const KNOWN_UNTRANSLATED_TIERS = new Set(['apiBusiness']);
+
+    const localeFiles = readdirSync(proLocalesDir).filter((f) => f.endsWith('.json') && f !== 'en.json').sort();
+    const mismatches = [];
+
+    for (const file of localeFiles) {
+      const locale = JSON.parse(readFileSync(join(proLocalesDir, file), 'utf8'));
+      const tiers = locale?.pricing?.tiers;
+      if (!tiers || typeof tiers !== 'object') {
+        mismatches.push(`${file}:pricing.tiers missing entirely`);
+        continue;
+      }
+
+      for (const [key, enTier] of Object.entries(enTiers)) {
+        if (!enTier || !Array.isArray(enTier.features)) continue;
+        const localeTier = tiers[key];
+        if (!localeTier || !Array.isArray(localeTier.features)) {
+          if (!KNOWN_UNTRANSLATED_TIERS.has(key)) {
+            mismatches.push(`${file}:pricing.tiers.${key} missing entirely (English has ${enTier.features.length} features)`);
+          }
+          continue;
+        }
+
+        if (localeTier.features.length !== enTier.features.length) {
+          const direction = localeTier.features.length < enTier.features.length ? 'fewer' : 'more';
+          mismatches.push(
+            `${file}:pricing.tiers.${key}.features has ${localeTier.features.length} items (${direction} than English's ${enTier.features.length})`,
+          );
+        }
+      }
+    }
+
+    if (mismatches.length > 0) {
+      assert.fail(
+        `Locale pricing feature count drift detected.\n` +
+          `Run: npx tsx scripts/generate-product-config.mjs (resolves missing/excess English placeholders).\n` +
+          `If the generator cannot resolve it, manually trim or add the divergent entries.\n\n` +
+          mismatches.join('\n'),
+      );
+    }
+  });
+
   it('product catalog fallbacks advertise the canonical Pro MCP feature', () => {
     const expectedFeature = tiersJson.find((tier) => tier.localeKey === 'pro')?.features?.find((f) => /\bMCP\b/.test(f));
     assert.equal(
