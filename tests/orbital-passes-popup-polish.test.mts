@@ -43,6 +43,27 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(text, /4m/);
   });
 
+  it('computes median revisit and typed summary line', async () => {
+    const { medianRevisitMinutes, countPassTypes, buildOverheadPassesSummaryLine } = await import('../src/components/OrbitalPassesPopup.ts');
+    assert.equal(medianRevisitMinutes([0, 10 * 60_000, 30 * 60_000]), 15);
+    assert.equal(medianRevisitMinutes([0]), null);
+    assert.deepEqual(countPassTypes([
+      { noradId: '1', name: 'a', type: 'sar', country: 'X', aosMs: 0, losMs: 1, maxElevationDeg: 1, maxElevationMs: 0 },
+      { noradId: '2', name: 'b', type: 'optical', country: 'Y', aosMs: 1, losMs: 2, maxElevationDeg: 1, maxElevationMs: 1 },
+      { noradId: '3', name: 'c', type: 'military', country: 'Z', aosMs: 2, losMs: 3, maxElevationDeg: 1, maxElevationMs: 2 },
+    ]), { sar: 1, optical: 1, other: 1 });
+
+    const now = Date.parse('2024-01-01T12:00:00Z');
+    const line = buildOverheadPassesSummaryLine([
+      { noradId: '1', name: 'a', type: 'sar', country: 'X', aosMs: now + 600_000, losMs: now + 700_000, maxElevationDeg: 40, maxElevationMs: now + 650_000 },
+      { noradId: '2', name: 'b', type: 'optical', country: 'Y', aosMs: now + 1_800_000, losMs: now + 1_900_000, maxElevationDeg: 35, maxElevationMs: now + 1_850_000 },
+    ], now);
+    assert.match(line, /2 passes/);
+    assert.match(line, /median revisit/);
+    assert.match(line, /1 SAR/);
+    assert.match(line, /1 optical/);
+  });
+
   it('wires Cmd+K overhead-passes command through search manager', () => {
     const commands = readFileSync(new URL('../src/config/commands.ts', import.meta.url), 'utf8');
     assert.match(commands, /id: 'view:overhead-passes'/);
