@@ -61,6 +61,9 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Trade Policy: restriction/barrier card click/keyboard → reporting country map focus
 - Global Procurement: tender card click/keyboard → country map focus (ISO2)
 - Big Mac Index / National Debt: country row click/keyboard → map focus
+- Fuel Prices: country row click/keyboard → map focus + calm empty
+- Grocery Basket: country header click/keyboard → map focus + calm empty
+- FAO Food Price Index: calm empty when no chart points
 - Consumer Prices World tab: inflation row click/keyboard → country map focus
 - AI Regulation countries tab: country card click/keyboard → map focus
 - settings.html / embed.html GeoSpy titles

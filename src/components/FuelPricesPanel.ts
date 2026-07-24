@@ -3,6 +3,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { getHydratedData } from '@/services/bootstrap';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type { ListFuelPricesResponse } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import { EconomicServiceClient } from '@/services/generated-rpc-clients';
@@ -10,8 +11,21 @@ import { EconomicServiceClient } from '@/services/generated-rpc-clients';
 const getEconomicClient = createLazyClient(() => new EconomicServiceClient(getRpcBaseUrl(), { fetch: rpcFetch }));
 
 export class FuelPricesPanel extends Panel {
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
   constructor() {
     super({ id: 'fuel-prices', title: t('panels.fuelPrices'), infoTooltip: t('components.fuelPrices.infoTooltip') });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<void> {
@@ -38,7 +52,10 @@ export class FuelPricesPanel extends Panel {
 
   private renderIndex(data: ListFuelPricesResponse): void {
     if (!data.countries?.length) {
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noDataAvailable'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -58,10 +75,11 @@ export class FuelPricesPanel extends Panel {
     const rows = sorted.map(c => {
       const gas = c.gasoline;
       const dsl = c.diesel;
+      const code = (c.code || '').trim().toUpperCase();
 
-      function fuelCell(fuel: typeof gas, cheapCode: string, priceyCode: string, code: string): string {
+      function fuelCell(fuel: typeof gas, cheapCode: string, priceyCode: string, rowCode: string): string {
         if (!fuel?.usdPrice) return `<td class="gb-cell gb-na">N/A</td>`;
-        const cls = code === cheapCode ? 'gb-cheapest' : code === priceyCode ? 'gb-priciest' : '';
+        const cls = rowCode === cheapCode ? 'gb-cheapest' : rowCode === priceyCode ? 'gb-priciest' : '';
         let wowStr = '';
         if (showWow && fuel.wowPct != null && fuel.wowPct !== 0) {
           const sign = fuel.wowPct >= 0 ? '▲' : '▼';
@@ -71,7 +89,7 @@ export class FuelPricesPanel extends Panel {
         return `<td class="gb-cell ${cls}">$${fuel.usdPrice.toFixed(3)}${wowStr}</td>`;
       }
 
-      return `<tr>
+      return `<tr class="fp-row-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map">
         <td class="gb-item-name">${escapeHtml(c.flag)} ${escapeHtml(c.name)}</td>
         ${fuelCell(gas, cheapestGas, priceiestGas, c.code)}
         ${fuelCell(dsl, cheapestDsl, priciestDsl, c.code)}
@@ -95,8 +113,25 @@ export class FuelPricesPanel extends Panel {
         </div>
         ${updatedAt ? `<div class="gb-updated">${t('components.status.updatedAt', { time: updatedAt })}${countLabel}</div>` : ''}
       </div>
+      <style>
+        .fp-row-clickable { cursor: pointer; }
+        .fp-row-clickable:hover td { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .fp-row-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `;
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
+
+    const activate = (tr: HTMLElement): void => {
+      this.focusCountry(tr.dataset.countryCode);
+    };
+    this.content?.querySelectorAll<HTMLElement>('tr.fp-row-clickable').forEach(tr => {
+      tr.addEventListener('click', () => activate(tr));
+      tr.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(tr);
+      });
+    });
   }
 }

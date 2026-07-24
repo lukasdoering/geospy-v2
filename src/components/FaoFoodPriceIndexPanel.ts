@@ -125,7 +125,10 @@ export class FaoFoodPriceIndexPanel extends Panel {
 
   private renderChart(data: GetFaoFoodPriceIndexResponse): void {
     if (!data.points?.length) {
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noDataAvailable'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 

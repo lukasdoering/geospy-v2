@@ -2241,7 +2241,13 @@ export class PanelLayoutManager implements AppModule {
       }),
     );
     this.lazyPanel('grocery-basket', () =>
-      this.importPanel('grocery-basket', () => import('@/components/GroceryBasketPanel'), 'GroceryBasketPanel', (GroceryBasketPanel) => new GroceryBasketPanel()),
+      this.importPanel('grocery-basket', () => import('@/components/GroceryBasketPanel'), 'GroceryBasketPanel', (GroceryBasketPanel) => {
+        const p = new GroceryBasketPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('bigmac', () =>
       this.importPanel('bigmac', () => import('@/components/BigMacPanel'), 'BigMacPanel', (BigMacPanel) => {
@@ -2253,7 +2259,13 @@ export class PanelLayoutManager implements AppModule {
       }),
     );
     this.lazyPanel('fuel-prices', () =>
-      this.importPanel('fuel-prices', () => import('@/components/FuelPricesPanel'), 'FuelPricesPanel', (FuelPricesPanel) => new FuelPricesPanel()),
+      this.importPanel('fuel-prices', () => import('@/components/FuelPricesPanel'), 'FuelPricesPanel', (FuelPricesPanel) => {
+        const p = new FuelPricesPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('fao-food-price-index', () =>
       this.importPanel('fao-food-price-index', () => import('@/components/FaoFoodPriceIndexPanel'), 'FaoFoodPriceIndexPanel', (FaoFoodPriceIndexPanel) => new FaoFoodPriceIndexPanel()),
