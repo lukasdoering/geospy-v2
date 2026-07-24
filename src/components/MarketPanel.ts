@@ -47,7 +47,11 @@ export class MarketPanel extends Panel {
     }
 
     this._markets = data;
-    const html = data
+    const hasChartable = data.some(hasPlottableSeries);
+    const hint = hasChartable
+      ? `<div class="market-chart-hint" role="note" data-testid="market-chart-hint">${escapeHtml(t('components.markets.chartHint'))}</div>`
+      : '';
+    const html = hint + data
       .map((stock, idx) => {
         const clickable = hasPlottableSeries(stock);
         const attrs = clickable
