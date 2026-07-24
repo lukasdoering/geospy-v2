@@ -2404,7 +2404,13 @@ export class PanelLayoutManager implements AppModule {
       this.lazyImportedPanel('runtime-config', () => import('@/components/RuntimeConfigPanel'), 'RuntimeConfigPanel', (RuntimeConfigPanel) => new RuntimeConfigPanel({ mode: 'alert' }));
     }
 
-    this.lazyDefaultPanel('insights', () => import('@/components/InsightsPanel'), 'InsightsPanel');
+    this.lazyImportedPanel('insights', () => import('@/components/InsightsPanel'), 'InsightsPanel', (InsightsPanel) => {
+      const p = new InsightsPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
     if (isPanelInVariantDefaults('threat-timeline')) {
       this.lazyDefaultPanel('threat-timeline', () => import('@/components/ThreatTimelinePanel'), 'ThreatTimelinePanel');
     }

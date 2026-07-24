@@ -74,6 +74,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Pipeline / Fuel Shortage / Energy Disruptions / Earnings / WSB / Oil / ETF / Cross-Source** — calm empty when unavailable or empty
 - **Storage Atlas / Disease Outbreaks / Global Procurement** — calm empty when unavailable
 - **CII** — country click/keyboard focuses the map and opens the country brief
+- **Insights focal points** — country focal card click/keyboard focuses the map
 
 ## Implementation note
 
