@@ -2393,7 +2393,11 @@ export class PanelLayoutManager implements AppModule {
     this.lazyDefaultPanel('cot-positioning', () => import('@/components/CotPositioningPanel'), 'CotPositioningPanel');
     this.lazyDefaultPanel('liquidity-shifts', () => import('@/components/LiquidityShiftsPanel'), 'LiquidityShiftsPanel');
     this.lazyDefaultPanel('positioning-247', () => import('@/components/PositioningPanel'), 'PositioningPanel');
-    this.lazyDefaultPanel('gold-intelligence', () => import('@/components/GoldIntelligencePanel'), 'GoldIntelligencePanel');
+    this.lazyDefaultPanel('gold-intelligence', () => import('@/components/GoldIntelligencePanel'), 'GoldIntelligencePanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
     this.lazyImportedPanel('hormuz-tracker', () => import('@/components/HormuzPanel'), 'HormuzPanel', (HormuzPanel) => {
       const p = new HormuzPanel();
       p.setMapFocusHandler(() => {

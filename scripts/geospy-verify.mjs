@@ -64,6 +64,8 @@ const focusedTests = [
   'tests/cii-storage-disease-calm.test.mts',
   'tests/market-calm-empty-batch2.test.mts',
   'tests/insights-focal-map-focus.test.mts',
+  'tests/economic-bis-map-focus.test.mts',
+  'tests/gold-cb-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
