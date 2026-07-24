@@ -84,6 +84,10 @@ describe('GeoSpy brand config', () => {
     assert.match(pro, /<h2>What GeoSpy Tracks<\/h2>/);
     assert.doesNotMatch(pro, /<title>World Monitor Pro/);
     assert.doesNotMatch(pro, /<h1>World Monitor Pro — From Noise to Signal<\/h1>/);
+
+    const index = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+    assert.match(index, /href="\/pro">GeoSpy Pro</);
+    assert.doesNotMatch(index, /href="https:\/\/www\.worldmonitor\.app\/pro">World Monitor Pro</);
   });
 
   it('brands Latest Brief and Settings API/MCP chrome as GeoSpy', () => {
