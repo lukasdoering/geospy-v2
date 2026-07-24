@@ -24,6 +24,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Settings a11y focus; Sign In visibility; AuthHeaderWidget cleanup
 - sharp ≥0.35 (blog-site); tauri ≥2.11.1; humanitarian health wiring
 - Renewable Energy panel discloses static fallback (parity with ProgressCharts)
+- Satellite catalog: CelesTrak TLE fallback when Redis seed is empty (local/dev)
 
 ### Docs
 - README GeoSpy highlights; CONTRIBUTING fork preamble; solutions note for overhead-pass surface

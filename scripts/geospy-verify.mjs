@@ -18,6 +18,7 @@ const focusedTests = [
   'tests/satellites-flat-hint.test.mts',
   'tests/renewable-fallback-disclose.test.mts',
   'tests/urlState.test.mts',
+  'tests/list-satellites-celestrak.test.mts',
 ];
 
 function run(cmd, args, label) {
