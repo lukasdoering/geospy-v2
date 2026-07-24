@@ -85,6 +85,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - AI Forecasts: Map chip focuses the map when forecast.region resolves to a country
 - Energy Risk Hormuz tile opens chokepoint; Cross-Source Signals theater cards focus the map
 - Calm empties: Prediction markets empty state + Daily Market Brief unavailable
+- Calm empties: GDELT Intel load failure, Tech Events error, Defense Patents error
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load

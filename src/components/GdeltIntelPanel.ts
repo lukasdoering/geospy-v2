@@ -1,5 +1,5 @@
 import { Panel } from './Panel';
-import { sanitizeUrl } from '@/utils/sanitize';
+import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { h, replaceChildren, setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 import { miniSparkline } from '@/utils/sparkline';
@@ -90,7 +90,10 @@ export class GdeltIntelPanel extends Panel {
       if (this.isAbortError(error)) return;
       if (!this.element?.isConnected || topic.id !== this.activeTopic.id) return;
       console.error('[GdeltIntelPanel] Load error:', error);
-      this.showError(t('common.failedIntelFeed'), () => this.loadActiveTopic());
+      setTrustedHtml(this.content, trustedHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedIntelFeed'))}</div>`,
+        'legacy direct innerHTML migration',
+      ));
     }
   }
 

@@ -83,7 +83,9 @@ export class TechEventsPanel extends Panel {
     }
 
     if (this.error) {
-      this.showError(this.error, () => this.refresh());
+      replaceChildren(this.content,
+        h('div', { className: 'panel-empty', role: 'status' }, this.error),
+      );
       return;
     }
 
