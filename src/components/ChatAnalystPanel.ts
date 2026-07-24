@@ -115,7 +115,7 @@ export class ChatAnalystPanel extends Panel {
   constructor() {
     super({
       id: 'chat-analyst',
-      title: 'WM Analyst',
+      title: 'GeoSpy Analyst',
       premium: 'locked',
       defaultRowSpan: 2,
       infoTooltip: t('components.chatAnalyst.infoTooltip'),
@@ -634,7 +634,7 @@ export class ChatAnalystPanel extends Panel {
 
   private exportChat(): void {
     if (this.history.length === 0) return;
-    const lines = [`# WM Analyst Session\n*Exported: ${new Date().toISOString()}*\n`];
+    const lines = [`# GeoSpy Analyst Session\n*Exported: ${new Date().toISOString()}*\n`];
     for (const msg of this.history) {
       const role = msg.role === 'user' ? '**You**' : '**Analyst**';
       lines.push(`\n${role}:\n${msg.content}`);

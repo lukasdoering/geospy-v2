@@ -4404,6 +4404,11 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
   background: color-mix(in srgb, var(--border) 40%, transparent);
 }
 
+.geospy-next-overhead-chip-empty .geospy-next-overhead-chip-open {
+  color: var(--text-dim);
+  font-style: italic;
+}
+
 .geospy-next-overhead-chip-dismiss {
   flex-shrink: 0;
   border: 0;
@@ -15320,6 +15325,12 @@ a.prediction-link:hover {
   border-left-color: var(--semantic-low);
 }
 
+.risk-item-clickable:focus-visible,
+.risk-alert-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .risk-location-icon {
   color: var(--semantic-low);
   font-size: 10px;
@@ -20000,6 +20011,11 @@ body.has-breaking-alert .panels-grid {
 .posture-theater:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px var(--shadow-color);
+}
+
+.posture-theater-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 .posture-compact {

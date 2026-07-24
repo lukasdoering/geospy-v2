@@ -28,7 +28,7 @@ Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 5. Or open a deep link: `/?lat=40.7128&lon=-74.0060&overhead=1`
 6. In the popup: Refresh / Share / Copy, SAR·Optical filters; click the prefs footer to open Settings → Satellites
 7. Or Cmd/Ctrl+K → **Open Settings → Satellites** to jump straight to elevation / look-ahead
-8. After you run a prediction once, a **Next SAR/optical…** chip stays in the corner (click to reopen)
+8. After you run a prediction once, a **Next SAR/optical…** chip stays in the corner (click to reopen; empty window → tune elevation)
 
 ## Markets / commodities / crypto charts
 

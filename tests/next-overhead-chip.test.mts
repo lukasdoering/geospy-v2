@@ -1,7 +1,10 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { buildNextOverheadChipLabel } from '../src/components/NextOverheadChip.ts';
+import {
+  buildEmptyOverheadChipLabel,
+  buildNextOverheadChipLabel,
+} from '../src/components/NextOverheadChip.ts';
 import type { OverheadPass } from '../src/services/satellites.ts';
 
 describe('next overhead chip', () => {
@@ -20,17 +23,26 @@ describe('next overhead chip', () => {
     assert.equal(buildNextOverheadChipLabel(pass, now), 'Next SAR: SENTINEL-1A in 42m');
   });
 
+  it('builds an empty-window CTA toward elevation prefs', () => {
+    assert.equal(buildEmptyOverheadChipLabel(20), 'No passes ≥20° — tune elevation');
+  });
+
   it('wires chip sync into country-intel and ships styles', () => {
     const intel = readFileSync(new URL('../src/app/country-intel.ts', import.meta.url), 'utf8');
     assert.match(intel, /syncNextOverheadChip/);
     assert.match(intel, /maybeShowNextOverheadChip/);
+    assert.match(intel, /openOverheadSettings/);
 
     const chip = readFileSync(new URL('../src/components/NextOverheadChip.ts', import.meta.url), 'utf8');
     assert.match(chip, /geospy-next-overhead-chip/);
     assert.match(chip, /geospy-next-overhead-chip-dismissed/);
     assert.match(chip, /readLastOverheadLocation/);
+    assert.match(chip, /renderEmptyChip/);
+    assert.match(chip, /openOverheadSettings/);
 
     const css = readFileSync(new URL('../src/styles/main.css', import.meta.url), 'utf8');
     assert.match(css, /\.geospy-next-overhead-chip\s*\{/);
+    assert.match(css, /geospy-next-overhead-chip-empty/);
   });
 });
+

@@ -14,6 +14,8 @@ const LAST_LOC_KEY = 'geospy-overhead-last-location';
 export interface NextOverheadChipHost {
   isDestroyed?: boolean;
   predictOverheadPasses?: (lat: number, lon: number, screenX: number, screenY: number) => void | Promise<void>;
+  /** Open Settings → Satellites when the window has no visible passes. */
+  openOverheadSettings?: () => void;
 }
 
 function isDismissed(): boolean {
@@ -51,8 +53,40 @@ export function buildNextOverheadChipLabel(pass: OverheadPass, nowMs = Date.now(
   return `Next ${type}: ${pass.name} ${formatEta(pass.aosMs, nowMs)}`;
 }
 
+export function buildEmptyOverheadChipLabel(minElevationDeg: number): string {
+  return `No passes ≥${minElevationDeg}° — tune elevation`;
+}
+
 export function removeNextOverheadChip(): void {
   document.getElementById(CHIP_ID)?.remove();
+}
+
+function ensureChipShell(): HTMLElement {
+  let chip = document.getElementById(CHIP_ID);
+  if (!chip) {
+    chip = document.createElement('div');
+    chip.id = CHIP_ID;
+    chip.className = 'geospy-next-overhead-chip';
+    chip.setAttribute('role', 'status');
+    chip.setAttribute('data-testid', 'geospy-next-overhead-chip');
+    document.body.appendChild(chip);
+    requestAnimationFrame(() => chip?.classList.add('visible'));
+  }
+  return chip;
+}
+
+function appendDismissButton(chip: HTMLElement): void {
+  const dismissBtn = document.createElement('button');
+  dismissBtn.type = 'button';
+  dismissBtn.className = 'geospy-next-overhead-chip-dismiss';
+  dismissBtn.setAttribute('aria-label', 'Dismiss next-pass chip');
+  dismissBtn.textContent = '×';
+  dismissBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    markDismissed();
+    removeNextOverheadChip();
+  });
+  chip.append(dismissBtn);
 }
 
 /** Refresh the chip from last location + a fresh short prediction. */
@@ -84,7 +118,7 @@ export async function syncNextOverheadChip(host: NextOverheadChipHost): Promise<
     });
     if (host.isDestroyed || isDismissed()) return;
     if (!passes.length) {
-      removeNextOverheadChip();
+      renderEmptyChip(host, loc, prefs.minElevationDeg);
       return;
     }
     const next = passes[0]!;
@@ -96,23 +130,48 @@ export async function syncNextOverheadChip(host: NextOverheadChipHost): Promise<
   }
 }
 
+function renderEmptyChip(
+  host: NextOverheadChipHost,
+  loc: { lat: number; lon: number },
+  minElevationDeg: number,
+): void {
+  const chip = ensureChipShell();
+  chip.replaceChildren();
+  chip.classList.add('geospy-next-overhead-chip-empty');
+
+  const openBtn = document.createElement('button');
+  openBtn.type = 'button';
+  openBtn.className = 'geospy-next-overhead-chip-open';
+  openBtn.setAttribute('data-testid', 'geospy-next-overhead-chip-empty');
+  openBtn.setAttribute(
+    'aria-label',
+    `No overhead passes near ${loc.lat.toFixed(2)}, ${loc.lon.toFixed(2)}. Open satellite settings.`,
+  );
+  openBtn.textContent = buildEmptyOverheadChipLabel(minElevationDeg);
+  openBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (host.openOverheadSettings) {
+      host.openOverheadSettings();
+    } else {
+      const screenX = Math.round(window.innerWidth * 0.55);
+      const screenY = Math.round(window.innerHeight * 0.35);
+      void host.predictOverheadPasses?.(loc.lat, loc.lon, screenX, screenY);
+    }
+  });
+
+  chip.append(openBtn);
+  appendDismissButton(chip);
+  chip.classList.add('visible');
+}
+
 function renderChip(
   host: NextOverheadChipHost,
   loc: { lat: number; lon: number },
   pass: OverheadPass,
   nowMs: number,
 ): void {
-  let chip = document.getElementById(CHIP_ID);
-  if (!chip) {
-    chip = document.createElement('div');
-    chip.id = CHIP_ID;
-    chip.className = 'geospy-next-overhead-chip';
-    chip.setAttribute('role', 'status');
-    chip.setAttribute('data-testid', 'geospy-next-overhead-chip');
-    document.body.appendChild(chip);
-    requestAnimationFrame(() => chip?.classList.add('visible'));
-  }
-
+  const chip = ensureChipShell();
+  chip.classList.remove('geospy-next-overhead-chip-empty');
   chip.replaceChildren();
 
   const openBtn = document.createElement('button');
@@ -132,17 +191,7 @@ function renderChip(
     removeNextOverheadChip();
   });
 
-  const dismissBtn = document.createElement('button');
-  dismissBtn.type = 'button';
-  dismissBtn.className = 'geospy-next-overhead-chip-dismiss';
-  dismissBtn.setAttribute('aria-label', 'Dismiss next-pass chip');
-  dismissBtn.textContent = '×';
-  dismissBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    markDismissed();
-    removeNextOverheadChip();
-  });
-
-  chip.append(openBtn, dismissBtn);
+  chip.append(openBtn);
+  appendDismissButton(chip);
   chip.classList.add('visible');
 }

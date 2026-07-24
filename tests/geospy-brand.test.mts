@@ -44,6 +44,11 @@ describe('GeoSpy brand config', () => {
     const shell = readFileSync(new URL('../src/locales/en.shell.json', import.meta.url), 'utf8');
     assert.match(shell, /Fetching live GeoSpy data/);
     assert.match(shell, /<strong>GeoSpy Analyst<\/strong>/);
+
+    const analyst = readFileSync(new URL('../src/components/ChatAnalystPanel.ts', import.meta.url), 'utf8');
+    assert.match(analyst, /title: 'GeoSpy Analyst'/);
+    assert.match(analyst, /# GeoSpy Analyst Session/);
+    assert.doesNotMatch(analyst, /WM Analyst/);
   });
 
   it('brands settings and embed entry HTML as GeoSpy', () => {

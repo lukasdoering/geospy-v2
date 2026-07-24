@@ -407,7 +407,7 @@ export class StrategicRiskPanel extends Panel {
       const isConvergence = i === 0 && risk.startsWith('Convergence:') && topZone;
       if (isConvergence) {
         return `
-                <div class="risk-item risk-item-clickable" data-lat="${topZone.lat}" data-lon="${topZone.lon}">
+                <div class="risk-item risk-item-clickable" data-lat="${topZone.lat}" data-lon="${topZone.lon}" role="button" tabindex="0" title="Show on map">
                   <span class="risk-rank">${i + 1}.</span>
                   <span class="risk-text">${escapeHtml(risk)}</span>
                   <span class="risk-location-icon">↗</span>
@@ -438,10 +438,12 @@ export class StrategicRiskPanel extends Panel {
         <div class="risk-section-title">${t('components.strategicRisk.recentAlerts', { count: String(this.alerts.length) })}</div>
         <div class="risk-alerts">
           ${displayAlerts.map(alert => {
-      const hasLocation = alert.location?.lat && alert.location.lon;
+      const lat = alert.location?.lat;
+      const lon = alert.location?.lon;
+      const hasLocation = Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0);
       const clickableClass = hasLocation ? 'risk-alert-clickable' : '';
       const locationAttrs = hasLocation
-        ? `data-lat="${alert.location!.lat}" data-lon="${alert.location!.lon}"`
+        ? `data-lat="${lat}" data-lon="${lon}" role="button" tabindex="0" title="Show on map"`
         : '';
 
       return `
@@ -526,27 +528,22 @@ export class StrategicRiskPanel extends Panel {
       });
     });
 
-    // Clickable risk items (convergence zones)
-    const clickableRisks = this.content.querySelectorAll('.risk-item-clickable');
-    clickableRisks.forEach(item => {
-      item.addEventListener('click', () => {
-        const lat = parseFloat((item as HTMLElement).dataset.lat || '0');
-        const lon = parseFloat((item as HTMLElement).dataset.lon || '0');
-        if (this.onLocationClick && !Number.isNaN(lat) && !Number.isNaN(lon)) {
-          this.onLocationClick(lat, lon);
-        }
-      });
-    });
+    const focusMap = (el: HTMLElement): void => {
+      if (!el.dataset.lat || !el.dataset.lon) return;
+      const lat = Number(el.dataset.lat);
+      const lon = Number(el.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onLocationClick?.(lat, lon);
+      }
+    };
 
-    // Clickable alerts with location
-    const clickableAlerts = this.content.querySelectorAll('.risk-alert-clickable');
-    clickableAlerts.forEach(alert => {
-      alert.addEventListener('click', () => {
-        const lat = parseFloat((alert as HTMLElement).dataset.lat || '0');
-        const lon = parseFloat((alert as HTMLElement).dataset.lon || '0');
-        if (this.onLocationClick && !Number.isNaN(lat) && !Number.isNaN(lon)) {
-          this.onLocationClick(lat, lon);
-        }
+    // Clickable risk items (convergence zones) + alerts with location
+    this.content.querySelectorAll<HTMLElement>('.risk-item-clickable, .risk-alert-clickable').forEach((item) => {
+      item.addEventListener('click', () => focusMap(item));
+      item.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        focusMap(item);
       });
     });
   }

@@ -28,6 +28,9 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - UCDP Events: keyboard-accessible row → map focus
 - Climate Anomalies: keyboard-accessible row → map focus
 - Cmd+K: **Open Settings → Satellites** (overhead prefs)
+- Strategic Risk / Posture: keyboard map focus + Null Island guards; drop posture debug logs
+- Next overhead chip: empty-window CTA to tune elevation in Settings
+- Chat Analyst panel title/export: GeoSpy Analyst (not WM)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

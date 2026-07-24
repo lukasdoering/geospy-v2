@@ -35,6 +35,7 @@ const focusedTests = [
   'tests/ucdp-events-map-a11y.test.mts',
   'tests/climate-anomaly-map-a11y.test.mts',
   'tests/settings-satellites-command.test.mts',
+  'tests/strategic-map-a11y.test.mts',
 ];
 
 function run(cmd, args, label) {

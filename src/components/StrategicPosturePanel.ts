@@ -391,7 +391,7 @@ export class StrategicPosturePanel extends Panel {
       if (p.totalVessels > 0) chips.push(`<span class="posture-chip naval">⚓ ${p.totalVessels}</span>`);
 
       return `
-        <div class="posture-theater posture-compact" data-lat="${p.centerLat}" data-lon="${p.centerLon}" title="${t('components.strategicPosture.clickToView', { name: escapeHtml(displayName) })}">
+        <div class="posture-theater posture-theater-clickable posture-compact" data-lat="${p.centerLat}" data-lon="${p.centerLon}" role="button" tabindex="0" title="${t('components.strategicPosture.clickToView', { name: escapeHtml(displayName) })}">
           <span class="posture-name">${escapeHtml(p.shortName)}</span>
           <div class="posture-chips">${chips.join('')}</div>
           ${this.getPostureBadge(p.postureLevel)}
@@ -429,7 +429,7 @@ export class StrategicPosturePanel extends Panel {
     const hasNaval = navalChips.length > 0;
 
     return `
-      <div class="posture-theater posture-expanded ${p.postureLevel}" data-lat="${p.centerLat}" data-lon="${p.centerLon}" title="${t('components.strategicPosture.clickToViewMap')}">
+      <div class="posture-theater posture-theater-clickable posture-expanded ${p.postureLevel}" data-lat="${p.centerLat}" data-lon="${p.centerLon}" role="button" tabindex="0" title="${t('components.strategicPosture.clickToViewMap')}">
         <div class="posture-theater-header">
           <span class="posture-name">${escapeHtml(displayName)}</span>
           ${this.getPostureBadge(p.postureLevel)}
@@ -508,34 +508,21 @@ export class StrategicPosturePanel extends Panel {
       this.refresh();
     });
 
-    const theaters = this.content.querySelectorAll('.posture-theater');
-    theaters.forEach((el) => {
-      el.addEventListener('click', (e) => {
-        // Prevent click if we clicked the deduce button specifically
-        if ((e.target as HTMLElement).closest('.posture-deduce-btn')) {
-          return;
-        }
-
-        const lat = parseFloat((el as HTMLElement).dataset.lat || '0');
-        const lon = parseFloat((el as HTMLElement).dataset.lon || '0');
-        console.log('[StrategicPosturePanel] Theater clicked:', {
-          lat,
-          lon,
-          dataLat: (el as HTMLElement).dataset.lat,
-          dataLon: (el as HTMLElement).dataset.lon,
-          element: (el as HTMLElement).textContent?.slice(0, 30),
-          hasHandler: !!this.onLocationClick,
-        });
-        if (this.onLocationClick && !Number.isNaN(lat) && !Number.isNaN(lon)) {
-          console.log('[StrategicPosturePanel] Calling onLocationClick with:', lat, lon);
-          this.onLocationClick(lat, lon);
-        } else {
-          console.warn('[StrategicPosturePanel] No handler or invalid coords!', {
-            hasHandler: !!this.onLocationClick,
-            lat,
-            lon,
-          });
-        }
+    const focusTheater = (el: HTMLElement, e?: Event): void => {
+      if ((e?.target as HTMLElement | undefined)?.closest?.('.posture-deduce-btn')) return;
+      if (!el.dataset.lat || !el.dataset.lon) return;
+      const lat = Number(el.dataset.lat);
+      const lon = Number(el.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onLocationClick?.(lat, lon);
+      }
+    };
+    this.content.querySelectorAll<HTMLElement>('.posture-theater-clickable').forEach((el) => {
+      el.addEventListener('click', (e) => focusTheater(el, e));
+      el.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        focusTheater(el, e);
       });
     });
 
@@ -566,10 +553,7 @@ export class StrategicPosturePanel extends Panel {
   }
 
   public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
-    console.log('[StrategicPosturePanel] setLocationClickHandler called, handler:', typeof handler);
     this.onLocationClick = handler;
-    // Verify it's stored
-    console.log('[StrategicPosturePanel] Handler stored, onLocationClick now:', typeof this.onLocationClick);
   }
 
   public getPostures(): TheaterPostureSummary[] {

@@ -234,6 +234,9 @@ export class CountryIntelManager implements AppModule {
       predictOverheadPasses: (lat: number, lon: number, screenX: number, screenY: number) => {
         void thisOuter.predictOverheadPasses(lat, lon, screenX, screenY);
       },
+      openOverheadSettings: () => {
+        thisOuter.openOverheadPassSettings();
+      },
     };
     // Defer so catalog / map boot can settle; refresh when popup closes.
     window.setTimeout(() => {
