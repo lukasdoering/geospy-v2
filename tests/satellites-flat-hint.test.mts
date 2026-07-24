@@ -10,6 +10,7 @@ describe('satellites flat-map coherence hint', () => {
     assert.match(src, /geospy-satellites-flat-hint-dismissed/);
     assert.match(src, /switchToGlobe/);
     assert.match(src, /Live orbits on 3D globe/);
+    assert.match(src, /document\.body\.appendChild/);
   });
 
   it('wires hint sync into map layer + dimension handlers', () => {

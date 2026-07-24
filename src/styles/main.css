@@ -1521,10 +1521,10 @@ canvas,
 
 /* GeoSpy: satellites layer on flat map coherence hint */
 .geospy-satellites-flat-hint {
-  position: absolute;
+  position: fixed;
   left: 12px;
-  bottom: 12px;
-  z-index: 40;
+  bottom: 72px;
+  z-index: 10050;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -1532,12 +1532,21 @@ canvas,
   padding: 8px 10px;
   border-radius: 8px;
   border: 1px solid var(--border);
-  background: color-mix(in srgb, var(--panel-bg) 92%, transparent);
+  background: color-mix(in srgb, var(--panel-bg) 94%, transparent);
   color: var(--text-secondary);
   font-size: 12px;
   line-height: 1.35;
   box-shadow: 0 6px 18px rgba(0, 0, 0, 0.28);
   backdrop-filter: blur(6px);
+  opacity: 0;
+  transform: translateY(8px);
+  transition: opacity 0.25s ease, transform 0.25s ease;
+  pointer-events: auto;
+}
+
+.geospy-satellites-flat-hint.visible {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .geospy-satellites-flat-hint-text {
