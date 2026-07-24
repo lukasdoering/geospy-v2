@@ -274,13 +274,17 @@ export class CountryIntelManager implements AppModule {
     showOrbitalPassesPopup(screenX, screenY, lat, lon, [], { loading: true });
     try {
       const { predictOverheadPassesAt } = await import('@/services/satellites');
+      const { getOverheadPassSettings } = await import('@/services/overhead-pass-settings');
+      const prefs = getOverheadPassSettings();
       const passes = await predictOverheadPassesAt(lat, lon, {
-        windowMinutes: 180,
+        windowMinutes: prefs.windowMinutes,
         stepSeconds: 60,
-        minElevationDeg: 20,
+        minElevationDeg: prefs.minElevationDeg,
         limit: 12,
       });
-      showOrbitalPassesPopup(screenX, screenY, lat, lon, passes);
+      showOrbitalPassesPopup(screenX, screenY, lat, lon, passes, {
+        emptyDetail: `No LEO imaging passes above ${prefs.minElevationDeg}° elevation in the next ${prefs.windowMinutes / 60} hours.`,
+      });
     } catch (err) {
       console.error('[satellites] overhead pass prediction failed', err);
       const catalogMissing = err instanceof Error && err.message === 'SATELLITE_CATALOG_UNAVAILABLE';
