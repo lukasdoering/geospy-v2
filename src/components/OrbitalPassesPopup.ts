@@ -93,6 +93,16 @@ export function countPassTypes(passes: OverheadPass[]): { sar: number; optical: 
   return { sar, optical, other };
 }
 
+export type OverheadTypeFilter = 'all' | 'sar' | 'optical';
+
+export function filterPassesByType(
+  passes: OverheadPass[],
+  filter: OverheadTypeFilter,
+): OverheadPass[] {
+  if (filter === 'all') return passes;
+  return passes.filter((p) => (p.type || '').toLowerCase() === filter);
+}
+
 export function buildOverheadPassesSummaryLine(
   passes: OverheadPass[],
   nowMs: number = Date.now(),
@@ -308,53 +318,96 @@ export function showOrbitalPassesPopup(
       options.emptyDetail ?? defaultOverheadEmptyDetail(),
     ));
   } else {
-    const list = el('ul', 'orbital-passes-list');
     const nowMs = Date.now();
-    const summary = el(
-      'div',
-      'orbital-passes-summary',
-      buildOverheadPassesSummaryLine(passes, nowMs),
-    );
-    popup.append(summary);
-    for (const p of passes) {
-      const row = el('li', 'orbital-passes-row');
-      row.tabIndex = 0;
-      row.setAttribute('role', 'button');
-      row.setAttribute('aria-label', `Copy ${p.name} pass details`);
-      row.title = 'Click to copy this pass';
-      const nameRow = el('div', 'orbital-passes-name-row');
-      nameRow.append(el('div', 'orbital-passes-name', p.name));
-      const typeBadge = el('span', `orbital-passes-type orbital-passes-type--${(p.type || 'sat').toLowerCase()}`, p.type || 'sat');
-      nameRow.append(typeBadge);
-      row.append(nameRow);
-      const meta = el('div', 'orbital-passes-meta');
-      meta.append(
-        el('span', undefined, p.country || '—'),
-        el('span', undefined, formatEta(p.aosMs, nowMs)),
-        el('span', undefined, `AOS ${formatUtc(p.aosMs)}`),
-        el('span', undefined, `LOS ${formatUtc(p.losMs)}`),
-        el('span', undefined, `max ${Math.round(p.maxElevationDeg)}°`),
-        el('span', undefined, formatPassDuration(p.aosMs, p.losMs)),
-      );
-      row.append(meta);
-      const copyRow = () => {
-        const text = buildSinglePassClipboardLine(p, nowMs);
-        void navigator.clipboard.writeText(text).catch(() => {});
-      };
-      row.addEventListener('click', (e) => {
-        e.stopPropagation();
-        copyRow();
-      });
-      row.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter' || e.key === ' ') {
-          e.preventDefault();
+    const types = countPassTypes(passes);
+    let activeFilter: OverheadTypeFilter = 'all';
+
+    const summary = el('div', 'orbital-passes-summary');
+    summary.setAttribute('data-testid', 'orbital-passes-summary');
+    const filters = el('div', 'orbital-passes-filters');
+    filters.setAttribute('role', 'group');
+    filters.setAttribute('aria-label', 'Filter by sensor type');
+    filters.setAttribute('data-testid', 'orbital-passes-filters');
+    const list = el('ul', 'orbital-passes-list');
+    const filterEmpty = el('div', 'orbital-passes-empty');
+    filterEmpty.hidden = true;
+
+    const applyFilter = (next: OverheadTypeFilter) => {
+      activeFilter = next;
+      const filtered = filterPassesByType(passes, activeFilter);
+      summary.textContent = filtered.length
+        ? buildOverheadPassesSummaryLine(filtered, nowMs)
+        : `No ${activeFilter.toUpperCase()} passes in this window`;
+      for (const btn of filters.querySelectorAll<HTMLButtonElement>('button[data-filter]')) {
+        const on = btn.dataset.filter === activeFilter;
+        btn.classList.toggle('is-active', on);
+        btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+      }
+      list.replaceChildren();
+      if (filtered.length === 0) {
+        filterEmpty.hidden = false;
+        filterEmpty.textContent = `No ${activeFilter} passes match. Try All.`;
+        return;
+      }
+      filterEmpty.hidden = true;
+      for (const p of filtered) {
+        const row = el('li', 'orbital-passes-row');
+        row.tabIndex = 0;
+        row.setAttribute('role', 'button');
+        row.setAttribute('aria-label', `Copy ${p.name} pass details`);
+        row.title = 'Click to copy this pass';
+        const nameRow = el('div', 'orbital-passes-name-row');
+        nameRow.append(el('div', 'orbital-passes-name', p.name));
+        const typeBadge = el('span', `orbital-passes-type orbital-passes-type--${(p.type || 'sat').toLowerCase()}`, p.type || 'sat');
+        nameRow.append(typeBadge);
+        row.append(nameRow);
+        const meta = el('div', 'orbital-passes-meta');
+        meta.append(
+          el('span', undefined, p.country || '—'),
+          el('span', undefined, formatEta(p.aosMs, nowMs)),
+          el('span', undefined, `AOS ${formatUtc(p.aosMs)}`),
+          el('span', undefined, `LOS ${formatUtc(p.losMs)}`),
+          el('span', undefined, `max ${Math.round(p.maxElevationDeg)}°`),
+          el('span', undefined, formatPassDuration(p.aosMs, p.losMs)),
+        );
+        row.append(meta);
+        const copyRow = () => {
+          const text = buildSinglePassClipboardLine(p, nowMs);
+          void navigator.clipboard.writeText(text).catch(() => {});
+        };
+        row.addEventListener('click', (e) => {
           e.stopPropagation();
           copyRow();
-        }
+        });
+        row.addEventListener('keydown', (e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            e.stopPropagation();
+            copyRow();
+          }
+        });
+        list.append(row);
+      }
+    };
+
+    const addFilterBtn = (id: OverheadTypeFilter, label: string, enabled: boolean) => {
+      const btn = el('button', 'orbital-passes-filter', label);
+      btn.type = 'button';
+      btn.dataset.filter = id;
+      btn.disabled = !enabled;
+      btn.setAttribute('aria-pressed', 'false');
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        applyFilter(id);
       });
-      list.append(row);
-    }
-    popup.append(list);
+      filters.append(btn);
+    };
+    addFilterBtn('all', `All (${passes.length})`, true);
+    addFilterBtn('sar', `SAR (${types.sar})`, types.sar > 0);
+    addFilterBtn('optical', `Optical (${types.optical})`, types.optical > 0);
+
+    popup.append(summary, filters, filterEmpty, list);
+    applyFilter('all');
   }
 
   if (!options.loading && options.settingsSummary !== false) {

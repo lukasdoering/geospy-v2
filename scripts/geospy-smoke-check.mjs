@@ -34,6 +34,7 @@ mustInclude('src/components/OrbitalPassesPopup.ts', 'orbital-passes-popup', 'pop
 mustInclude('src/components/OrbitalPassesPopup.ts', 'aria-modal', 'popup aria-modal');
 mustInclude('src/components/OrbitalPassesPopup.ts', 'orbital-passes-prefs', 'prefs footer testid');
 mustInclude('src/components/OrbitalPassesPopup.ts', 'buildOverheadShareUrl', 'overhead share URL helper');
+mustInclude('src/components/OrbitalPassesPopup.ts', 'filterPassesByType', 'SAR/optical type filter');
 mustInclude('src/utils/urlState.ts', 'parseOverheadParam', 'overhead deep-link parser');
 mustInclude('src/App.ts', 'pendingDeepLinkOverhead', 'overhead deep-link wiring');
 mustInclude('src/components/SatellitesFlatHint.ts', 'geospy-satellites-flat-hint', 'flat-map hint');

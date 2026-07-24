@@ -90,6 +90,18 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(line, /1 optical/);
   });
 
+  it('filters passes by sensor type', async () => {
+    const { filterPassesByType } = await import('../src/components/OrbitalPassesPopup.ts');
+    const passes: OverheadPass[] = [
+      { noradId: '1', name: 'a', type: 'sar', country: 'X', aosMs: 0, losMs: 1, maxElevationDeg: 1, maxElevationMs: 0 },
+      { noradId: '2', name: 'b', type: 'optical', country: 'Y', aosMs: 1, losMs: 2, maxElevationDeg: 1, maxElevationMs: 1 },
+      { noradId: '3', name: 'c', type: 'military', country: 'Z', aosMs: 2, losMs: 3, maxElevationDeg: 1, maxElevationMs: 2 },
+    ];
+    assert.equal(filterPassesByType(passes, 'all').length, 3);
+    assert.deepEqual(filterPassesByType(passes, 'sar').map((p) => p.noradId), ['1']);
+    assert.deepEqual(filterPassesByType(passes, 'optical').map((p) => p.noradId), ['2']);
+  });
+
   it('wires Cmd+K overhead-passes command through search manager', () => {
     const commands = readFileSync(new URL('../src/config/commands.ts', import.meta.url), 'utf8');
     assert.match(commands, /id: 'view:overhead-passes'/);
