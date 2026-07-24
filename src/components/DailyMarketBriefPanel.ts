@@ -111,6 +111,9 @@ export class DailyMarketBriefPanel extends Panel {
   }
 
   public showUnavailable(message = 'The daily brief needs live market data before it can be generated.'): void {
-    this.showError(message);
+    this.setSafeContent(unsafeRawHtml(
+      `<div class="panel-empty">${escapeHtml(message)}</div>`,
+      'legacy Panel.setContent() migration',
+    ));
   }
 }
