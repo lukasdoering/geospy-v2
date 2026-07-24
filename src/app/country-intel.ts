@@ -41,6 +41,7 @@ import { collectStoryData } from '@/services/story-data';
 import { hasPremiumAccess } from '@/services/panel-gating';
 import { getAuthState, subscribeAuthState } from '@/services/auth-state';
 import { showMapContextMenu } from '@/components/MapContextMenu';
+import { showOrbitalPassesPopup } from '@/components/OrbitalPassesPopup';
 import { BETA_MODE } from '@/config/beta';
 import { mlWorker } from '@/services/ml-worker';
 import { isHeadlineMemoryEnabled } from '@/services/ai-flow-settings';
@@ -201,8 +202,155 @@ export class CountryIntelManager implements AppModule {
         });
       }
       items.push({ label: t('contextMenu.copyCoordinates'), action: () => navigator.clipboard.writeText(`${payload.lat.toFixed(5)}, ${payload.lon.toFixed(5)}`).catch(() => {}) });
+      items.push({
+        label: t('contextMenu.predictOverheadPasses'),
+        action: () => {
+          void this.predictOverheadPasses(payload.lat, payload.lon, payload.screenX, payload.screenY);
+        },
+      });
       showMapContextMenu(payload.screenX, payload.screenY, items);
     });
+
+    this.maybeShowOverheadPassesTip();
+  }
+
+  /** Predict overhead passes at the current map center (Cmd+K / tip CTA). */
+  public predictOverheadPassesAtMapCenter(): void {
+    const center = this.ctx.map?.getCenter?.();
+    if (!center) {
+      this.showToast('Map center unavailable. Pan the map and try again.');
+      return;
+    }
+    const screenX = Math.round(window.innerWidth * 0.55);
+    const screenY = Math.round(window.innerHeight * 0.35);
+    void this.predictOverheadPasses(center.lat, center.lon, screenX, screenY);
+  }
+
+  /** Re-run overhead passes at the last requested coordinates (if any). */
+  public predictOverheadPassesAtLastLocation(): void {
+    let lat: number | null = null;
+    let lon: number | null = null;
+    try {
+      const raw = localStorage.getItem('geospy-overhead-last-location');
+      if (raw) {
+        const parsed = JSON.parse(raw) as { lat?: unknown; lon?: unknown };
+        if (typeof parsed.lat === 'number' && typeof parsed.lon === 'number') {
+          lat = parsed.lat;
+          lon = parsed.lon;
+        }
+      }
+    } catch {
+      /* ignore */
+    }
+    if (lat == null || lon == null) {
+      this.showToast('No previous overhead-pass location yet. Right-click the map first.');
+      return;
+    }
+    const screenX = Math.round(window.innerWidth * 0.55);
+    const screenY = Math.round(window.innerHeight * 0.35);
+    void this.predictOverheadPasses(lat, lon, screenX, screenY);
+  }
+
+  private rememberOverheadLocation(lat: number, lon: number): void {
+    try {
+      localStorage.setItem('geospy-overhead-last-location', JSON.stringify({ lat, lon, at: Date.now() }));
+    } catch {
+      /* ignore */
+    }
+  }
+
+  private maybeShowOverheadPassesTip(): void {
+    try {
+      if (localStorage.getItem('geospy-overhead-passes-tip-dismissed') === '1') return;
+    } catch {
+      return;
+    }
+    // Defer so the map shell is interactive before the tip appears.
+    window.setTimeout(() => {
+      if (this.ctx.isDestroyed) return;
+      try {
+        if (localStorage.getItem('geospy-overhead-passes-tip-dismissed') === '1') return;
+      } catch {
+        return;
+      }
+      const tip = document.createElement('div');
+      tip.className = 'geospy-overhead-tip';
+      tip.setAttribute('role', 'status');
+      tip.setAttribute('data-testid', 'geospy-overhead-tip');
+      const strong = document.createElement('strong');
+      strong.textContent = 'GeoSpy tip';
+      tip.append(strong, document.createTextNode(' — Right-click map, Cmd+K “overhead”, or Cmd/Ctrl+Shift+O '));
+      const tryBtn = document.createElement('button');
+      tryBtn.type = 'button';
+      tryBtn.className = 'geospy-overhead-tip-try';
+      tryBtn.setAttribute('aria-label', 'Try overhead passes at map center');
+      tryBtn.setAttribute('data-testid', 'geospy-overhead-tip-try');
+      tryBtn.textContent = 'Try now';
+      const dismissBtn = document.createElement('button');
+      dismissBtn.type = 'button';
+      dismissBtn.className = 'geospy-overhead-tip-dismiss';
+      dismissBtn.setAttribute('aria-label', 'Dismiss tip');
+      dismissBtn.textContent = 'Got it';
+      const dismiss = () => {
+        tip.remove();
+        try {
+          localStorage.setItem('geospy-overhead-passes-tip-dismissed', '1');
+        } catch {
+          /* ignore quota / private mode */
+        }
+      };
+      tryBtn.addEventListener('click', () => {
+        dismiss();
+        this.predictOverheadPassesAtMapCenter();
+      });
+      dismissBtn.addEventListener('click', dismiss);
+      tip.append(tryBtn, dismissBtn);
+      document.body.appendChild(tip);
+      requestAnimationFrame(() => {
+        tip.classList.add('visible');
+        try {
+          tryBtn.focus();
+        } catch {
+          /* ignore */
+        }
+      });
+      window.setTimeout(dismiss, 12_000);
+    }, 2500);
+  }
+
+  public async predictOverheadPasses(lat: number, lon: number, screenX: number, screenY: number): Promise<void> {
+    const retry = () => {
+      void this.predictOverheadPasses(lat, lon, screenX, screenY);
+    };
+    this.rememberOverheadLocation(lat, lon);
+    showOrbitalPassesPopup(screenX, screenY, lat, lon, [], { loading: true });
+    try {
+      const { predictOverheadPassesAt } = await import('@/services/satellites');
+      const { getOverheadPassSettings } = await import('@/services/overhead-pass-settings');
+      const prefs = getOverheadPassSettings();
+      const passes = await predictOverheadPassesAt(lat, lon, {
+        windowMinutes: prefs.windowMinutes,
+        stepSeconds: 60,
+        minElevationDeg: prefs.minElevationDeg,
+        limit: 12,
+      });
+      showOrbitalPassesPopup(screenX, screenY, lat, lon, passes, {
+        emptyDetail: `No LEO imaging passes above ${prefs.minElevationDeg}° elevation in the next ${prefs.windowMinutes / 60} hours.`,
+        settingsSummary: `Threshold ${prefs.minElevationDeg}° · window ${prefs.windowMinutes / 60}h · Settings → Satellites`,
+        onRefresh: retry,
+      });
+    } catch (err) {
+      console.error('[satellites] overhead pass prediction failed', err);
+      const catalogMissing = err instanceof Error && err.message === 'SATELLITE_CATALOG_UNAVAILABLE';
+      showOrbitalPassesPopup(screenX, screenY, lat, lon, [], {
+        error: catalogMissing
+          ? 'Satellite catalog unavailable right now. Use Refresh, or try Cmd/Ctrl+Shift+O again in a moment.'
+          : 'Could not compute overhead passes. Try again in a moment.',
+        onRetry: retry,
+        onRefresh: retry,
+        settingsSummary: false,
+      });
+    }
   }
 
   private async ensureCountryBriefPage(): Promise<boolean> {

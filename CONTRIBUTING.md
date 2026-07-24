@@ -1,4 +1,20 @@
-# Contributing to World Monitor
+# Contributing to GeoSpy
+
+GeoSpy (`lukasdoering/geospy-v2`) is an AGPL-3.0 fork of [WorldMonitor](https://github.com/koala73/worldmonitor).
+Most contribution mechanics below still apply. For the fullest local product surface used in overnight builds, see:
+
+```bash
+npm run geospy:demo
+git checkout cursor/geospy-working-demo-4151
+```
+
+Quick start guide: [GEOSPY.md](GEOSPY.md).
+
+Upstream WorldMonitor contribution docs remain the baseline for architecture, Sebuf, and data-source workflows.
+
+---
+
+# Contributing to World Monitor (upstream baseline)
 
 Thank you for your interest in contributing to World Monitor! This project thrives on community contributions — whether it's code, data sources, documentation, or bug reports.
 
