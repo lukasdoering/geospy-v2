@@ -97,6 +97,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Energy Complex IEA/LNG country rows + Cascade affected countries focus the map; Insights catch calm empty
 - Route Explorer: unavailable/proposed corridor cards no longer keyboard-focusable
 - Calm empties: Service Status error + Latest Brief unavailable
+- Calm empty: MCP Data Panel failures; refresh geospy:demo help map list
 - Calm empties: GDELT Intel load failure, Tech Events error, Defense Patents error
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles

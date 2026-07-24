@@ -84,6 +84,7 @@ const focusedTests = [
   'tests/energy-complex-cascade-map.test.mts',
   'tests/route-card-inert-a11y.test.mts',
   'tests/calm-empty-service-brief.test.mts',
+  'tests/calm-empty-mcp.test.mts',
 ];
 
 function run(cmd, args, label) {
