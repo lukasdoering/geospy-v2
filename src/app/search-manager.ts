@@ -570,6 +570,10 @@ export class SearchManager implements AppModule {
           }
         } else if (action === 'settings') {
           this.ctx.unifiedSettings?.open();
+        } else if (action === 'settings-satellites') {
+          void import('@/utils/overhead-settings-focus').then(({ openOverheadPassSettings }) => {
+            openOverheadPassSettings((tab) => this.ctx.unifiedSettings?.open(tab));
+          });
         } else if (action === 'refresh') {
           window.location.reload();
         } else if (action === 'resilience') {

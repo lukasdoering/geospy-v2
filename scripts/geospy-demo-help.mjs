@@ -28,6 +28,7 @@ Try other polish:
   • Security Advisories → search + click card to focus country on map
   • UCDP / Climate / Displacement / Radiation → click enables matching layer
   • Thermal Escalation → search region/status, then click/keyboard → map
+  • Cmd/Ctrl+K → “Settings → Satellites” for overhead elevation prefs
 
 Integration PR: https://github.com/lukasdoering/geospy-v2/pull/6
 `);

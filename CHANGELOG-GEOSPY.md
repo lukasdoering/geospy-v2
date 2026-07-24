@@ -26,6 +26,8 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Overhead prefs footer: await/retry Settings cold-open before focusing Satellites elevation
 - Thermal Escalation: region/status search + keyboard map focus
 - UCDP Events: keyboard-accessible row → map focus
+- Climate Anomalies: keyboard-accessible row → map focus
+- Cmd+K: **Open Settings → Satellites** (overhead prefs)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
