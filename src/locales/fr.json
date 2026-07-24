@@ -3092,7 +3092,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Ouvrir la fiche pays",
-    "copyCoordinates": "Copier les coordonnées"
+    "copyCoordinates": "Copier les coordonnées",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Tableau de Bord de Renseignement Mondial en Temps Réel",
