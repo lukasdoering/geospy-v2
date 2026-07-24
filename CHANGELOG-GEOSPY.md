@@ -34,6 +34,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Geo Hubs / Tech Hubs: keyboard map focus + calm empty state (not error)
 - Tech Events: fix dead map-pin CustomEvent — wire setCenter + enable techEvents layer; Cmd+K techevent flies to coords
 - Locked-panel / runtime-config copy: GeoSpy license (not World Monitor)
+- OREF Sirens: alert/history row click → map focus (Tel Aviv)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

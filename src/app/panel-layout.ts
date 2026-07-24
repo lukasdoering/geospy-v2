@@ -2085,10 +2085,17 @@ export class PanelLayoutManager implements AppModule {
       _lockPanels ? ['AI-powered geopolitical forecasts', 'Cross-domain cascade predictions', 'Prediction market calibration'] : undefined,
     );
 
-    this.lazyDefaultPanel(
+    this.lazyImportedPanel(
       'oref-sirens',
       () => import('@/components/OrefSirensPanel'),
       'OrefSirensPanel',
+      (OrefSirensPanel) => {
+        const p = new OrefSirensPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 7);
+        });
+        return p;
+      },
       undefined,
       _lockPanels ? [t('premium.features.orefSirens1'), t('premium.features.orefSirens2')] : undefined,
     );

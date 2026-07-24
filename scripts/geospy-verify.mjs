@@ -38,6 +38,7 @@ const focusedTests = [
   'tests/strategic-map-a11y.test.mts',
   'tests/hubs-map-a11y.test.mts',
   'tests/tech-events-map-focus.test.mts',
+  'tests/oref-sirens-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {

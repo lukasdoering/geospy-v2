@@ -46,6 +46,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Thermal Escalation** — search region/status; click/keyboard focuses the map
 - **Geo / Tech Hubs** — keyboard-accessible row → map focus
 - **Tech Events** — pin focuses the map and enables the techEvents layer
+- **OREF Sirens** — alert/history row focuses Israel (Tel Aviv)
 
 ## Docs
 

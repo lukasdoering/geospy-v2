@@ -1296,6 +1296,15 @@
   background: var(--overlay-subtle);
 }
 
+.oref-row-clickable {
+  cursor: pointer;
+}
+
+.oref-row-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .oref-alert-header {
   display: flex;
   align-items: center;
