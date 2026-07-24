@@ -653,7 +653,8 @@
       "title": "Sanctions & Designations"
     },
     "satelliteFires": {
-      "infoTooltip": "NASA FIRMS VIIRS satellite thermal detections across monitored conflict regions. High-intensity = brightness >360K & confidence >80%."
+      "empty": "No active satellite fire detections in the current window.",
+      "infoTooltip": "NASA FIRMS VIIRS satellite thermal detections across monitored conflict regions. High-intensity = brightness >360K & confidence >80%. Click a region row to focus the map."
     },
     "securityAdvisories": {
       "infoTooltip": "<strong>Security Advisories</strong><br>Travel advisories and security alerts from government foreign affairs agencies:<br><br><strong>Sources:</strong><br>🇺🇸 US State Dept Travel Advisories<br>🇦🇺 AU DFAT Smartraveller<br>🇬🇧 UK FCDO Travel Advice<br><br><strong>Levels:</strong><br>🟥 Do Not Travel<br>🟧 Reconsider Travel<br>🟨 Exercise Caution<br>🟩 Normal Precautions"

@@ -1,5 +1,6 @@
 import { Panel } from './Panel';
 import type { FireRegionStats } from '@/services/wildfires';
+import { regionMapFocus } from '@/services/wildfires/region-focus';
 import { t } from '@/services/i18n';
 import { unsafeRawHtml } from '@/utils/sanitize';
 
@@ -7,6 +8,7 @@ export class SatelliteFiresPanel extends Panel {
   private stats: FireRegionStats[] = [];
   private totalCount = 0;
   private lastUpdated: Date | null = null;
+  private onRegionFocus?: (lat: number, lon: number) => void;
 
   constructor() {
     super({
@@ -17,6 +19,30 @@ export class SatelliteFiresPanel extends Panel {
       infoTooltip: t('components.satelliteFires.infoTooltip'),
     });
     this.showLoading(t('common.scanningThermalData'));
+    this.content.addEventListener('click', (e) => {
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-fire-focus]');
+      if (!row) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onRegionFocus?.(lat, lon);
+      }
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-fire-focus]');
+      if (!row) return;
+      e.preventDefault();
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onRegionFocus?.(lat, lon);
+      }
+    });
+  }
+
+  public setRegionClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onRegionFocus = handler;
   }
 
   public update(stats: FireRegionStats[], totalCount: number): void {
@@ -35,11 +61,14 @@ export class SatelliteFiresPanel extends Panel {
 
   private render(): void {
     if (this.stats.length === 0) {
-      this.setSafeContent(unsafeRawHtml(`<div class="panel-empty">${t('common.noDataAvailable')}</div>`, 'legacy Panel.setContent() migration'));
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty" data-testid="satellite-fires-empty">${t('components.satelliteFires.empty')}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
-    const rows = this.stats.map(s => {
+    const rows = this.stats.map((s, idx) => {
       const frpStr = s.totalFrp >= 1000
         ? `${(s.totalFrp / 1000).toFixed(1)}k`
         : Math.round(s.totalFrp).toLocaleString();
@@ -47,7 +76,11 @@ export class SatelliteFiresPanel extends Panel {
       const explosionBadge = s.possibleExplosionCount > 0
         ? `<span class="fires-explosion-badge" title="${t('components.satelliteFires.explosionTooltip')}">${s.possibleExplosionCount}</span>`
         : '';
-      return `<tr class="fire-row${highClass}">
+      const focus = regionMapFocus(s);
+      const focusAttrs = focus
+        ? ` data-fire-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" data-region-idx="${idx}" role="button" tabindex="0" title="Show on map"`
+        : '';
+      return `<tr class="fire-row${highClass}${focus ? ' fire-row-clickable' : ''}"${focusAttrs}>
         <td class="fire-region">${escapeHtml(s.region)}${explosionBadge}</td>
         <td class="fire-count">${s.fireCount}</td>
         <td class="fire-hi">${s.highIntensityCount}</td>

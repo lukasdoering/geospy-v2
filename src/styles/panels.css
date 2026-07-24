@@ -111,6 +111,15 @@
   color: var(--text-secondary);
 }
 
+.fire-row-clickable {
+  cursor: pointer;
+}
+
+.fire-row-clickable:focus-visible {
+  outline: 1px solid var(--accent, #3d7eff);
+  outline-offset: -1px;
+}
+
 .fire-row:hover {
   background: var(--surface-hover);
 }

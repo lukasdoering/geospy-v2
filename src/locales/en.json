@@ -1650,12 +1650,13 @@
       "high": "High",
       "total": "Total",
       "never": "never",
+      "empty": "No active satellite fire detections in the current window.",
       "time": {
         "justNow": "just now",
         "minutesAgo": "{{count}}m ago",
         "hoursAgo": "{{count}}h ago"
       },
-      "infoTooltip": "NASA FIRMS VIIRS satellite thermal detections across monitored conflict regions. High-intensity = brightness >360K & confidence >80%.",
+      "infoTooltip": "NASA FIRMS VIIRS satellite thermal detections across monitored conflict regions. High-intensity = brightness >360K & confidence >80%. Click a region row to focus the map.",
       "possibleExplosions": "{{count}} possible explosion(s) detected",
       "explosionTooltip": "Thermal signature consistent with explosion (FRP >80 MW, brightness >380 K)"
     },

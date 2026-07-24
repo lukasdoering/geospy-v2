@@ -1916,7 +1916,16 @@ export class PanelLayoutManager implements AppModule {
     });
 
     this.lazyDefaultPanel('cascade', () => import('@/components/CascadePanel'), 'CascadePanel');
-    this.lazyDefaultPanel('satellite-fires', () => import('@/components/SatelliteFiresPanel'), 'SatelliteFiresPanel');
+    this.lazyImportedPanel('satellite-fires', () => import('@/components/SatelliteFiresPanel'), 'SatelliteFiresPanel', (SatelliteFiresPanel) => {
+      const p = new SatelliteFiresPanel();
+      p.setRegionClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 5);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.natural) {
+          this.callbacks.applyMapLayerChange?.('natural', true, 'programmatic');
+        }
+      });
+      return p;
+    });
 
     this.lazyDefaultPanel('defense-patents', () => import('@/components/DefensePatentsPanel'), 'DefensePatentsPanel');
 
