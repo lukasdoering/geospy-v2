@@ -50,6 +50,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Fix hubs panel CSS orphan brace (broke Vite PostCSS / app boot)
 - Route Explorer empty/lazy states: GeoSpy brand (not WorldMonitor)
 - Latest Brief cover/share/empty states + Settings API keys/MCP copy: GeoSpy brand
+- Fuel Shortage Registry: row click/keyboard → country map focus + enable fuelShortages pins
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help

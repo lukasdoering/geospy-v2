@@ -1802,7 +1802,16 @@ export class PanelLayoutManager implements AppModule {
       this.importPanel('storage-facility-map', () => import('@/components/StorageFacilityMapPanel'), 'StorageFacilityMapPanel', (StorageFacilityMapPanel) => new StorageFacilityMapPanel()),
     );
     this.lazyPanel('fuel-shortages', () =>
-      this.importPanel('fuel-shortages', () => import('@/components/FuelShortagePanel'), 'FuelShortagePanel', (FuelShortagePanel) => new FuelShortagePanel()),
+      this.importPanel('fuel-shortages', () => import('@/components/FuelShortagePanel'), 'FuelShortagePanel', (FuelShortagePanel) => {
+        const p = new FuelShortagePanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.fuelShortages) {
+            this.callbacks.applyMapLayerChange?.('fuelShortages', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('energy-disruptions', () =>
       this.importPanel('energy-disruptions', () => import('@/components/EnergyDisruptionsPanel'), 'EnergyDisruptionsPanel', (EnergyDisruptionsPanel) => new EnergyDisruptionsPanel()),
