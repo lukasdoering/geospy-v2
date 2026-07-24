@@ -141,6 +141,7 @@ export function showOrbitalPassesPopup(
   const popup = el('div', 'orbital-passes-popup');
   popup.setAttribute('role', 'dialog');
   popup.setAttribute('aria-label', 'Overhead satellite passes');
+  popup.setAttribute('data-testid', 'orbital-passes-popup');
 
   const clampedX = Math.min(Math.max(8, screenX), window.innerWidth - 320);
   const clampedY = Math.min(Math.max(8, screenY), window.innerHeight - 280);
@@ -149,15 +150,17 @@ export function showOrbitalPassesPopup(
 
   const header = el('div', 'orbital-passes-header');
   const headerText = el('div');
-  headerText.append(
-    el('div', 'orbital-passes-title', 'Overhead passes'),
-    el('div', 'orbital-passes-coords', `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`),
-  );
+  const titleEl = el('div', 'orbital-passes-title', 'Overhead passes');
+  titleEl.setAttribute('data-testid', 'orbital-passes-title');
+  const coordsEl = el('div', 'orbital-passes-coords', `${lat.toFixed(3)}°, ${lng.toFixed(3)}°`);
+  coordsEl.setAttribute('data-testid', 'orbital-passes-coords');
+  headerText.append(titleEl, coordsEl);
   const headerActions = el('div', 'orbital-passes-header-actions');
   if (!options.loading && options.onRefresh) {
     const refreshBtn = el('button', 'orbital-passes-copy', 'Refresh');
     refreshBtn.type = 'button';
     refreshBtn.setAttribute('aria-label', 'Refresh overhead passes');
+    refreshBtn.setAttribute('data-testid', 'orbital-passes-refresh');
     refreshBtn.title = 'Refresh';
     refreshBtn.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -169,6 +172,7 @@ export function showOrbitalPassesPopup(
     const copyBtn = el('button', 'orbital-passes-copy', 'Copy');
     copyBtn.type = 'button';
     copyBtn.setAttribute('aria-label', 'Copy pass summary');
+    copyBtn.setAttribute('data-testid', 'orbital-passes-copy');
     copyBtn.title = 'Copy summary';
     copyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
