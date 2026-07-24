@@ -55,12 +55,14 @@ describe('OrbitalPassesPopup polish', () => {
   });
 
   it('exposes clipboard helpers with failure labels', async () => {
-    const src = readFileSync(new URL('../src/components/OrbitalPassesPopup.ts', import.meta.url), 'utf8');
-    assert.match(src, /export async function copyTextToClipboard/);
-    assert.match(src, /export function flashClipboardFeedback/);
-    assert.match(src, /Copy failed/);
-    assert.match(src, /Copy unavailable/);
-    assert.match(src, /clipboard\?\.writeText/);
+    const shared = readFileSync(new URL('../src/utils/clipboard-feedback.ts', import.meta.url), 'utf8');
+    assert.match(shared, /export async function copyTextToClipboard/);
+    assert.match(shared, /export function flashClipboardFeedback/);
+    assert.match(shared, /Copy failed/);
+    assert.match(shared, /Copy unavailable/);
+    assert.match(shared, /clipboard\?\.writeText/);
+    const popup = readFileSync(new URL('../src/components/OrbitalPassesPopup.ts', import.meta.url), 'utf8');
+    assert.match(popup, /clipboard-feedback/);
   });
 
   it('formats prefs-aware empty detail and settings summary', async () => {

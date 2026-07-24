@@ -20,6 +20,7 @@ import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 import { getAuthState } from '@/services/auth-state';
 import { hasPremiumAccess } from '@/services/panel-gating';
 import { trackGateHit } from '@/services/analytics';
+import { copyTextToClipboard } from '@/utils/clipboard-feedback';
 
 
 type BriefAssetType = AssetType | 'port';
@@ -99,11 +100,15 @@ export class CountryBriefPage implements CountryBriefPanel {
       if (linkShareBtn) {
         if (!this.currentCode || !this.currentName) return;
         const url = `${window.location.origin}/?c=${this.currentCode}`;
-        navigator.clipboard.writeText(url).then(() => {
-          const orig = linkShareBtn.innerHTML;
-          setTrustedHtml(linkShareBtn, trustedHtml('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>', "legacy direct innerHTML migration"));
-          setTimeout(() => { setTrustedHtml(linkShareBtn, trustedHtml(orig, "legacy direct innerHTML migration")); }, 1500);
-        }).catch(() => {});
+        const orig = linkShareBtn.innerHTML;
+        void copyTextToClipboard(url).then((ok) => {
+          if (ok) {
+            setTrustedHtml(linkShareBtn, trustedHtml('<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>', 'legacy direct innerHTML migration'));
+            setTimeout(() => { setTrustedHtml(linkShareBtn, trustedHtml(orig, 'legacy direct innerHTML migration')); }, 1500);
+          } else {
+            showToast('Copy failed');
+          }
+        });
         return;
       }
 

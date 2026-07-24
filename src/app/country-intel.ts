@@ -43,6 +43,7 @@ import { getAuthState, subscribeAuthState } from '@/services/auth-state';
 import { showMapContextMenu } from '@/components/MapContextMenu';
 import { showOrbitalPassesPopup, OVERHEAD_POPUP_CHANGE_EVENT } from '@/components/OrbitalPassesPopup';
 import { syncNextOverheadChip } from '@/components/NextOverheadChip';
+import { copyTextToClipboard } from '@/utils/clipboard-feedback';
 import { BETA_MODE } from '@/config/beta';
 import { mlWorker } from '@/services/ml-worker';
 import { isHeadlineMemoryEnabled } from '@/services/ai-flow-settings';
@@ -202,7 +203,14 @@ export class CountryIntelManager implements AppModule {
           },
         });
       }
-      items.push({ label: t('contextMenu.copyCoordinates'), action: () => navigator.clipboard.writeText(`${payload.lat.toFixed(5)}, ${payload.lon.toFixed(5)}`).catch(() => {}) });
+      items.push({
+        label: t('contextMenu.copyCoordinates'),
+        action: () => {
+          void copyTextToClipboard(`${payload.lat.toFixed(5)}, ${payload.lon.toFixed(5)}`).then((ok) => {
+            this.showToast(ok ? 'Coordinates copied' : 'Copy failed');
+          });
+        },
+      });
       items.push({
         label: t('contextMenu.predictOverheadPasses'),
         action: () => {
