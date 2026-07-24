@@ -44,6 +44,7 @@ const focusedTests = [
   'tests/cascade-map-focus.test.mts',
   'tests/strategic-risk-enable-panel.test.mts',
   'tests/breaking-news-enable-panel.test.mts',
+  'tests/energy-disruptions-enable-panels.test.mts',
 ];
 
 function run(cmd, args, label) {

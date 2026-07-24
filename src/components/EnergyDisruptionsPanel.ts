@@ -268,13 +268,23 @@ export class EnergyDisruptionsPanel extends Panel {
     // with matching drawer-side rendering (scroll-into-view + visual
     // emphasis); until then, emitting an unread field was a misleading
     // API surface (Codex P2).
+    //
+    // Enable the destination panel first — EventHandlers listens for
+    // enable-panel — so the open-* detail event isn't lost when the
+    // pipeline/storage panel is off or still lazy.
+    const targetPanelId = assetType === 'storage' ? 'storage-facility-map' : 'pipeline-status';
+    window.dispatchEvent(new CustomEvent('enable-panel', { detail: { panelId: targetPanelId } }));
+
     const detail = assetType === 'storage'
       ? { facilityId: assetId }
       : { pipelineId: assetId };
     const eventName = assetType === 'storage'
       ? 'energy:open-storage-facility-detail'
       : 'energy:open-pipeline-detail';
-    window.dispatchEvent(new CustomEvent(eventName, { detail }));
+    // Brief delay so lazy mount can attach its detail listener.
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent(eventName, { detail }));
+    }, 80);
   }
 
   private renderRow(e: EnergyDisruptionEntry): string {
