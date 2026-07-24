@@ -54,6 +54,15 @@ describe('OrbitalPassesPopup polish', () => {
     assert.equal(params.get('overhead'), '1');
   });
 
+  it('exposes clipboard helpers with failure labels', async () => {
+    const src = readFileSync(new URL('../src/components/OrbitalPassesPopup.ts', import.meta.url), 'utf8');
+    assert.match(src, /export async function copyTextToClipboard/);
+    assert.match(src, /export function flashClipboardFeedback/);
+    assert.match(src, /Copy failed/);
+    assert.match(src, /Copy unavailable/);
+    assert.match(src, /clipboard\?\.writeText/);
+  });
+
   it('formats prefs-aware empty detail and settings summary', async () => {
     const {
       defaultOverheadEmptyDetail,

@@ -75,6 +75,31 @@ export function formatUtc(ms: number): string {
   return new Date(ms).toISOString().slice(11, 16) + 'Z';
 }
 
+/** Write text to the clipboard; returns false when the API is unavailable or rejects. */
+export async function copyTextToClipboard(text: string): Promise<boolean> {
+  try {
+    const write = navigator.clipboard?.writeText;
+    if (typeof write !== 'function') return false;
+    await write.call(navigator.clipboard, text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/** Temporarily replace a control's label after a clipboard attempt. */
+export function flashClipboardFeedback(
+  el: HTMLElement,
+  ok: boolean,
+  idleLabel: string,
+  ms = 1200,
+): void {
+  el.textContent = ok ? 'Copied' : (navigator.clipboard?.writeText ? 'Copy failed' : 'Copy unavailable');
+  window.setTimeout(() => {
+    if (el.isConnected) el.textContent = idleLabel;
+  }, ms);
+}
+
 /** Pass duration from AOS→LOS, e.g. "4m" or "1h 2m". */
 export function formatPassDuration(aosMs: number, losMs: number): string {
   const sec = Math.max(0, Math.round((losMs - aosMs) / 1000));
@@ -275,12 +300,9 @@ export function showOrbitalPassesPopup(
     shareBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const text = buildOverheadShareUrl(lat, lng);
-      void navigator.clipboard.writeText(text).then(() => {
-        shareBtn.textContent = 'Copied';
-        setTimeout(() => {
-          if (shareBtn.isConnected) shareBtn.textContent = 'Share';
-        }, 1200);
-      }).catch(() => {});
+      void copyTextToClipboard(text).then((ok) => {
+        flashClipboardFeedback(shareBtn, ok, 'Share');
+      });
     });
     headerActions.append(shareBtn);
   }
@@ -293,12 +315,9 @@ export function showOrbitalPassesPopup(
     copyBtn.addEventListener('click', (e) => {
       e.stopPropagation();
       const text = buildOverheadPassesClipboardText(lat, lng, passes);
-      void navigator.clipboard.writeText(text).then(() => {
-        copyBtn.textContent = 'Copied';
-        setTimeout(() => {
-          if (copyBtn.isConnected) copyBtn.textContent = 'Copy';
-        }, 1200);
-      }).catch(() => {});
+      void copyTextToClipboard(text).then((ok) => {
+        flashClipboardFeedback(copyBtn, ok, 'Copy');
+      });
     });
     headerActions.append(copyBtn);
   }
@@ -384,7 +403,8 @@ export function showOrbitalPassesPopup(
         row.setAttribute('aria-label', `Copy ${p.name} pass details`);
         row.title = 'Click to copy this pass';
         const nameRow = el('div', 'orbital-passes-name-row');
-        nameRow.append(el('div', 'orbital-passes-name', p.name));
+        const nameEl = el('div', 'orbital-passes-name', p.name);
+        nameRow.append(nameEl);
         const typeBadge = el('span', `orbital-passes-type orbital-passes-type--${(p.type || 'sat').toLowerCase()}`, p.type || 'sat');
         nameRow.append(typeBadge);
         row.append(nameRow);
@@ -400,7 +420,9 @@ export function showOrbitalPassesPopup(
         row.append(meta);
         const copyRow = () => {
           const text = buildSinglePassClipboardLine(p, nowMs);
-          void navigator.clipboard.writeText(text).catch(() => {});
+          void copyTextToClipboard(text).then((ok) => {
+            flashClipboardFeedback(nameEl, ok, p.name);
+          });
         };
         row.addEventListener('click', (e) => {
           e.stopPropagation();

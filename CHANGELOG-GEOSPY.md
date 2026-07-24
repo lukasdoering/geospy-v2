@@ -10,6 +10,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Overhead satellite pass prediction (SGP4) from map context menu
 - Discoverability: Cmd+K, Cmd/Ctrl+Shift+O, last-location rerun, first-run tip (Try now CTA), flat-map coherence hint
 - Popup polish: duration, type badges, copy, Retry/Refresh, revisit median + SAR/optical counts, testids, prefs footer, AOS/LOS, a11y, Share deep-link, SAR/Optical filters
+- Clipboard feedback: Share/Copy/row click show Copied / Copy failed / Copy unavailable
 - Prefs footer opens Settings → Satellites; tip auto-hide no longer permanently dismisses
 - Flat-map hint **Predict passes** CTA; live URL keeps `?overhead=1` while popup is open
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
