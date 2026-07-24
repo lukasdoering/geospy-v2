@@ -70,7 +70,10 @@ export class GeoHubsPanel extends Panel {
 
   private render(): void {
     if (this.activities.length === 0) {
-      this.showError(t('common.noActiveGeoHubs'));
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noActiveGeoHubs'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -80,7 +83,7 @@ export class GeoHubsPanel extends Panel {
       const topStory = hub.topStories[0];
 
       return `
-        <div class="geo-hub-item ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}">
+        <div class="geo-hub-item geo-hub-item-clickable ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}" role="button" tabindex="0" title="Show on map">
           <div class="hub-rank">${index + 1}</div>
           <span class="geo-hub-indicator ${hub.activityLevel}"></span>
           <div class="hub-info">
@@ -113,15 +116,23 @@ export class GeoHubsPanel extends Panel {
    * re-renders (which replace innerHTML) never accumulate listeners.
    */
   private setupDelegatedListeners(): void {
-    this.content.addEventListener('click', (e: Event) => {
-      const target = e.target as HTMLElement;
-      const item = target.closest<HTMLDivElement>('.geo-hub-item');
+    const activate = (item: HTMLElement | null): void => {
       if (!item) return;
       const hubId = item.dataset.hubId;
       const hub = this.activities.find(a => a.hubId === hubId);
-      if (hub && this.onHubClick) {
-        this.onHubClick(hub);
-      }
+      if (hub) this.onHubClick?.(hub);
+    };
+    this.content.addEventListener('click', (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('a')) return;
+      activate(target.closest<HTMLDivElement>('.geo-hub-item'));
+    });
+    this.content.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const item = (e.target as HTMLElement).closest<HTMLDivElement>('.geo-hub-item');
+      if (!item) return;
+      e.preventDefault();
+      activate(item);
     });
   }
 }

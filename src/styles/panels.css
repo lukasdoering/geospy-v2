@@ -2796,7 +2796,18 @@ body.panel-drag-active .map-bottom-grid:empty::after {
   gap: 8px;
   padding: 7px 10px;
   border-bottom: 1px solid var(--border-subtle);
+}
+
+.geo-hub-item-clickable,
+.tech-hub-item-clickable {
   cursor: pointer;
+}
+
+.geo-hub-item-clickable:focus-visible,
+.tech-hub-item-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
   transition: background 0.15s;
 }
 .geo-hub-item:hover,

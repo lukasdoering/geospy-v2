@@ -74,6 +74,7 @@ export class TechHubsPanel extends Panel {
         lowColor: getCSSColor('--text-dim'),
       }),
     });
+    this.setupDelegatedListeners();
   }
 
   public setOnHubClick(handler: (hub: TechHubActivity) => void): void {
@@ -92,7 +93,10 @@ export class TechHubsPanel extends Panel {
 
   private render(): void {
     if (this.activities.length === 0) {
-      this.showError(t('common.noActiveTechHubs'));
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noActiveTechHubs'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -102,7 +106,7 @@ export class TechHubsPanel extends Panel {
       const topStory = hub.topStories[0];
 
       return `
-        <div class="tech-hub-item ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}">
+        <div class="tech-hub-item tech-hub-item-clickable ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}" role="button" tabindex="0" title="Show on map">
           <div class="hub-rank">${index + 1}</div>
           <span class="hub-indicator ${hub.activityLevel}"></span>
           <div class="hub-info">
@@ -128,19 +132,26 @@ export class TechHubsPanel extends Panel {
     }).join('');
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
-    this.bindEvents();
   }
 
-  private bindEvents(): void {
-    const items = this.content.querySelectorAll<HTMLDivElement>('.tech-hub-item');
-    items.forEach((item) => {
-      item.addEventListener('click', () => {
-        const hubId = item.dataset.hubId;
-        const hub = this.activities.find(a => a.hubId === hubId);
-        if (hub && this.onHubClick) {
-          this.onHubClick(hub);
-        }
-      });
+  private setupDelegatedListeners(): void {
+    const activate = (item: HTMLElement | null): void => {
+      if (!item) return;
+      const hubId = item.dataset.hubId;
+      const hub = this.activities.find(a => a.hubId === hubId);
+      if (hub) this.onHubClick?.(hub);
+    };
+    this.content.addEventListener('click', (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.closest('a')) return;
+      activate(target.closest<HTMLDivElement>('.tech-hub-item'));
+    });
+    this.content.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const item = (e.target as HTMLElement).closest<HTMLDivElement>('.tech-hub-item');
+      if (!item) return;
+      e.preventDefault();
+      activate(item);
     });
   }
 }

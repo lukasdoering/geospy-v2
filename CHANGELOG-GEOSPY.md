@@ -31,6 +31,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Strategic Risk / Posture: keyboard map focus + Null Island guards; drop posture debug logs
 - Next overhead chip: empty-window CTA to tune elevation in Settings
 - Chat Analyst panel title/export: GeoSpy Analyst (not WM)
+- Geo Hubs / Tech Hubs: keyboard map focus + calm empty state (not error)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
