@@ -276,9 +276,16 @@ export class CountryIntelManager implements AppModule {
       const tip = document.createElement('div');
       tip.className = 'geospy-overhead-tip';
       tip.setAttribute('role', 'status');
+      tip.setAttribute('data-testid', 'geospy-overhead-tip');
       const strong = document.createElement('strong');
       strong.textContent = 'GeoSpy tip';
       tip.append(strong, document.createTextNode(' — Right-click map, Cmd+K “overhead”, or Cmd/Ctrl+Shift+O '));
+      const tryBtn = document.createElement('button');
+      tryBtn.type = 'button';
+      tryBtn.className = 'geospy-overhead-tip-try';
+      tryBtn.setAttribute('aria-label', 'Try overhead passes at map center');
+      tryBtn.setAttribute('data-testid', 'geospy-overhead-tip-try');
+      tryBtn.textContent = 'Try now';
       const dismissBtn = document.createElement('button');
       dismissBtn.type = 'button';
       dismissBtn.className = 'geospy-overhead-tip-dismiss';
@@ -292,8 +299,12 @@ export class CountryIntelManager implements AppModule {
           /* ignore quota / private mode */
         }
       };
+      tryBtn.addEventListener('click', () => {
+        dismiss();
+        this.predictOverheadPassesAtMapCenter();
+      });
       dismissBtn.addEventListener('click', dismiss);
-      tip.append(dismissBtn);
+      tip.append(tryBtn, dismissBtn);
       document.body.appendChild(tip);
       requestAnimationFrame(() => tip.classList.add('visible'));
       window.setTimeout(dismiss, 12_000);

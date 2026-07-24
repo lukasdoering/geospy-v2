@@ -83,5 +83,7 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(intel, /predictOverheadPassesAtMapCenter\(/);
     assert.match(intel, /geospy-overhead-passes-tip-dismissed/);
     assert.match(intel, /onRetry:\s*retry/);
+    assert.match(intel, /geospy-overhead-tip-try/);
+    assert.match(intel, /Try now/);
   });
 });
