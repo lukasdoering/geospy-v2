@@ -123,6 +123,7 @@ describe('OrbitalPassesPopup polish', () => {
     assert.match(intel, /onRetry:\s*retry/);
     assert.match(intel, /geospy-overhead-tip-try/);
     assert.match(intel, /Try now/);
-    assert.match(intel, /tryBtn\.focus\(/);
+    assert.match(intel, /settingsSummary/);
+    assert.doesNotMatch(intel, /settingsSummary:\s*false/);
   });
 });
