@@ -95,6 +95,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Calm empties: NewsPanel empty feed + CascadePanel dependency graph failure
 - Calm empty: Strategic Risk overview failures
 - Energy Complex IEA/LNG country rows + Cascade affected countries focus the map; Insights catch calm empty
+- Route Explorer: unavailable/proposed corridor cards no longer keyboard-focusable
 - Calm empties: GDELT Intel load failure, Tech Events error, Defense Patents error
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
