@@ -12,7 +12,7 @@ import {
   getCacheKey,
 } from './_shared';
 import { CHROME_UA } from '../../../_shared/constants';
-import { isProviderAvailable } from '../../../_shared/llm-health';
+import { isModelUsable, isProviderAvailable, recordModelFailure, recordModelSuccess } from '../../../_shared/llm-health';
 import { sanitizeHeadlinesLight, sanitizeHeadlines, sanitizeForPrompt } from '../../../_shared/llm-sanitize.js';
 import { isCallerPremium } from '../../../_shared/premium-check';
 import { stripThinkingTags } from '../../../_shared/llm';
@@ -162,6 +162,7 @@ export async function summarizeArticle(
       CACHE_TTL_SECONDS,
       async () => {
         // Health gate inside fetcher — only runs on cache miss
+        if (!isModelUsable(apiUrl, model)) return null;
         if (!(await isProviderAvailable(apiUrl))) return null;
         // Full injection sanitization applied at prompt-build time only.
         // Headlines are re-sanitized here (not at cache-key time) so that
@@ -226,6 +227,7 @@ export async function summarizeArticle(
         if (!response.ok) {
           const errorText = await response.text();
           console.error(`[SummarizeArticle:${provider}] API error:`, response.status, errorText);
+          recordModelFailure(apiUrl, model, response.status, errorText);
           await emitSummarizeLlmEvent({ provider, model, ok: false, durationMs: Date.now() - llmStartMs, promptChars: llmPromptChars, reason: `http_${response.status}` });
           throw new Error(response.status === 429 ? 'Rate limited' : `${provider} API error`);
         }
@@ -249,6 +251,7 @@ export async function summarizeArticle(
           return null;
         }
 
+        if (rawContent) recordModelSuccess(apiUrl, model);
         await emitSummarizeLlmEvent({ provider, model, ok: Boolean(rawContent), durationMs: Date.now() - llmStartMs, promptChars: llmPromptChars, usage, reason: rawContent ? '' : 'empty' });
         return rawContent ? { summary: rawContent, model, tokens } : null;
       },
