@@ -1,0 +1,42 @@
+#!/usr/bin/env node
+/**
+ * GeoSpy overnight verification: smoke check + focused product-surface tests.
+ * Runs sequentially to avoid worktree OOM (same guidance as pre-push heavy checks).
+ */
+import { spawnSync } from 'node:child_process';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const tsxBin = resolve(root, 'node_modules/.bin/tsx');
+
+const focusedTests = [
+  'tests/orbital-passes-popup-polish.test.mts',
+  'tests/overhead-pass-settings.test.mts',
+  'tests/overhead-last-location.test.mts',
+  'tests/satellite-overhead-passes.test.mts',
+  'tests/satellites-flat-hint.test.mts',
+  'tests/renewable-fallback-disclose.test.mts',
+  'tests/urlState.test.mts',
+  'tests/list-satellites-celestrak.test.mts',
+];
+
+function run(cmd, args, label) {
+  console.log(`\n→ ${label}`);
+  const result = spawnSync(cmd, args, {
+    cwd: root,
+    stdio: 'inherit',
+    env: process.env,
+  });
+  if (result.status !== 0) {
+    console.error(`\nGeoSpy verify FAILED at: ${label}`);
+    process.exit(result.status ?? 1);
+  }
+}
+
+run(process.execPath, [resolve(root, 'scripts/geospy-smoke-check.mjs')], 'geospy:smoke');
+run(tsxBin, ['--test', '--test-concurrency=1', ...focusedTests], 'focused GeoSpy tests');
+
+console.log('\nGeoSpy verify OK');
+console.log('  smoke + overhead/markets/renewable focused tests passed');
+console.log('  demo branch: cursor/geospy-working-demo-4151');
