@@ -1,13 +1,13 @@
-# World Monitor — By the time it's news, you already knew.
+# GeoSpy — By the time it's news, you already knew.
 
-Free real-time global intelligence dashboard. World Monitor streams the world's raw signals — ships, jets, sirens, cables, markets — onto one live map, with AI that flags when they converge into something that matters.
+Free real-time global intelligence dashboard. GeoSpy streams the world's raw signals — ships, jets, sirens, cables, markets — onto one live map, with AI that flags when they converge into something that matters.
 
-Open-source (AGPL-3.0), used by 2M+ people across 190+ countries, as featured in WIRED. Runs as a web app, installable PWA, and native desktop app for macOS, Windows, and Linux. No signup required.
+Open-source (AGPL-3.0) fork of [WorldMonitor](https://github.com/koala73/worldmonitor). Runs as a web app, installable PWA, and native desktop app for macOS, Windows, and Linux. No signup required for the core dashboard.
 
 ## What you get
 
 - Real-time global map with 56 data layers and 500+ curated news feeds
-- Country Instability Index across 196 countries, live conflict tracking
+- Country Instability Index (CII v8) across 31 Tier-1 countries, plus Country Resilience Index (CRI) across a 196-country universe
 - Market quotes, sector heatmaps, and macro indicators
 - 13 shipping chokepoints with live AIS vessel-transit intelligence
 - Satellite tracking, GPS jamming zones, submarine cables, AI datacenters
@@ -15,6 +15,8 @@ Open-source (AGPL-3.0), used by 2M+ people across 190+ countries, as featured in
 - 39-tool MCP server so AI agents can query everything above
 
 ## Live instances
+
+Upstream WorldMonitor deployments (data/API hosts GeoSpy uses by default):
 
 - [World Monitor](https://www.worldmonitor.app/dashboard) — geopolitics, military, conflicts, infrastructure
 - [Tech Monitor](https://tech.worldmonitor.app/dashboard) — startups, AI/ML, cloud, cybersecurity
@@ -35,4 +37,4 @@ Open-source (AGPL-3.0), used by 2M+ people across 190+ countries, as featured in
 ## Documentation
 
 - [Product & API docs](https://www.worldmonitor.app/docs/documentation)
-- [Pricing](https://www.worldmonitor.app/pro) · [GitHub](https://github.com/koala73/worldmonitor)
+- [GeoSpy source](https://github.com/lukasdoering/geospy-v2) · [Upstream WorldMonitor](https://github.com/koala73/worldmonitor)
