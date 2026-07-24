@@ -22,6 +22,7 @@ const focusedTests = [
   'tests/markets-chart-hint.test.mts',
   'tests/next-overhead-chip.test.mts',
   'tests/disease-panel-polish.test.mts',
+  'tests/geospy-brand.test.mts',
 ];
 
 function run(cmd, args, label) {

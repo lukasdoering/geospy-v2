@@ -7,6 +7,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 
 ### Product
 - GeoSpy brand identity (header, footer, offline, Tauri productName, honest meta)
+- Demo chrome copy: widget preview, Analyst tooltip, Keyword Monitors use GeoSpy (not WM)
 - Overhead satellite pass prediction (SGP4) from map context menu
 - Discoverability: Cmd+K, Cmd/Ctrl+Shift+O, last-location rerun, first-run tip (Try now CTA), flat-map coherence hint
 - Popup polish: duration, type badges, copy, Retry/Refresh, revisit median + SAR/optical counts, testids, prefs footer, AOS/LOS, a11y, Share deep-link, SAR/Optical filters

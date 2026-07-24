@@ -31,4 +31,18 @@ describe('GeoSpy brand config', () => {
     assert.match(html, /AGPL fork of WorldMonitor|AGPL fork of <a[^>]*>WorldMonitor/i);
     assert.match(html, /name="description" content="GeoSpy is a real-time global intelligence dashboard/);
   });
+
+  it('uses GeoSpy in demo-facing panel/widget chrome copy', () => {
+    const en = readFileSync(new URL('../src/locales/en.json', import.meta.url), 'utf8');
+    assert.match(en, /Fetching live GeoSpy data/);
+    assert.match(en, /approved GeoSpy endpoints/);
+    assert.match(en, /<strong>GeoSpy Analyst<\/strong>/);
+    assert.match(en, /across all GeoSpy sources/);
+    assert.doesNotMatch(en, /Fetching live WorldMonitor data/);
+    assert.doesNotMatch(en, /<strong>WM Analyst<\/strong>/);
+
+    const shell = readFileSync(new URL('../src/locales/en.shell.json', import.meta.url), 'utf8');
+    assert.match(shell, /Fetching live GeoSpy data/);
+    assert.match(shell, /<strong>GeoSpy Analyst<\/strong>/);
+  });
 });
