@@ -3092,7 +3092,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Deschide prezentarea țării",
-    "copyCoordinates": "Copiază coordonatele"
+    "copyCoordinates": "Copiază coordonatele",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Tabloul de Bord al Inteligenței Globale în Timp Real",

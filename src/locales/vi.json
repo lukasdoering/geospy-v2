@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Mở tổng quan quốc gia",
-    "copyCoordinates": "Sao chép tọa độ"
+    "copyCoordinates": "Sao chép tọa độ",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Bảng điều khiển tình báo toàn cầu theo thời gian thực",

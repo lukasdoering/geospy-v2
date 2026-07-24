@@ -3074,7 +3074,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Отвори обзор на страната",
-    "copyCoordinates": "Копирай координати"
+    "copyCoordinates": "Копирай координати",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "shell": {
     "documentTitle": "World Monitor — Табло за управление на глобална разузнавателна информация в реално време",
