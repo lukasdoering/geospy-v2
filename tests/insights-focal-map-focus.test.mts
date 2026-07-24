@@ -19,9 +19,10 @@ describe('insights focal points map focus', () => {
     assert.match(layout, /insights[\s\S]*?setLocationClickHandler/);
   });
 
-  it('includes clickable focal-point styles', () => {
+  it('includes clickable focal-point and convergence styles', () => {
     const css = readFileSync(new URL('../src/styles/main.css', import.meta.url), 'utf8');
     assert.match(css, /\.focal-point-clickable/);
     assert.match(css, /\.focal-point-clickable:focus-visible/);
+    assert.match(css, /\.convergence-zone-clickable/);
   });
 });
