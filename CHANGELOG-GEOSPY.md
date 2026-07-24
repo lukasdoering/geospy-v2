@@ -13,7 +13,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
 - Satellites layer default-on (full variant)
 - Markets expandable terminal price chart (in-panel click hint)
-- `npm run geospy:smoke` / `npm run geospy:demo` helpers
+- `npm run geospy:smoke` / `geospy:demo` / `geospy:verify` helpers
 
 ### Reliability / trust / security (selected upstream ports)
 - Fail-closed source provenance; news classify-cache validation

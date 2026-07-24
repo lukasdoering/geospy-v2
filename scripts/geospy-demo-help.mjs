@@ -12,8 +12,10 @@ Checkout and run:
 
 Validate:
   npm run geospy:smoke
+  npm run geospy:verify
 
 Try:
+  • Tip → Try now (first visit)
   • Right-click map → Predict Overhead Passes
   • Cmd/Ctrl+K → "overhead" or "last overhead"
   • Cmd/Ctrl+Shift+O → passes at map center
