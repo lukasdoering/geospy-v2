@@ -161,4 +161,20 @@ describe('GeoSpy brand config', () => {
     assert.match(grant, /A GeoSpy Pro subscription is required/);
     assert.doesNotMatch(grant, /A WorldMonitor Pro subscription is required/);
   });
+
+  it('brands map-layer explanation source strings as GeoSpy', () => {
+    const layers = readFileSync(new URL('../src/config/map-layer-definitions.ts', import.meta.url), 'utf8');
+    assert.match(layers, /GeoSpy conflict-zone registry/);
+    assert.match(layers, /GeoSpy CII scoring service/);
+    assert.match(layers, /GeoSpy maritime service/);
+    assert.match(layers, /GeoSpy strategic-waterways registry/);
+    assert.match(layers, /GeoSpy trade-route registry/);
+    assert.match(layers, /GeoSpy hotspot registry/);
+    assert.doesNotMatch(layers, /WorldMonitor conflict-zone registry/);
+    assert.doesNotMatch(layers, /WorldMonitor CII scoring service/);
+    assert.doesNotMatch(layers, /WorldMonitor maritime service/);
+    assert.doesNotMatch(layers, /WorldMonitor strategic-waterways registry/);
+    assert.doesNotMatch(layers, /WorldMonitor trade-route registry/);
+    assert.doesNotMatch(layers, /WorldMonitor hotspot registry/);
+  });
 });
