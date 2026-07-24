@@ -77,16 +77,16 @@ export class InsightsPanel extends Panel {
     this.header.appendChild(this.fwSelector.el);
 
     this.content.addEventListener('click', (e) => {
-      const card = (e.target as HTMLElement).closest<HTMLElement>('.focal-point-clickable');
-      if (!card?.dataset.country) return;
       // Don't steal clicks on headline links
       if ((e.target as HTMLElement).closest('a')) return;
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.focal-point-clickable, .convergence-zone-clickable');
+      if (!card?.dataset.country) return;
       this.focusCountry(card.dataset.country);
     });
     this.content.addEventListener('keydown', (e) => {
       if (!(e instanceof KeyboardEvent)) return;
       if (e.key !== 'Enter' && e.key !== ' ') return;
-      const card = (e.target as HTMLElement).closest<HTMLElement>('.focal-point-clickable');
+      const card = (e.target as HTMLElement).closest<HTMLElement>('.focal-point-clickable, .convergence-zone-clickable');
       if (!card?.dataset.country) return;
       e.preventDefault();
       this.focusCountry(card.dataset.country);
@@ -896,9 +896,13 @@ export class InsightsPanel extends Panel {
       };
 
       const icons = zone.signalTypes.map(t => signalIcons[t] || '📍').join('');
+      const focusCode = (zone.countries?.[0] || '').trim().toUpperCase();
+      const attrs = focusCode
+        ? ` class="convergence-zone convergence-zone-clickable" data-country="${escapeHtml(focusCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(zone.region)} on map"`
+        : ' class="convergence-zone"';
 
       return `
-        <div class="convergence-zone">
+        <div${attrs}>
           <div class="convergence-region">${icons} ${escapeHtml(zone.region)}</div>
           <div class="convergence-description">${escapeHtml(zone.description)}</div>
           <div class="convergence-stats">${t('components.insights.signalTypesEvents', { types: zone.signalTypes.length, events: zone.totalSignals })}</div>

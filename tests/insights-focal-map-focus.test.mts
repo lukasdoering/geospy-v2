@@ -8,6 +8,7 @@ describe('insights focal points map focus', () => {
     assert.match(panel, /setLocationClickHandler/);
     assert.match(panel, /resolveCountryMapFocus/);
     assert.match(panel, /focal-point-clickable/);
+    assert.match(panel, /convergence-zone-clickable/);
     assert.match(panel, /data-country/);
     assert.match(panel, /tabindex="0"/);
     assert.match(panel, /keydown/);

@@ -75,7 +75,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Earnings / WSB / Oil Inventories / ETF Flows / Cross-Source Signals: calm empty when no data
 - Storage Atlas / Disease Outbreaks / Global Procurement: calm empty when unavailable
 - CII country click also focuses the map (then opens country brief); keyboard a11y + calm unavailable
-- Insights: country focal-point cards click/keyboard → map focus
+- Insights: country focal-point cards + convergence zones click/keyboard → map focus
 - Hormuz / Yield Curve / AAII / Liquidity / COT / Macro Signals / Stablecoin / Chokepoint Strip / Energy Crisis: calm empty when unavailable
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
