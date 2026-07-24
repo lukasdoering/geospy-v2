@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import type { GlobalTender, ListGlobalTendersResponse } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import type { GlobalTenderFilters } from '@/services/global-tenders';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveFuelShortageMapFocus } from '@/utils/fuel-shortage-map-focus';
 
 type RequestHandler = (filters: GlobalTenderFilters, append: boolean) => void;
 
@@ -52,6 +53,7 @@ export class GlobalProcurementPanel extends Panel {
   private filters: GlobalTenderFilters = { ...DEFAULT_FILTERS };
   private requestHandler: RequestHandler | null = null;
   private loading = false;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -74,6 +76,7 @@ export class GlobalProcurementPanel extends Panel {
 
     this.content.addEventListener('click', (event) => {
       const target = event.target as HTMLElement;
+      if (target.closest('a')) return;
       if (target.closest('[data-procurement-load-more]')) {
         const cursor = this.data?.nextCursor;
         if (cursor) this.request({ ...this.filters, cursor }, true);
@@ -82,8 +85,29 @@ export class GlobalProcurementPanel extends Panel {
       if (target.closest('[data-procurement-reset]')) {
         this.filters = { ...DEFAULT_FILTERS };
         this.request({ ...this.filters }, false);
+        return;
       }
+      const card = target.closest<HTMLElement>('[data-procurement-country]');
+      if (card) this.focusCountry(card.dataset.procurementCountry);
     });
+    this.content.addEventListener('keydown', (event: KeyboardEvent) => {
+      if (event.key !== 'Enter' && event.key !== ' ') return;
+      const card = (event.target as HTMLElement | null)?.closest<HTMLElement>('[data-procurement-country]');
+      if (!card) return;
+      event.preventDefault();
+      this.focusCountry(card.dataset.procurementCountry);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveFuelShortageMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public setRequestHandler(handler: RequestHandler): void {
@@ -182,6 +206,11 @@ export class GlobalProcurementPanel extends Panel {
       ${cards ? `<div class="spending-list global-procurement-list">${cards}</div>` : ''}
       ${loadMore}
       <div class="economic-footer"><span class="economic-source">${escapeHtml(sourceSummary)}${data.fetchedAt ? ` · snapshot ${escapeHtml(new Date(data.fetchedAt).toLocaleString())}` : ''}</span></div>
+      <style>
+        .global-procurement-card-clickable { cursor: pointer; }
+        .global-procurement-card-clickable:hover { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .global-procurement-card-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `, 'global procurement results'));
   }
 
@@ -220,7 +249,12 @@ export class GlobalProcurementPanel extends Panel {
     const relevance = tender.automationFit?.matchReasons?.length
       ? `<div class="award-agency">Technology relevance (keyword evidence, not bidding eligibility): ${escapeHtml(tender.automationFit.matchReasons.join(', '))}</div>`
       : '';
-    return `<article class="spending-award global-procurement-card">
+    const code = (tender.countryCode || '').trim().toUpperCase();
+    const clickable = code.length === 2;
+    const attrs = clickable
+      ? ` class="spending-award global-procurement-card global-procurement-card-clickable" data-procurement-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+      : ' class="spending-award global-procurement-card"';
+    return `<article${attrs}>
       <div class="award-header"><span class="award-amount">${escapeHtml(tender.status.toUpperCase())}</span><span class="award-icon">${closingSoon ? '⏰' : '📄'}</span></div>
       <div class="award-recipient">${escapeHtml(tender.title)}</div>
       <div class="award-agency">${meta}</div>

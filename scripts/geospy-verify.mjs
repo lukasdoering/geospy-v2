@@ -52,6 +52,7 @@ const focusedTests = [
   'tests/gulf-economies-map-focus.test.mts',
   'tests/sanctions-map-focus.test.mts',
   'tests/trade-policy-map-focus.test.mts',
+  'tests/procurement-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {

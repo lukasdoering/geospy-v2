@@ -59,6 +59,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Gulf Economies: country quote click/keyboard → map focus + calm empty (not error)
 - Sanctions Pressure: country/entry row click/keyboard → country map focus
 - Trade Policy: restriction/barrier card click/keyboard → reporting country map focus
+- Global Procurement: tender card click/keyboard → country map focus (ISO2)
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
