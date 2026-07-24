@@ -12,5 +12,6 @@ describe('panel → map layer enable', () => {
     assert.match(layout, /applyMapLayerChange\?\.\('climate'/);
     assert.match(layout, /applyMapLayerChange\?\.\('displacement'/);
     assert.match(layout, /applyMapLayerChange\?\.\('radiationWatch'/);
+    assert.match(layout, /thermal-escalation[\s\S]*applyMapLayerChange\?\.\('natural'/);
   });
 });

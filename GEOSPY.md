@@ -43,7 +43,7 @@ Cmd/Ctrl+K → **Panel: Markets** (or Commodities / Crypto), then click a ticker
 - **Security Advisories** — search by country / title; click a card to focus the country
 - **Radiation Watch** — keyboard-accessible row → map focus (enables radiation layer)
 - **UCDP / Climate / Displacement** — row click enables the matching map layer
-- **Thermal Escalation** — search region/status; click/keyboard focuses the map
+- **Thermal Escalation** — search region/status; click/keyboard focuses the map (enables natural/FIRMS layer)
 - **Geo / Tech Hubs** — keyboard-accessible row → map focus
 - **Tech Events** — pin focuses the map and enables the techEvents layer
 - **OREF Sirens** — alert/history row focuses Israel (Tel Aviv)

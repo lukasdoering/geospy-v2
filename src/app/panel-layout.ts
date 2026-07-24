@@ -2068,7 +2068,13 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('thermal-escalation', () => import('@/components/ThermalEscalationPanel'), 'ThermalEscalationPanel', (ThermalEscalationPanel) => {
       const p = new ThermalEscalationPanel();
-      p.setLocationClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        // Thermal clusters are FIRMS-derived — surface natural detections when focusing.
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.natural) {
+          this.callbacks.applyMapLayerChange?.('natural', true, 'programmatic');
+        }
+      });
       return p;
     });
 

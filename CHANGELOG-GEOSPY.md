@@ -43,6 +43,7 @@ Notable product work on top of WorldMonitor. Prefer the integration branch
 - Infrastructure Cascade: wire select/analyze → map focus (chokepoint open / setCenter)
 - Strategic Risk: wire dead `enable-panel` CustomEvent → enablePanelById
 - Breaking news banner click: enable target panel (retry mount) then scroll/highlight
+- Thermal Escalation map focus also enables the natural (FIRMS) layer
 - settings.html / embed.html GeoSpy titles
 - Deep link: `?overhead=1&lat=&lon=` or `?overhead=lat,lon` opens pass prediction on load
 - Settings → Satellites: elevation threshold + look-ahead window + shortcuts help
