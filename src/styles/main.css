@@ -10436,6 +10436,19 @@ a.prediction-link:hover {
   padding: 8px 12px;
 }
 
+.economic-indicator-clickable {
+  cursor: pointer;
+}
+
+.economic-indicator-clickable:hover {
+  filter: brightness(1.08);
+}
+
+.economic-indicator-clickable:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
 .indicator-header {
   display: flex;
   justify-content: space-between;

@@ -1884,7 +1884,11 @@ export class PanelLayoutManager implements AppModule {
     this.createNewsPanel('github', 'panels.github');
     this.createNewsPanel('ipo', 'panels.ipo');
     this.createNewsPanel('thinktanks', 'panels.thinktanks');
-    this.lazyDefaultPanel('economic', () => import('@/components/EconomicPanel'), 'EconomicPanel');
+    this.lazyDefaultPanel('economic', () => import('@/components/EconomicPanel'), 'EconomicPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
     this.lazyImportedPanel('global-procurement', () => import('@/components/GlobalProcurementPanel'), 'GlobalProcurementPanel', (GlobalProcurementPanel) => {
       const p = new GlobalProcurementPanel();
       p.setLocationClickHandler((lat: number, lon: number) => {
