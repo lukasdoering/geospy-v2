@@ -42,6 +42,7 @@ npm run dev:energy
 - **Overhead pass prediction** — right-click the map (or Cmd/Ctrl+K → “overhead passes”) to compute upcoming LEO imaging passes at that point
 - **Orbital polish** — pass duration, type badges, copy summary, retry, revisit window, and a flat-map hint that live orbits render on the 3D globe
 - **GeoSpy product chrome** — header/footer/offline branding with explicit WorldMonitor attribution; API hosts stay upstream for zero-env data
+- **Markets chart** — Cmd/Ctrl+K → “Markets” / “Panel: Markets”, then click a ticker sparkline for the terminal chart
 - **Integration branch** — [`cursor/geospy-working-demo-4151`](https://github.com/lukasdoering/geospy-v2/tree/cursor/geospy-working-demo-4151) / [PR #6](https://github.com/lukasdoering/geospy-v2/pull/6)
 
 ## What It Does
