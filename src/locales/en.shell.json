@@ -1,9 +1,9 @@
 {
   "shell": {
-    "documentTitle": "World Monitor — Real-Time Global Intelligence Dashboard",
-    "metaDescription": "Real-time global intelligence platform. Featured in WIRED. Used by 2M+ people across 190 countries. Conflicts, markets, military, OSINT in one view.",
+    "documentTitle": "GeoSpy — Real-Time Global Intelligence Dashboard",
+    "metaDescription": "GeoSpy real-time global intelligence dashboard. Conflicts, markets, military, climate, and OSINT in one live map. AGPL fork of WorldMonitor.",
     "offlineTitle": "You're Offline",
-    "offlineMessage": "World Monitor requires an internet connection for real-time intelligence data.",
+    "offlineMessage": "GeoSpy requires an internet connection for real-time intelligence data.",
     "offlineRetry": "Retry"
   },
   "header": {
@@ -259,7 +259,7 @@
   },
   "premium": {
     "pro": "PRO",
-    "lockedDesc": "Requires a World Monitor license key",
+    "lockedDesc": "Requires a GeoSpy license key",
     "signInToUnlock": "Sign in to unlock premium features",
     "signIn": "Sign In to Unlock",
     "upgradeDesc": "Upgrade to Pro for full access to premium analytics",
@@ -341,12 +341,12 @@
     "phaseError": "Error",
     "previewCheckingHeading": "Connecting the widget builder",
     "previewReadyHeading": "Describe the widget you want",
-    "previewFetchingHeading": "Fetching live WorldMonitor data",
+    "previewFetchingHeading": "Fetching live GeoSpy data",
     "previewComposingHeading": "Composing the widget layout",
     "previewErrorHeading": "The preview needs attention",
     "previewCheckingCopy": "We are validating your widget key and backend availability before enabling generation.",
     "previewReadyCopy": "Use a prompt example or describe the exact live view you want. The preview will update here before you save it.",
-    "previewFetchingCopy": "The agent is calling approved WorldMonitor endpoints and shaping the dataset for the widget.",
+    "previewFetchingCopy": "The agent is calling approved GeoSpy endpoints and shaping the dataset for the widget.",
     "previewComposingCopy": "The preview is rendering with the latest live data and dashboard styling.",
     "previewErrorCopy": "Fix the issue, then retry. Your existing widgets are unaffected.",
     "createInteractive": "Create Interactive Widget",
@@ -396,7 +396,8 @@
   },
   "contextMenu": {
     "openCountryBrief": "Open Country Brief",
-    "copyCoordinates": "Copy Coordinates"
+    "copyCoordinates": "Copy Coordinates",
+    "predictOverheadPasses": "Predict Overhead Passes"
   },
   "components": {
     "deckgl": {
@@ -463,7 +464,7 @@
       "infoTooltip": "<strong>Central Bank Watch</strong> Latest statements, rate decisions, and communications from the Federal Reserve, ECB, Bank of England, and other major central banks worldwide."
     },
     "chatAnalyst": {
-      "infoTooltip": "<strong>WM Analyst</strong> AI analyst with live context across geopolitical, market, military, and economic domains. Powered by Claude with real-time data injected from active WorldMonitor feeds."
+      "infoTooltip": "<strong>GeoSpy Analyst</strong> AI analyst with live context across geopolitical, market, military, and economic domains. Powered by Claude with real-time data injected from active GeoSpy feeds."
     },
     "chokepointStrip": {
       "infoTooltip": "Live status for the seven global oil & gas shipping chokepoints. Flow estimates calibrated from Portwatch DWT + AIS observations. See /docs/methodology/chokepoints for methodology.",
@@ -607,13 +608,14 @@
       "title": "AI Market Implications"
     },
     "markets": {
-      "infoTooltip": "<strong>Markets</strong> Real-time stock indices, equities, and crypto prices. Customize your watchlist with the Watchlist button. Sparklines show recent price trend."
+      "infoTooltip": "<strong>Markets</strong> Real-time stock indices, equities, and crypto prices. Customize your watchlist with the Watchlist button. Sparklines show recent price trend. Click a ticker to open the terminal price chart.",
+      "chartHint": "Click a ticker with a sparkline to open the terminal chart"
     },
     "militaryCorrelation": {
       "infoTooltip": "<strong>Force Posture</strong> Correlates military activity with geopolitical context:<ul><li>Military aircraft and naval vessel concentrations by region</li><li>Cross-references with active conflict zones and news spikes</li><li>Highlights unusual force buildups or repositioning</li></ul>Click a card to zoom to the region on the map."
     },
     "monitors": {
-      "infoTooltip": "<strong>Keyword Monitors</strong> Add any term to track live news mentions across all WorldMonitor sources. Results update in real time as matching articles are ingested."
+      "infoTooltip": "<strong>Keyword Monitors</strong> Add any term to track live news mentions across all GeoSpy sources. Results update in real time as matching articles are ingested."
     },
     "oilInventories": {
       "infoTooltip": "<strong>Oil Inventories</strong> US crude oil and SPR stockpiles (EIA weekly), natural gas storage, EU gas fill percentage (GIE AGSI+), and OECD oil stocks days-of-cover (IEA monthly)."
@@ -642,14 +644,17 @@
       "infoTooltip": "<strong>Regulation</strong> Regulatory actions, policy changes, and enforcement updates from global regulators: financial, tech, energy, and trade authorities. Sourced from official government and regulatory body publications."
     },
     "renewable": {
-      "infoTooltip": "<strong>Renewable Energy</strong> Share of electricity generation from renewables by region and year, plus US installed capacity for solar, wind, and coal (MW). Sources: World Bank (EG.ELC.RNEW.ZS) and EIA."
+      "infoTooltip": "<strong>Renewable Energy</strong> Share of electricity generation from renewables by region and year, plus US installed capacity for solar, wind, and coal (MW). Sources: World Bank (EG.ELC.RNEW.ZS) and EIA.",
+      "fallbackBadge": "Showing static fallback data — live series unavailable",
+      "fallbackTooltip": "The live World Bank renewable seed could not be reached. This panel is rendered from a hardcoded snapshot last verified Feb 2026."
     },
     "sanctionsPressure": {
       "infoTooltip": "OFAC sanctions designations from the SDN and Consolidated Lists. Shows which countries face the highest designation pressure, what programs are driving it, and what has been newly added since the last update.",
       "title": "Sanctions & Designations"
     },
     "satelliteFires": {
-      "infoTooltip": "NASA FIRMS VIIRS satellite thermal detections across monitored conflict regions. High-intensity = brightness >360K & confidence >80%."
+      "empty": "No active satellite fire detections in the current window.",
+      "infoTooltip": "NASA FIRMS VIIRS satellite thermal detections across monitored conflict regions. High-intensity = brightness >360K & confidence >80%. Click a region row to focus the map."
     },
     "securityAdvisories": {
       "infoTooltip": "<strong>Security Advisories</strong><br>Travel advisories and security alerts from government foreign affairs agencies:<br><br><strong>Sources:</strong><br>🇺🇸 US State Dept Travel Advisories<br>🇦🇺 AU DFAT Smartraveller<br>🇬🇧 UK FCDO Travel Advice<br><br><strong>Levels:</strong><br>🟥 Do Not Travel<br>🟧 Reconsider Travel<br>🟨 Exercise Caution<br>🟩 Normal Precautions"
@@ -733,7 +738,7 @@
         "staged": "Staged (save with OK)"
       },
       "reserveEarlyAccess": "Reserve Your Early Access",
-      "skipSetup": "Skip the setup — a single World Monitor license unlocks everything. Join the waitlist for early access.",
+      "skipSetup": "Skip the setup — a single GeoSpy license unlocks everything. Join the waitlist for early access.",
       "status": {
         "invalid": "Invalid",
         "looksInvalid": "Looks invalid",
@@ -761,7 +766,7 @@
       "shellCancel": "Cancel",
       "shellSaveClose": "Save & Close",
       "shellSearchPlaceholder": "Search settings...",
-      "shellTitle": "World Monitor Settings",
+      "shellTitle": "GeoSpy Settings",
       "sidecarError": "Could not reach sidecar to toggle verbose mode",
       "sidecarUnreachable": "Sidecar not reachable.",
       "table": {

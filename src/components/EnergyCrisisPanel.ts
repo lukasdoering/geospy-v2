@@ -5,6 +5,7 @@ import { getHydratedData } from '@/services/bootstrap';
 import type { GetEnergyCrisisPoliciesResponse, EnergyCrisisPolicy } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { EconomicServiceClient } from '@/services/generated-rpc-clients';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type PolicyData = GetEnergyCrisisPoliciesResponse;
 
@@ -33,6 +34,7 @@ export class EnergyCrisisPanel extends Panel {
   private loading = true;
   private error: string | null = null;
   private activeFilter: string = 'all';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -44,6 +46,17 @@ export class EnergyCrisisPanel extends Panel {
       infoTooltip: 'IEA 2026 Energy Crisis Policy Response Tracker. Tracks government measures to conserve energy and support consumers in response to Middle East conflict and Strait of Hormuz supply disruptions.',
     });
     this.showLoading('Loading energy crisis policies...');
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<void> {
@@ -105,7 +118,10 @@ export class EnergyCrisisPanel extends Panel {
     }
 
     if (this.error || !this.data) {
-      this.showError(this.error || 'No data available', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(this.error || 'No data available')}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -149,7 +165,7 @@ export class EnergyCrisisPanel extends Panel {
       const categoryClass = p.category === 'conservation' ? 'ecp-cat-conservation' : 'ecp-cat-support';
 
       return `
-        <div class="ecp-policy-row">
+        <div class="ecp-policy-row ecp-policy-row-clickable" data-country-code="${escapeHtml(p.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(p.countryCode)} on map">
           <div class="ecp-policy-header">
             <span class="ecp-country">${escapeHtml(p.country)}</span>
             <span class="ecp-pill ${categoryClass}">${escapeHtml(categoryLabel)}</span>
@@ -185,6 +201,21 @@ export class EnergyCrisisPanel extends Panel {
         const filter = (e.currentTarget as HTMLElement).dataset.filter || 'all';
         this.activeFilter = filter;
         this.render();
+      });
+    });
+
+    const activate = (row: HTMLElement): void => {
+      this.focusCountry(row.dataset.countryCode);
+    };
+    this.content?.querySelectorAll<HTMLElement>('.ecp-policy-row-clickable').forEach(row => {
+      row.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) return;
+        activate(row);
+      });
+      row.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(row);
       });
     });
   }

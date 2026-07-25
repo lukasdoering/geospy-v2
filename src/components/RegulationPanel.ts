@@ -10,14 +10,27 @@ import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { getCSSColor } from '@/utils';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 
 export class RegulationPanel extends Panel {
   private viewMode: 'timeline' | 'deadlines' | 'regulations' | 'countries' = 'timeline';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor(id: string) {
     super({ id, title: t('panels.regulation'), infoTooltip: t('components.regulation.infoTooltip') });
     this.render();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   protected render(): void {
@@ -36,6 +49,11 @@ export class RegulationPanel extends Panel {
           ${this.renderContent()}
         </div>
       </div>
+      <style>
+        .regulation-map-clickable { cursor: pointer; }
+        .regulation-map-clickable:hover { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .regulation-map-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `, "legacy direct innerHTML migration"));
 
     // Add event listeners for tabs
@@ -47,6 +65,21 @@ export class RegulationPanel extends Panel {
           this.viewMode = view;
           this.render();
         }
+      });
+    });
+
+    const activate = (el: HTMLElement): void => {
+      this.focusCountry(el.dataset.regCountry);
+    };
+    this.content.querySelectorAll<HTMLElement>('[data-reg-country]').forEach(el => {
+      el.addEventListener('click', (e) => {
+        if ((e.target as HTMLElement).closest('a')) return;
+        activate(el);
+      });
+      el.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(el);
       });
     });
   }
@@ -286,8 +319,14 @@ export class RegulationPanel extends Panel {
     const activeCount = profile.activeRegulations.length;
     const proposedCount = profile.proposedRegulations.length;
 
+    // EU (and similar) codes won't resolve to a map centroid — still mark
+    // ISO2 profiles clickable; focusCountry no-ops when unresolvable.
+    const code = (profile.countryCode || '').trim().toUpperCase();
+    const attrs = code.length === 2
+      ? ` class="country-card stance-${profile.stance} regulation-map-clickable" data-reg-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
+      : ` class="country-card stance-${profile.stance}"`;
     return `
-      <div class="country-card stance-${profile.stance}">
+      <div${attrs}>
         <div class="country-card-header" style="border-left: 4px solid ${stanceColors[profile.stance]}">
           <h5>${escapeHtml(profile.country)}</h5>
           <span class="stance-badge" style="background-color: ${stanceColors[profile.stance]}">${profile.stance.toUpperCase()}</span>

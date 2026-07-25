@@ -21,6 +21,7 @@ import { escapeHtml, sanitizeUrl } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { Panel } from './Panel';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
+import { resolveAirportMapFocus } from '@/utils/airport-map-focus';
 
 
 // ---- Helpers ----
@@ -93,6 +94,24 @@ export class AirlineIntelPanel extends Panel {
     private refreshTimer: ReturnType<typeof setInterval> | null = null;
     private liveIndicator!: HTMLElement;
     private tabBar!: HTMLElement;
+    private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
+    public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+        this.onMapFocus = handler;
+    }
+
+    private focusLatLon(lat?: number, lon?: number): void {
+        if (!this.onMapFocus) return;
+        if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+        this.onMapFocus(lat as number, lon as number);
+    }
+
+    private focusAirport(iata?: string): void {
+        if (!this.onMapFocus || !iata) return;
+        const focus = resolveAirportMapFocus(iata);
+        if (!focus) return;
+        this.onMapFocus(focus.lat, focus.lon);
+    }
 
     constructor() {
         super({ id: 'airline-intel', title: t('panels.airlineIntel'), trackActivity: true, infoTooltip: t('components.airlineIntel.infoTooltip') });
@@ -166,12 +185,36 @@ export class AirlineIntelPanel extends Panel {
                 this.trackingFlightData = [];
                 this.trackingData = [];
                 void this.loadTab('tracking');
+                return;
+            }
+            const trackRow = target.closest('.track-row-clickable') as HTMLElement | null;
+            if (trackRow?.dataset.lat && trackRow?.dataset.lon) {
+                this.focusLatLon(Number(trackRow.dataset.lat), Number(trackRow.dataset.lon));
+                return;
+            }
+            const opsRow = target.closest('.ops-row-clickable') as HTMLElement | null;
+            if (opsRow?.dataset.iata) {
+                this.focusAirport(opsRow.dataset.iata);
             }
         });
 
         this.content.addEventListener('keydown', (e) => {
             if (e.key === 'Enter' && (e.target as HTMLElement).id === 'trackQueryInput') {
                 this.handleTrackSearch();
+                return;
+            }
+            if (e.key !== 'Enter' && e.key !== ' ') return;
+            const target = e.target as HTMLElement;
+            const trackRow = target.closest('.track-row-clickable') as HTMLElement | null;
+            if (trackRow?.dataset.lat && trackRow?.dataset.lon) {
+                e.preventDefault();
+                this.focusLatLon(Number(trackRow.dataset.lat), Number(trackRow.dataset.lon));
+                return;
+            }
+            const opsRow = target.closest('.ops-row-clickable') as HTMLElement | null;
+            if (opsRow?.dataset.iata) {
+                e.preventDefault();
+                this.focusAirport(opsRow.dataset.iata);
             }
         });
 
@@ -391,8 +434,13 @@ export class AirlineIntelPanel extends Panel {
             setTrustedHtml(this.content, trustedHtml(`<div class="no-data">${t('components.airlineIntel.noOpsData')}</div>`, "legacy direct innerHTML migration"));
             return;
         }
-        const rows = this.opsData.map(s => `
-      <div class="ops-row">
+        const rows = this.opsData.map(s => {
+            const focusable = Boolean(resolveAirportMapFocus(s.iata));
+            const attrs = focusable
+                ? ` class="ops-row ops-row-clickable" data-iata="${escapeHtml(s.iata)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(s.iata)} on map"`
+                : ' class="ops-row"';
+            return `
+      <div${attrs}>
         <div class="ops-iata">${escapeHtml(s.iata)}</div>
         <div class="ops-name">${escapeHtml(s.name || s.iata)}</div>
         <div class="ops-severity" style="color:${SEVERITY_COLOR[s.severity] ?? '#aaa'}">${s.severity.toUpperCase()}</div>
@@ -400,7 +448,8 @@ export class AirlineIntelPanel extends Panel {
         <div class="ops-cancel">${s.cancellationRate > 0 ? `${s.cancellationRate.toFixed(1)}% cxl` : ''}</div>
         ${s.closureStatus ? '<div class="ops-closed">CLOSED</div>' : ''}
         ${s.notamFlags.length ? `<div class="ops-notam">⚠️ NOTAM</div>` : ''}
-      </div>`).join('');
+      </div>`;
+        }).join('');
         setTrustedHtml(this.content, trustedHtml(`<div class="ops-grid">${rows}</div>`, "legacy direct innerHTML migration"));
     }
 
@@ -485,13 +534,20 @@ export class AirlineIntelPanel extends Panel {
 
         // Position results (searched by callsign/ICAO24 or default global fetch)
         if (this.trackingData.length) {
-            const rows = this.trackingData.slice(0, 20).map(p => `
-        <div class="track-row">
+            const rows = this.trackingData.slice(0, 20).map(p => {
+                const hasPos = Number.isFinite(p.lat) && Number.isFinite(p.lon)
+                    && !(Math.abs(p.lat) < 1e-6 && Math.abs(p.lon) < 1e-6);
+                const attrs = hasPos
+                    ? ` class="track-row track-row-clickable" data-lat="${p.lat}" data-lon="${p.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show aircraft on map"`
+                    : ' class="track-row"';
+                return `
+        <div${attrs}>
           <div class="track-cs">${escapeHtml(p.callsign || p.icao24)}</div>
           <div class="track-alt">${fmt(p.altitudeFt)} ft</div>
           <div class="track-spd">${fmt(p.groundSpeedKts)} kts</div>
           <div class="track-pos">${p.lat.toFixed(2)}, ${p.lon.toFixed(2)}</div>
-        </div>`).join('');
+        </div>`;
+            }).join('');
             setTrustedHtml(this.content, trustedHtml(`${searchBar}<div class="tracking-list">${rows}</div>`, "legacy direct innerHTML migration"));
             return;
         }

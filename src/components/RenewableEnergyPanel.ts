@@ -9,19 +9,59 @@
 import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import * as d3 from 'd3';
-import type { RenewableEnergyData, RegionRenewableData, CapacitySeries } from '@/services/renewable-energy-data';
+import type {
+  RenewableEnergyData,
+  RenewableEnergyDataResult,
+  RenewableEnergyDataSource,
+  RegionRenewableData,
+  CapacitySeries,
+} from '@/services/renewable-energy-data';
 import { getCSSColor } from '@/utils';
 import { replaceChildren } from '@/utils/dom-utils';
+import { resolveTheaterMapFocus } from '@/utils/theater-map-focus';
 
 export class RenewableEnergyPanel extends Panel {
+  private source: RenewableEnergyDataSource = 'hydrated';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
   constructor() {
     super({ id: 'renewable', title: 'Renewable Energy', trackActivity: false, infoTooltip: t('components.renewable.infoTooltip') });
+    this.content.addEventListener('click', (e) => {
+      const row = (e.target as HTMLElement).closest('.region-row-clickable') as HTMLElement | null;
+      if (!row?.dataset.theater) return;
+      this.focusTheater(row.dataset.theater);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('.region-row-clickable') as HTMLElement | null;
+      if (!row?.dataset.theater) return;
+      e.preventDefault();
+      this.focusTheater(row.dataset.theater);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusTheater(theater?: string): void {
+    if (!this.onMapFocus || !theater) return;
+    const focus = resolveTheaterMapFocus(theater);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   /**
    * Set data and render the full panel: gauge + sparkline + regional breakdown.
+   * Accepts either a tagged `RenewableEnergyDataResult` (preferred — carries a
+   * source tag so the panel can disclose fallback state) or raw data.
    */
-  public setData(data: RenewableEnergyData): void {
+  public setData(input: RenewableEnergyDataResult | RenewableEnergyData): void {
+    const { data, source } = 'source' in input && 'data' in input
+      ? input
+      : { data: input as RenewableEnergyData, source: 'hydrated' as RenewableEnergyDataSource };
+    this.source = source;
     replaceChildren(this.content);
 
     // Empty state
@@ -37,6 +77,10 @@ export class RenewableEnergyPanel extends Panel {
       empty.textContent = 'No renewable energy data available';
       this.content.appendChild(empty);
       return;
+    }
+
+    if (source === 'fallback') {
+      this.renderFallbackBanner();
     }
 
     const container = document.createElement('div');
@@ -77,6 +121,29 @@ export class RenewableEnergyPanel extends Panel {
     }
 
     this.content.appendChild(container);
+  }
+
+  private renderFallbackBanner(): void {
+    const banner = document.createElement('div');
+    banner.className = 'renewable-fallback-banner';
+    banner.setAttribute('role', 'status');
+    banner.setAttribute('data-source', 'fallback');
+    banner.setAttribute('data-testid', 'renewable-fallback-banner');
+    banner.title = t('components.renewable.fallbackTooltip');
+    Object.assign(banner.style, {
+      display: 'flex',
+      alignItems: 'center',
+      gap: '6px',
+      margin: '0 0 8px 0',
+      padding: '6px 8px',
+      fontSize: '11px',
+      color: 'var(--text-dim)',
+      background: 'var(--bg-subtle, rgba(255,255,255,0.04))',
+      border: '1px solid var(--border-subtle, rgba(255,255,255,0.12))',
+      borderRadius: '4px',
+    });
+    banner.textContent = t('components.renewable.fallbackBadge');
+    this.content.appendChild(banner);
   }
 
   /**
@@ -239,7 +306,15 @@ export class RenewableEnergyPanel extends Panel {
     for (let i = 0; i < regions.length; i++) {
       const region = regions[i]!;
       const row = document.createElement('div');
-      row.className = 'region-row';
+      const theaterFocus = resolveTheaterMapFocus(region.name);
+      row.className = theaterFocus ? 'region-row region-row-clickable' : 'region-row';
+      if (theaterFocus) {
+        row.dataset.theater = region.name;
+        row.setAttribute('role', 'button');
+        row.tabIndex = 0;
+        row.title = 'Show on map';
+        row.style.cursor = 'pointer';
+      }
       Object.assign(row.style, {
         display: 'flex',
         alignItems: 'center',

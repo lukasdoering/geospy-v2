@@ -474,6 +474,33 @@
   color: var(--text-dim);
 }
 
+[data-variant="happy"] .positive-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+[data-variant="happy"] .positive-card-map {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent, #6B8F5E);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent, #6B8F5E) 40%, transparent);
+  border-radius: 4px;
+  z-index: 2;
+  position: relative;
+}
+
+[data-variant="happy"] .positive-card-map:hover {
+  border-color: var(--accent, #6B8F5E);
+}
+
 /* ---------- Share button ---------- */
 [data-variant="happy"] .positive-card-share {
   position: absolute;
@@ -869,6 +896,25 @@
   letter-spacing: 0.03em;
 }
 
+[data-variant="happy"] .digest-card-map {
+  align-self: flex-start;
+  margin-top: 4px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent, #6B8F5E);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent, #6B8F5E) 40%, transparent);
+  border-radius: 4px;
+}
+
+[data-variant="happy"] .digest-card-map:hover {
+  border-color: var(--accent, #6B8F5E);
+}
+
 [data-variant="happy"] .digest-card-summary {
   font-size: 0.85rem;
   color: var(--text);
@@ -933,6 +979,28 @@
   overflow: hidden;
   border: 1px solid var(--border);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+[data-variant='happy'] .species-card-clickable {
+  cursor: pointer;
+}
+
+[data-variant='happy'] .species-card-clickable:focus-visible {
+  outline: 2px solid var(--accent, #6B8F5E);
+  outline-offset: 2px;
+}
+
+[data-variant='happy'] .species-map-chip {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--accent, #6B8F5E);
+  border: 1px solid color-mix(in srgb, var(--accent, #6B8F5E) 40%, transparent);
+  border-radius: 4px;
 }
 
 [data-variant='happy'] .species-card:hover {

@@ -12,6 +12,7 @@ import {
 } from '@/config/panels';
 import { isProUser } from '@/services/widget-store';
 import { SITE_VARIANT } from '@/config/variant';
+import { BRAND } from '@/config/brand';
 import { t } from '@/services/i18n';
 import { createSettingsButton } from '@/components/settings-button';
 import { confirmDialog } from '@/components/confirm-dialog';
@@ -143,7 +144,7 @@ export class UnifiedSettings {
         void openBillingPortal(reservedWin).then((result) => {
           if (result.outcome === 'no-customer') {
             showToast(
-              'Subscription is managed outside Dodo. Email support@worldmonitor.app for help.',
+              `${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`,
             );
           }
         });
@@ -163,7 +164,7 @@ export class UnifiedSettings {
           // generic Dodo portal that won't recognise them.
           if (result.outcome === 'no-customer') {
             showToast(
-              'Subscription is managed outside Dodo. Email support@worldmonitor.app for help.',
+              `${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`,
             );
           }
         });
@@ -332,6 +333,7 @@ export class UnifiedSettings {
     this.overlay.classList.add('active');
     localStorage.setItem('wm-settings-open', '1');
     document.addEventListener('keydown', this.escapeHandler);
+    (this.overlay.querySelector('.unified-settings-tabs') as HTMLElement)?.addEventListener('keydown', (e: KeyboardEvent) => this.handleKeyDown(e));
     track('settings-open', { tab: tab ?? 'default' });
 
     // Re-render API Keys panel when entitlements arrive (cold-load race:
@@ -450,6 +452,30 @@ export class UnifiedSettings {
     this.overlay.remove();
   }
 
+  private handleKeyDown(e: KeyboardEvent): void {
+      if (!(e.target instanceof HTMLElement)) return;
+      const tablist = this.overlay.querySelector('.unified-settings-tabs');
+      if (!tablist || !tablist.contains(e.target)) return;
+      const tabs = Array.from(tablist.querySelectorAll<HTMLButtonElement>('button[role="tab"]'));
+      const currentIndex = tabs.indexOf(e.target.closest('button[role="tab"]') as HTMLButtonElement);
+      if (currentIndex === -1) return;
+      
+      let nextIndex: number | null = null;
+      if (e.key === 'ArrowRight') nextIndex = (currentIndex + 1) % tabs.length;
+      else if (e.key === 'ArrowLeft') nextIndex = (currentIndex - 1 + tabs.length) % tabs.length;
+      else if (e.key === 'Home') nextIndex = 0;
+      else if (e.key === 'End') nextIndex = tabs.length - 1;
+      else return;
+
+      e.preventDefault();
+
+      const nextTab = tabs[nextIndex];
+      const tabId = nextTab?.dataset.tab as TabId | undefined;
+      if (!tabId || !nextTab) return;
+      this.switchTab(tabId);
+      nextTab.focus();
+    }
+
   private render(): void {
     this.prefsCleanup?.();
     this.prefsCleanup = null;
@@ -476,12 +502,12 @@ export class UnifiedSettings {
           <button class="modal-close unified-settings-close" aria-label="Close">\u00d7</button>
         </div>
         <div class="unified-settings-tabs" role="tablist" aria-label="Settings">
-          <button class="${tabClass('settings')}" data-tab="settings" role="tab" aria-selected="${this.activeTab === 'settings'}" id="us-tab-settings" aria-controls="us-tab-panel-settings">${t('header.tabSettings')}</button>
-          <button class="${tabClass('panels')}" data-tab="panels" role="tab" aria-selected="${this.activeTab === 'panels'}" id="us-tab-panels" aria-controls="us-tab-panel-panels">${t('header.tabPanels')}</button>
-          <button class="${tabClass('sources')}" data-tab="sources" role="tab" aria-selected="${this.activeTab === 'sources'}" id="us-tab-sources" aria-controls="us-tab-panel-sources">${t('header.tabSources')}</button>
-          ${showNotificationsTab ? `<button class="${tabClass('notifications')}" data-tab="notifications" role="tab" aria-selected="${this.activeTab === 'notifications'}" id="us-tab-notifications" aria-controls="us-tab-panel-notifications">${t('header.tabNotifications')}</button>` : ''}
-          <button class="${tabClass('api-keys')}" data-tab="api-keys" role="tab" aria-selected="${this.activeTab === 'api-keys'}" id="us-tab-api-keys" aria-controls="us-tab-panel-api-keys">API Keys <span class="panel-pro-badge">PRO</span></button>
-          ${hasFeature('mcpAccess') ? `<button class="${tabClass('mcp-clients')}" data-tab="mcp-clients" role="tab" aria-selected="${this.activeTab === 'mcp-clients'}" id="us-tab-mcp-clients" aria-controls="us-tab-panel-mcp-clients">MCP Clients <span class="panel-pro-badge">PRO</span></button>` : ''}
+          <button class="${tabClass('settings')}" tabindex="${this.activeTab === 'settings' ? 0 : -1}" data-tab="settings" role="tab" aria-selected="${this.activeTab === 'settings'}" id="us-tab-settings" aria-controls="us-tab-panel-settings">${t('header.tabSettings')}</button>
+          <button class="${tabClass('panels')}" tabindex="${this.activeTab === 'panels' ? 0 : -1}" data-tab="panels" role="tab" aria-selected="${this.activeTab === 'panels'}" id="us-tab-panels" aria-controls="us-tab-panel-panels">${t('header.tabPanels')}</button>
+          <button class="${tabClass('sources')}" tabindex="${this.activeTab === 'sources' ? 0 : -1}" data-tab="sources" role="tab" aria-selected="${this.activeTab === 'sources'}" id="us-tab-sources" aria-controls="us-tab-panel-sources">${t('header.tabSources')}</button>
+          ${showNotificationsTab ? `<button class="${tabClass('notifications')}" tabindex="${this.activeTab === 'notifications' ? 0 : -1}" data-tab="notifications" role="tab" aria-selected="${this.activeTab === 'notifications'}" id="us-tab-notifications" aria-controls="us-tab-panel-notifications">${t('header.tabNotifications')}</button>` : ''}
+          <button class="${tabClass('api-keys')}" tabindex="${this.activeTab === 'api-keys' ? 0 : -1}" data-tab="api-keys" role="tab" aria-selected="${this.activeTab === 'api-keys'}" id="us-tab-api-keys" aria-controls="us-tab-panel-api-keys">API Keys <span class="panel-pro-badge">PRO</span></button>
+          ${hasFeature('mcpAccess') ? `<button class="${tabClass('mcp-clients')}" tabindex="${this.activeTab === 'mcp-clients' ? 0 : -1}" data-tab="mcp-clients" role="tab" aria-selected="${this.activeTab === 'mcp-clients'}" id="us-tab-mcp-clients" aria-controls="us-tab-panel-mcp-clients">MCP Clients <span class="panel-pro-badge">PRO</span></button>` : ''}
         </div>
         <div class="unified-settings-tab-panel${this.activeTab === 'settings' ? ' active' : ''}" data-panel-id="settings" id="us-tab-panel-settings" role="tabpanel" aria-labelledby="us-tab-settings">
           ${prefs.html}
@@ -555,7 +581,7 @@ export class UnifiedSettings {
     this.renderRegionPills();
     this.renderSourcesGrid();
     this.updateSourcesCounter();
-
+  
     this.attachApiKeysHandlers();
     if (this.activeTab === 'api-keys' || this.activeTab === 'mcp-clients') {
       void this.loadPlanLimitNotices();
@@ -576,6 +602,7 @@ export class UnifiedSettings {
       const isActive = (el as HTMLElement).dataset.tab === tab;
       el.classList.toggle('active', isActive);
       el.setAttribute('aria-selected', String(isActive));
+      el.setAttribute('tabindex', isActive ? '0' : '-1');
     });
 
     this.overlay.querySelectorAll('.unified-settings-tab-panel').forEach(el => {
@@ -718,7 +745,7 @@ export class UnifiedSettings {
       void openBillingPortal(reservedWin).then((result) => {
         if (result.outcome === 'no-customer') {
           showToast(
-            'Subscription is managed outside Dodo. Email support@worldmonitor.app for help.',
+            `${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`,
           );
         }
       });
@@ -730,7 +757,7 @@ export class UnifiedSettings {
       return;
     }
     import('@/services/checkout').then(m => import('@/config/products').then(p => m.startCheckout(p.DEFAULT_UPGRADE_PRODUCT))).catch(() => {
-      window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+      window.open('/pro', '_blank', 'noopener,noreferrer');
     });
   }
 
@@ -801,11 +828,11 @@ export class UnifiedSettings {
       const changed = !locked && savedSettings[key]?.enabled !== panel.enabled;
       const displayName = this.config.getLocalizedPanelName(key, resolvedPanel.name ?? panel.name);
       return `
-        <div class="panel-toggle-item ${panel.enabled && !locked ? 'active' : ''}${changed ? ' changed' : ''}${locked ? ' pro-locked' : ''}" data-panel="${escapeHtml(key)}" aria-pressed="${panel.enabled && !locked}" ${locked ? 'data-pro-locked="1"' : ''}>
-          <div class="panel-toggle-checkbox">${panel.enabled && !locked ? '\u2713' : ''}${locked ? '\uD83D\uDD12' : ''}</div>
+        <button type="button" class="panel-toggle-item ${panel.enabled && !locked ? 'active' : ''}${changed ? ' changed' : ''}${locked ? ' pro-locked' : ''}" data-panel="${escapeHtml(key)}" aria-pressed="${panel.enabled && !locked}" ${locked ? 'data-pro-locked="1"' : ''}>
+          <div  class="panel-toggle-checkbox" aria-hidden="true">${panel.enabled && !locked ? '\u2713' : ''}${locked ? '\uD83D\uDD12' : ''}</div>
           <span class="panel-toggle-label">${escapeHtml(displayName)}</span>
-          ${(locked || resolvedPanel.premium) ? '<span class="panel-toggle-pro-badge">PRO</span>' : ''}
-        </div>
+          ${(locked || resolvedPanel.premium) ? '<span class="panel-toggle-pro-badge" aria-hidden="true">PRO</span>' : ''}
+        </button>
       `;
     }).join(''), "legacy direct innerHTML migration"));
 
@@ -975,10 +1002,10 @@ export class UnifiedSettings {
       const isEnabled = !disabled.has(source);
       const escaped = escapeHtml(source);
       return `
-        <div class="source-toggle-item ${isEnabled ? 'active' : ''}" data-source="${escaped}">
-          <div class="source-toggle-checkbox">${isEnabled ? '\u2713' : ''}</div>
+        <button type="button" class="source-toggle-item ${isEnabled ? 'active' : ''}" aria-pressed="${isEnabled}" data-source="${escaped}">
+          <div class="source-toggle-checkbox" aria-hidden="true">${isEnabled ? '\u2713' : ''}</div>
           <span class="source-toggle-label">${escaped}</span>
-        </div>
+        </button>
       `;
     }).join(''), "legacy direct innerHTML migration"));
   }
@@ -1084,7 +1111,7 @@ export class UnifiedSettings {
       const reservedWin = prereserveBillingPortalTab();
       void openBillingPortal(reservedWin).then((result) => {
         if (result.outcome === 'no-customer') {
-          showToast('Subscription is managed outside Dodo. Email support@worldmonitor.app for help.');
+          showToast(`${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`);
         }
       });
       return;
@@ -1101,7 +1128,7 @@ export class UnifiedSettings {
         const reservedWin = prereserveBillingPortalTab();
         void openBillingPortal(reservedWin).then((result) => {
           if (result.outcome === 'no-customer') {
-            showToast('Subscription is managed outside Dodo. Email support@worldmonitor.app for help.');
+            showToast(`${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`);
           }
         });
         return;
@@ -1113,12 +1140,12 @@ export class UnifiedSettings {
           : p.DODO_PRODUCTS.PRO_MONTHLY;
         return m.startCheckout(product);
       })).catch(() => {
-        window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+        window.open('/pro', '_blank', 'noopener,noreferrer');
       });
       return;
     }
     if (notice.ctaKind === 'contact_support') {
-      window.location.href = `mailto:support@worldmonitor.app?subject=${encodeURIComponent('WorldMonitor API plan limit upgrade')}`;
+      window.location.href = `mailto:support@worldmonitor.app?subject=${encodeURIComponent(`${BRAND.name} API plan limit upgrade`)}`;
     }
   }
 
@@ -1145,7 +1172,7 @@ export class UnifiedSettings {
         } else {
           this.close();
           import('@/services/checkout').then(m => import('@/config/products').then(p => m.startCheckout(p.DODO_PRODUCTS.API_STARTER_MONTHLY))).catch(() => {
-            window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+            window.open('/pro', '_blank', 'noopener,noreferrer');
           });
         }
       });
@@ -1170,7 +1197,7 @@ export class UnifiedSettings {
       return `
         <div class="panel-locked-state">
           <div class="panel-locked-icon">${upgradeIcon}</div>
-          <div class="panel-locked-desc">Create and manage API keys to access WorldMonitor data programmatically.</div>
+          <div class="panel-locked-desc">Create and manage API keys to access GeoSpy data programmatically.</div>
           <button class="panel-locked-cta api-keys-gate-btn">Upgrade to API Starter</button>
         </div>`;
     }
@@ -1179,7 +1206,7 @@ export class UnifiedSettings {
       <div class="api-keys-section">
         <div data-plan-limit-notices>${this.renderPlanLimitNotices()}</div>
         <div class="api-keys-header">
-          <p class="api-keys-desc">Create API keys to access WorldMonitor data programmatically. Keys are shown once on creation — store them securely.</p>
+          <p class="api-keys-desc">Create API keys to access GeoSpy data programmatically. Keys are shown once on creation — store them securely.</p>
         </div>
         <div class="api-keys-create-form">
           <input type="text" class="api-keys-name-input" placeholder="Key name (e.g. my-app)" maxlength="64" />
@@ -1361,7 +1388,7 @@ export class UnifiedSettings {
       return `
         <div class="panel-locked-state">
           <div class="panel-locked-icon">${upgradeIcon}</div>
-          <div class="panel-locked-desc">Connect Claude Desktop and other AI clients to your WorldMonitor account.</div>
+          <div class="panel-locked-desc">Connect Claude Desktop and other AI clients to your GeoSpy account.</div>
         </div>`;
     }
 
@@ -1369,7 +1396,7 @@ export class UnifiedSettings {
       <div class="mcp-clients-section">
         <div data-plan-limit-notices>${this.renderPlanLimitNotices()}</div>
         <div class="mcp-clients-header">
-          <p class="mcp-clients-desc">Connect Claude Desktop, Cursor, and other AI clients to your WorldMonitor account. Each client gets its own credential — revoke any time.</p>
+          <p class="mcp-clients-desc">Connect Claude Desktop, Cursor, and other AI clients to your GeoSpy account. Each client gets its own credential — revoke any time.</p>
         </div>
         <div class="mcp-clients-quota" id="usMcpQuota" aria-live="polite">${this.renderMcpQuotaText()}</div>
         <div class="mcp-clients-error" id="usMcpClientsError" style="display:none;"></div>
@@ -1506,7 +1533,7 @@ export class UnifiedSettings {
       setTrustedHtml(container, trustedHtml(`
         <div class="mcp-clients-empty">
           <div class="mcp-clients-empty-title">No connected MCP clients yet</div>
-          <div class="mcp-clients-empty-desc">To connect Claude Desktop or another AI client, paste this URL into the client's MCP server settings and sign in with your WorldMonitor Pro account:</div>
+          <div class="mcp-clients-empty-desc">To connect Claude Desktop or another AI client, paste this URL into the client's MCP server settings and sign in with your GeoSpy Pro account:</div>
           <div class="mcp-clients-empty-url">
             <code>${escapeHtml(mcpUrl)}</code>
             <button class="btn btn-secondary mcp-clients-copy-url-btn" data-copy-value="${escapeHtml(mcpUrl)}">Copy URL</button>

@@ -2,9 +2,11 @@ import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import type { CountrySanctionsPressure, ProgramSanctionsPressure, SanctionsEntry, SanctionsPressureResult } from '@/services/sanctions-pressure';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 export class SanctionsPressurePanel extends Panel {
   private data: SanctionsPressureResult | null = null;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -18,10 +20,21 @@ export class SanctionsPressurePanel extends Panel {
     this.showLoading(t('components.sanctionsPressure.loading'));
   }
 
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
   public setData(data: SanctionsPressureResult): void {
     this.data = data;
     this.setCount(data.totalCount);
     this.render();
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   private render(): void {
@@ -77,7 +90,27 @@ export class SanctionsPressurePanel extends Panel {
         </div>
         <div class="economic-footer">${escapeHtml(footer)}</div>
       </div>
+      <style>
+        .sanctions-row-clickable,
+        .sanctions-entry-clickable { cursor: pointer; border-radius: 4px; }
+        .sanctions-row-clickable:hover,
+        .sanctions-entry-clickable:hover { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .sanctions-row-clickable:focus-visible,
+        .sanctions-entry-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `, 'legacy Panel.setContent() migration'));
+
+    const activate = (el: HTMLElement): void => {
+      this.focusCountry(el.dataset.countryCode);
+    };
+    this.content?.querySelectorAll<HTMLElement>('[data-country-code]').forEach(el => {
+      el.addEventListener('click', () => activate(el));
+      el.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(el);
+      });
+    });
   }
 
   private renderSummaryCard(label: string, value: string | number, tone = ''): string {
@@ -96,7 +129,7 @@ export class SanctionsPressurePanel extends Panel {
     if (country.aircraftCount > 0) flags.push(`<span class="sanctions-pill">✈ ${country.aircraftCount}</span>`);
 
     return `
-      <div class="sanctions-row">
+      <div class="sanctions-row sanctions-row-clickable" data-country-code="${escapeHtml(country.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(country.countryCode)} on map">
         <div class="sanctions-row-main">
           <div class="sanctions-row-title">${escapeHtml(country.countryName)}</div>
           <div class="sanctions-row-meta">${escapeHtml(country.countryCode)} · ${escapeHtml(t('components.sanctionsPressure.designations', { count: country.entryCount }))}</div>
@@ -125,9 +158,14 @@ export class SanctionsPressurePanel extends Panel {
     const program = entry.programs[0] || t('components.sanctionsPressure.fallbacks.program');
     const note = entry.note ? `<div class="sanctions-entry-note">${escapeHtml(entry.note)}</div>` : '';
     const effective = entry.effectiveAt ? entry.effectiveAt.toISOString().slice(0, 10) : t('components.sanctionsPressure.fallbacks.undated');
+    const code = entry.countryCodes[0] || '';
+    const clickable = Boolean(code);
+    const attrs = clickable
+      ? ` class="sanctions-entry sanctions-entry-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
+      : ' class="sanctions-entry"';
 
     return `
-      <div class="sanctions-entry">
+      <div${attrs}>
         <div class="sanctions-entry-top">
           <span class="sanctions-entry-name">${escapeHtml(entry.name)}</span>
           <span class="sanctions-pill sanctions-pill-type">${escapeHtml(entry.entityType)}</span>

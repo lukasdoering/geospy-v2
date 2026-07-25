@@ -52,6 +52,7 @@ function formatFlow(cp: ChokepointInfo): string {
 
 export class ChokepointStripPanel extends Panel {
   private data: GetChokepointStatusResponse | null = null;
+  private onChokepointClick?: (id: string) => void;
 
   constructor() {
     super({
@@ -59,6 +60,24 @@ export class ChokepointStripPanel extends Panel {
       title: t('components.chokepointStrip.title'),
       infoTooltip: t('components.chokepointStrip.infoTooltip'),
     });
+    const activate = (chip: HTMLElement | null): void => {
+      const id = chip?.dataset.cp;
+      if (id) this.onChokepointClick?.(id);
+    };
+    this.content.addEventListener('click', (e) => {
+      activate((e.target as HTMLElement).closest<HTMLElement>('.cp-chip[data-cp]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const chip = (e.target as HTMLElement).closest<HTMLElement>('.cp-chip[data-cp]');
+      if (!chip) return;
+      e.preventDefault();
+      activate(chip);
+    });
+  }
+
+  public setChokepointClickHandler(handler: (id: string) => void): void {
+    this.onChokepointClick = handler;
   }
 
   public async fetchData(): Promise<void> {
@@ -81,13 +100,13 @@ export class ChokepointStripPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError(t('components.chokepointStrip.errors.unavailable'), () => void this.fetchData());
+      this.setSafeContent(safeHtml`<div class="panel-empty">${t('components.chokepointStrip.errors.unavailable')}</div>`);
     }
   }
 
   private render(): void {
     if (!this.data?.chokepoints?.length) {
-      this.showError(t('components.chokepointStrip.errors.noData'), () => void this.fetchData());
+      this.setSafeContent(safeHtml`<div class="panel-empty">${t('components.chokepointStrip.errors.noData')}</div>`);
       return;
     }
 
@@ -104,7 +123,7 @@ export class ChokepointStripPanel extends Panel {
         ? safeHtml`<span class="cp-chip-warn">${cp.activeWarnings}</span>`
         : safeHtml``;
       return safeHtml`
-        <div class="cp-chip" data-cp="${cp.id}" title="${cp.name} - ${cp.status || t('components.chokepointStrip.unknown')}">
+        <div class="cp-chip cp-chip-clickable" data-cp="${cp.id}" role="button" tabindex="0" title="Show ${cp.name} on map">
           <div class="cp-chip-dot" style="background:${color}"></div>
           <div class="cp-chip-body">
             <div class="cp-chip-name">${short}${warnings}</div>
@@ -140,8 +159,10 @@ export class ChokepointStripPanel extends Panel {
           border-radius: 8px;
           min-width: 120px;
           font-size: 11px;
-          cursor: default;
         }
+        .cp-chip-clickable { cursor: pointer; }
+        .cp-chip-clickable:hover { border-color: var(--accent, #4488ff); }
+        .cp-chip-clickable:focus-visible { outline: 2px solid var(--accent, #4488ff); outline-offset: 2px; }
         .cp-chip-dot { width: 8px; height: 8px; border-radius: 50%; flex: 0 0 8px; }
         .cp-chip-body { display: flex; flex-direction: column; line-height: 1.2; }
         .cp-chip-name { font-weight: 600; color: var(--text, #eee); display: flex; align-items: center; gap: 4px; }

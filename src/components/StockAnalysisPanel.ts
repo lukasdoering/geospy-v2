@@ -227,8 +227,16 @@ export class StockAnalysisPanel extends Panel {
               <strong style="font-size:16px;letter-spacing:-0.02em">${escapeHtml(item.name || item.symbol)}</strong>
               <span style="font-size:11px;color:var(--text-dim);font-family:var(--font-mono);text-transform:uppercase">${escapeHtml(item.display || item.symbol)}</span>
               <span class="signal-badge ${tone}" style="font-family:var(--font-mono)">${escapeHtml(item.signal)}</span>
+              ${item.fallback
+                ? `<span title="Rules-based template from technical indicators — LLM commentary was unavailable" style="font-size:10px;padding:2px 6px;border-radius:3px;border:1px solid var(--border);color:var(--text-dim);text-transform:uppercase;letter-spacing:0.06em">Rules fallback</span>`
+                : item.provider
+                  ? `<span title="LLM-generated commentary" style="font-size:10px;padding:2px 6px;border-radius:3px;border:1px solid color-mix(in srgb, var(--accent) 45%, var(--border));color:var(--accent);text-transform:uppercase;letter-spacing:0.06em">${escapeHtml(item.provider)}</span>`
+                  : ''}
             </div>
             <div style="margin-top:6px;font-size:12px;color:var(--text-dim);line-height:1.5">${escapeHtml(item.summary)}</div>
+            ${item.fallback
+              ? `<div style="margin-top:4px;font-size:11px;color:var(--text-dim);line-height:1.4">Commentary is a rules-based template from RSI/MACD/MAs — not live LLM analysis.</div>`
+              : ''}
           </div>
           <div style="text-align:right;min-width:110px">
             <div style="font-size:18px;font-weight:700">${escapeHtml(formatPrice(item.currentPrice, item.currency))}</div>

@@ -8,6 +8,7 @@ import { isFeatureAvailable } from '@/services/runtime-config';
 import type { SpendingSummary } from '@/services/usa-spending';
 import { formatAwardAmount, getAwardTypeIcon } from '@/services/usa-spending';
 import { getCSSColor } from '@/utils';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import { sparkline } from '@/utils/sparkline';
 import type { GetEconomicStressResponse, EconomicStressComponent } from '@/generated/client/worldmonitor/economic/v1/service_client';
 
@@ -144,6 +145,7 @@ export class EconomicPanel extends Panel {
   private activeTab: TabId = 'indicators';
   private fredState: FredLoadState = 'loading';
   private fredErrorMsg = '';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -157,8 +159,32 @@ export class EconomicPanel extends Panel {
       if (tab?.dataset.tab) {
         this.activeTab = tab.dataset.tab as TabId;
         this.render();
+        return;
+      }
+      const row = (e.target as HTMLElement).closest('.economic-indicator-clickable') as HTMLElement | null;
+      if (row?.dataset.country) {
+        this.focusCountry(row.dataset.country);
       }
     });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('.economic-indicator-clickable') as HTMLElement | null;
+      if (!row?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(row.dataset.country);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public update(data: FredSeries[]): void {
@@ -405,7 +431,7 @@ export class EconomicPanel extends Panel {
       const label = diff < 0 ? t('components.economic.cut') : diff > 0 ? t('components.economic.hike') : t('components.economic.hold');
       const arrow = diff < 0 ? '▼' : diff > 0 ? '▲' : '–';
       return `
-              <div class="economic-indicator">
+              <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.countryCode)} on map">
                 <div class="indicator-header">
                   <span class="indicator-name">${escapeHtml(r.centralBank)}</span>
                   <span class="indicator-id">${escapeHtml(r.countryCode)}</span>
@@ -431,7 +457,7 @@ export class EconomicPanel extends Panel {
         const color = r.realChange > 0 ? redColor : r.realChange < 0 ? greenColor : neutralColor;
         const arrow = r.realChange > 0 ? '▲' : r.realChange < 0 ? '▼' : '–';
         return `
-                <div class="economic-indicator">
+                <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.countryName || r.countryCode)} on map">
                   <div class="indicator-header">
                     <span class="indicator-name">${escapeHtml(r.countryName)}</span>
                     <span class="indicator-id">${escapeHtml(r.countryCode)}</span>
@@ -461,7 +487,7 @@ export class EconomicPanel extends Panel {
         const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '–';
         const changeStr = diff !== 0 ? `${diff > 0 ? '+' : ''}${(Math.round(diff * 10) / 10)}pp` : '–';
         return `
-                <div class="economic-indicator">
+                <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.countryName || r.countryCode)} on map">
                   <div class="indicator-header">
                     <span class="indicator-name">${escapeHtml(r.countryName)}</span>
                     <span class="indicator-id">${escapeHtml(r.countryCode)}</span>
@@ -522,8 +548,11 @@ export class EconomicPanel extends Panel {
 
   private renderStress(): string {
     const d = this.stressData;
-    if (!d || d.unavailable || !Number.isFinite(d.compositeScore)) {
-      return `<div class="economic-empty">Stress index data unavailable</div>`;
+    if (!d || d.unavailable) {
+      return `<div class="economic-empty">Stress index is temporarily unavailable. Retrying on the next refresh.</div>`;
+    }
+    if (!Number.isFinite(d.compositeScore)) {
+      return `<div class="economic-empty">No stress index currently available.</div>`;
     }
 
     const color = stressScoreColor(d.compositeScore);

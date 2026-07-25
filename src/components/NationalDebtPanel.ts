@@ -1,6 +1,7 @@
 import { Panel } from './Panel';
 import { getNationalDebtData, type NationalDebtEntry } from '@/services/economic';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type SortMode = 'total' | 'gdp-ratio' | 'growth';
 
@@ -117,11 +118,23 @@ export class NationalDebtPanel extends Panel {
   private connectRefreshQueued = false;
   private connectionObserver: MutationObserver | null = null;
   private connectRetryFrames = 0;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
   // Bounds the MutationObserver-less fallback retry so a never-connected panel
   // cannot spin. Browsers always have MutationObserver, so this only caps the
   // non-browser/SSR/test path.
   private static readonly MAX_CONNECT_RETRY_FRAMES = 8;
   private readonly REFRESH_INTERVAL = 6 * 60 * 60 * 1000;
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(iso3?: string): void {
+    if (!this.onMapFocus || !iso3) return;
+    const focus = resolveCountryMapFocus(iso3);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
+  }
 
   constructor() {
     super({
@@ -146,7 +159,17 @@ export class NationalDebtPanel extends Panel {
         this.visibleCount += PAGE_SIZE;
         this.render();
         this.restartTicker();
+        return;
       }
+      const row = target.closest<HTMLElement>('.debt-row[data-iso3]');
+      if (row) this.focusCountry(row.dataset.iso3);
+    });
+    this.content.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement | null)?.closest<HTMLElement>('.debt-row[data-iso3]');
+      if (!row) return;
+      e.preventDefault();
+      this.focusCountry(row.dataset.iso3);
     });
 
     this.content.addEventListener('input', (e) => {
@@ -187,7 +210,10 @@ export class NationalDebtPanel extends Panel {
     } catch (err) {
       if (!this.element?.isConnected) return;
       console.error('[NationalDebtPanel] Error fetching data:', err);
-      this.showError('Failed to load national debt data');
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">National debt data unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     } finally {
       this.loading = false;
     }
@@ -295,7 +321,10 @@ export class NationalDebtPanel extends Panel {
 
   private render(): void {
     if (this.entries.length === 0) {
-      this.showError('No data available');
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">No data available</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -355,7 +384,7 @@ export class NationalDebtPanel extends Panel {
     const growthClass = entry.annualGrowth > 5 ? 'debt-growth-high' : entry.annualGrowth > 0 ? 'debt-growth-mid' : '';
 
     return `
-      <div class="debt-row" data-iso3="${escapeHtml(entry.iso3)}">
+      <div class="debt-row debt-row-clickable" data-iso3="${escapeHtml(entry.iso3)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(entry.iso3)} on map">
         <div class="debt-rank">${rank}</div>
         <div class="debt-flag">${flag}</div>
         <div class="debt-info">

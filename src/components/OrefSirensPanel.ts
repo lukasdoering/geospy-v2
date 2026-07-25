@@ -3,6 +3,7 @@ import { joinSafeHtml, safeHtml, type SafeHtml } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import { fetchOrefHistory } from '@/services/oref-alerts';
 import type { OrefAlertsResponse, OrefAlert, OrefHistoryEntry } from '@/services/oref-alerts';
+import { OREF_MAP_FOCUS } from '@/utils/oref-map-focus';
 
 const MAX_HISTORY_WAVES = 50;
 const ONE_HOUR_MS = 60 * 60 * 1000;
@@ -15,6 +16,7 @@ export class OrefSirensPanel extends Panel {
   private historyWaves: OrefHistoryEntry[] = [];
   private historyFetchInFlight = false;
   private historyLastFetchAt = 0;
+  private onMapFocus?: (lat: number, lon: number) => void;
 
   constructor() {
     super({
@@ -25,6 +27,25 @@ export class OrefSirensPanel extends Panel {
       infoTooltip: t('components.orefSirens.infoTooltip'),
     });
     this.showLoading(t('components.orefSirens.checking'));
+    const focus = (): void => {
+      this.onMapFocus?.(OREF_MAP_FOCUS.lat, OREF_MAP_FOCUS.lon);
+    };
+    this.content.addEventListener('click', (e) => {
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-oref-focus]');
+      if (!row) return;
+      focus();
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-oref-focus]');
+      if (!row) return;
+      e.preventDefault();
+      focus();
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
   }
 
   public setData(data: OrefAlertsResponse): void {
@@ -116,7 +137,7 @@ export class OrefSirensPanel extends Panel {
       const totalAreas = wave.alerts.reduce((sum, a) => sum + (a.data?.length || 0), 0);
       const summary = uniqueTypes.join(', ') + (totalAreas > 0 ? ` - ${totalAreas} areas` : '');
 
-      return safeHtml`<div class="${rowClass}">
+      return safeHtml`<div class="${rowClass} oref-row-clickable" data-oref-focus="1" role="button" tabindex="0" title="Show on map" aria-label="Show siren alert on map">
         <div class="oref-wave-header">
           <span class="oref-wave-time">${this.formatWaveTime(wave.timestamp)}</span>
           ${badge}
@@ -150,7 +171,7 @@ export class OrefSirensPanel extends Panel {
     const alertRows = joinSafeHtml(this.alerts.slice(0, 20).map(alert => {
       const areas = (alert.data || []).join(', ');
       const time = this.formatAlertTime(alert.alertDate);
-      return safeHtml`<div class="oref-alert-row">
+      return safeHtml`<div class="oref-alert-row oref-row-clickable" data-oref-focus="1" role="button" tabindex="0" title="Show on map" aria-label="Show siren alert on map">
         <div class="oref-alert-header">
           <span class="oref-alert-title">${alert.title || alert.cat}</span>
           <span class="oref-alert-time">${time}</span>

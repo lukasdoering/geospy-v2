@@ -1,4 +1,5 @@
 import type { StoryData } from './story-data';
+import { BRAND } from '@/config/brand';
 import { getLocale, t } from './i18n';
 
 const W = 1080;
@@ -75,7 +76,7 @@ export async function renderStoryToCanvas(data: StoryData): Promise<HTMLCanvasEl
   ctx.fillStyle = '#666';
   ctx.font = '700 30px Inter, system-ui, sans-serif';
   ctx.letterSpacing = '6px';
-  ctx.fillText('WORLDMONITOR.APP', textX, y + 26);
+  ctx.fillText(BRAND.nameUpper, textX, y + 26);
   ctx.letterSpacing = '0px';
   const dateStr = new Date().toLocaleDateString(getLocale(), { weekday: 'short', day: 'numeric', month: 'short', year: 'numeric' });
   ctx.font = '400 24px Inter, system-ui, sans-serif';
@@ -443,10 +444,10 @@ export async function renderStoryToCanvas(data: StoryData): Promise<HTMLCanvasEl
   ctx.fillStyle = '#444';
   ctx.font = '600 24px Inter, system-ui, sans-serif';
   ctx.letterSpacing = '2px';
-  ctx.fillText('WORLDMONITOR.APP', footerTextX, H - 55);
+  ctx.fillText(BRAND.nameUpper, footerTextX, H - 55);
   ctx.letterSpacing = '0px';
   ctx.font = '400 20px Inter, system-ui, sans-serif';
-  ctx.fillText('Real-time global intelligence monitoring', footerTextX, H - 30);
+  ctx.fillText(BRAND.tagline, footerTextX, H - 30);
 
   ctx.font = '400 22px Inter, system-ui, sans-serif';
   ctx.fillStyle = '#555';

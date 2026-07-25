@@ -13,6 +13,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { isFeatureAvailable } from '@/services/runtime-config';
 import { isDesktopRuntime } from '@/services/runtime';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 type TabId = 'restrictions' | 'tariffs' | 'flows' | 'barriers' | 'revenue' | 'comtrade';
 
@@ -24,19 +25,51 @@ export class TradePolicyPanel extends Panel {
   private revenueData: GetCustomsRevenueResponse | null = null;
   private comtradeData: ListComtradeFlowsResponse | null = null;
   private activeTab: TabId = 'restrictions';
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'trade-policy', title: t('panels.tradePolicy'), defaultRowSpan: 2, infoTooltip: t('components.tradePolicy.infoTooltip') });
-    this.content.addEventListener('click', (e) => {
-      const target = (e.target as HTMLElement).closest('.panel-tab') as HTMLElement | null;
-      if (!target) return;
-      const tabId = target.dataset.tab as TabId;
+    this.content.addEventListener('click', this.handleContentClick);
+    this.content.addEventListener('keydown', this.handleContentKeydown);
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(nameOrCode?: string): void {
+    if (!this.onMapFocus || !nameOrCode) return;
+    const focus = resolveCountryMapFocus(nameOrCode);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
+  }
+
+  private handleContentClick = (e: Event): void => {
+    const el = e.target as HTMLElement | null;
+    if (!el) return;
+    if (el.closest('a')) return;
+
+    const tab = el.closest('.panel-tab') as HTMLElement | null;
+    if (tab) {
+      const tabId = tab.dataset.tab as TabId;
       if (tabId && tabId !== this.activeTab) {
         this.activeTab = tabId;
         this.render();
       }
-    });
-  }
+      return;
+    }
+
+    const card = el.closest<HTMLElement>('[data-trade-country]');
+    if (card) this.focusCountry(card.dataset.tradeCountry);
+  };
+
+  private handleContentKeydown = (e: KeyboardEvent): void => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const card = (e.target as HTMLElement | null)?.closest<HTMLElement>('[data-trade-country]');
+    if (!card) return;
+    e.preventDefault();
+    this.focusCountry(card.dataset.tradeCountry);
+  };
 
   public updateRestrictions(data: GetTradeRestrictionsResponse): void {
     this.restrictionsData = data;
@@ -155,6 +188,11 @@ export class TradePolicyPanel extends Panel {
       <div class="economic-footer">
         <span class="economic-source">${escapeHtml(source)}</span>
       </div>
+      <style>
+        .trade-card-clickable { cursor: pointer; }
+        .trade-card-clickable:hover { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .trade-card-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `, 'legacy Panel.setContent() migration'));
 
   }
@@ -170,7 +208,7 @@ export class TradePolicyPanel extends Panel {
         const statusClass = r.status === 'high' ? 'status-active' : r.status === 'moderate' ? 'status-notified' : 'status-terminated';
         const statusLabel = r.status === 'high' ? t('components.tradePolicy.highTariff') : r.status === 'moderate' ? t('components.tradePolicy.moderateTariff') : t('components.tradePolicy.lowTariff');
         const sourceLink = this.renderSourceUrl(r.sourceUrl);
-        return `<div class="trade-restriction-card">
+        return `<div class="trade-restriction-card trade-card-clickable" data-trade-country="${escapeHtml(r.reportingCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.reportingCountry)} on map">
           <div class="trade-restriction-header">
             <span class="trade-country">${escapeHtml(r.reportingCountry)}</span>
             <span class="trade-badge">${escapeHtml(r.measureType)}</span>
@@ -358,7 +396,7 @@ export class TradePolicyPanel extends Panel {
     return `<div class="trade-barriers-list">
       ${this.barriersData.barriers.map(b => {
         const sourceLink = this.renderSourceUrl(b.sourceUrl);
-        return `<div class="trade-barrier-card">
+        return `<div class="trade-barrier-card trade-card-clickable" data-trade-country="${escapeHtml(b.notifyingCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(b.notifyingCountry)} on map">
           <div class="trade-barrier-header">
             <span class="trade-country">${escapeHtml(b.notifyingCountry)}</span>
             <span class="trade-badge">${escapeHtml(b.measureType)}</span>

@@ -34,6 +34,11 @@ import {
   showToast,
 } from '@/utils';
 import { clearPanelColSpans, clearPanelSpans } from '@/utils/panel-storage';
+import { syncSatellitesFlatHint } from '@/components/SatellitesFlatHint';
+import {
+  getActiveOverheadShareLocation,
+  OVERHEAD_POPUP_CHANGE_EVENT,
+} from '@/components/OrbitalPassesPopup';
 import {
   IDLE_PAUSE_MS,
   DEFAULT_MAP_LAYERS,
@@ -47,6 +52,7 @@ import {
 } from '@/config';
 import { resolveNewsCategories, enabledNewsCategoryKeys } from '@/config/feed-resolution';
 import { VARIANT_META } from '@/config/variant-meta';
+import { BRAND } from '@/config/brand';
 import { isDesktopRuntime } from '@/services/runtime';
 import {
   MISSION_PRESETS,
@@ -136,8 +142,8 @@ class LazyUnifiedSettings implements UnifiedSettingsController {
     return this.button;
   }
 
-  open(tab?: UnifiedSettingsTabId): void {
-    void this.load().then((settings) => {
+  open(tab?: UnifiedSettingsTabId): Promise<void> {
+    return this.load().then((settings) => {
       if (!this.destroyed) settings.open(tab);
     }).catch((error) => {
       // A rejection because the controller was torn down mid-load is a
@@ -199,6 +205,7 @@ export interface EventHandlerCallbacks {
   refreshCiiAfterFocalPointsReady?: () => void;
   stopLayerActivity?: (layer: keyof MapLayers) => void;
   mountLiveNewsIfReady?: () => void;
+  predictOverheadPassesAtMapCenter?: () => void;
 }
 
 export class EventHandlerManager implements AppModule {
@@ -229,6 +236,7 @@ export class EventHandlerManager implements AppModule {
   private boundWidgetModifyHandler: ((e: Event) => void) | null = null;
   private boundUndoHandler: ((e: KeyboardEvent) => void) | null = null;
   private boundNotifyForCountryHandler: ((e: Event) => void) | null = null;
+  private boundEnablePanelHandler: ((e: Event) => void) | null = null;
   private boundMissionOutsideHandler: ((e: MouseEvent) => void) | null = null;
   private boundMissionKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
   private boundEmbedModalKeydownHandler: ((e: KeyboardEvent) => void) | null = null;
@@ -463,6 +471,10 @@ export class EventHandlerManager implements AppModule {
       );
       this.boundNotifyForCountryHandler = null;
     }
+    if (this.boundEnablePanelHandler) {
+      window.removeEventListener('enable-panel', this.boundEnablePanelHandler);
+      this.boundEnablePanelHandler = null;
+    }
     this.closeMissionPresetPopover();
     if (this.missionDataRefreshTimer) {
       window.clearTimeout(this.missionDataRefreshTimer);
@@ -506,6 +518,11 @@ export class EventHandlerManager implements AppModule {
         if ((e.metaKey || e.ctrlKey) && !e.shiftKey && e.key.toLowerCase() === 'k') {
           e.preventDefault();
           this.callbacks.openSearch({ toggle: true });
+        }
+        // GeoSpy: Cmd/Ctrl+Shift+O → overhead passes at map center
+        if ((e.metaKey || e.ctrlKey) && e.shiftKey && e.key.toLowerCase() === 'o') {
+          e.preventDefault();
+          this.callbacks.predictOverheadPassesAtMapCenter?.();
         }
       };
       document.addEventListener('keydown', this.boundSearchKeyHandler);
@@ -1227,6 +1244,11 @@ export class EventHandlerManager implements AppModule {
       this.debouncedWebcamReload();
     });
 
+    // Keep ?overhead=1 in the live URL while the prediction popup is open.
+    window.addEventListener(OVERHEAD_POPUP_CHANGE_EVENT, () => {
+      this.syncUrlState();
+    });
+
     // Skip the immediate sync only when applyInitialUrlState() will start an
     // async flyTo that makes getCenter() return stale intermediate coordinates.
     // Two cases qualify:
@@ -1260,6 +1282,7 @@ export class EventHandlerManager implements AppModule {
     this.ctx.mapLayers[layer] = enabled;
     saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
     this.syncUrlState();
+    this.syncSatellitesFlatHint();
 
     const sourceIds = LAYER_TO_SOURCE[layer];
     if (sourceIds) {
@@ -1294,7 +1317,11 @@ export class EventHandlerManager implements AppModule {
   getShareUrl(): string | null {
     if (!this.ctx.map) return null;
     const state = this.ctx.map.getState();
-    const center = this.ctx.map.getCenter();
+    const mapCenter = this.ctx.map.getCenter();
+    const overheadShare = getActiveOverheadShareLocation();
+    const center = overheadShare
+      ? { lat: overheadShare.lat, lon: overheadShare.lon }
+      : mapCenter;
     const baseUrl = `${window.location.origin}${window.location.pathname}`;
     const briefPage = this.ctx.countryBriefPage;
     const isCountryVisible = briefPage?.isVisible() ?? false;
@@ -1307,6 +1334,7 @@ export class EventHandlerManager implements AppModule {
       country: isCountryVisible ? (briefPage?.getCode() ?? undefined) : undefined,
       expanded: isCountryVisible && briefPage?.getIsMaximized?.() ? true : undefined,
       chokepoint: !isCountryVisible ? (this.ctx.activeChokepoint ?? undefined) : undefined,
+      overhead: Boolean(overheadShare),
     });
   }
 
@@ -1353,7 +1381,7 @@ export class EventHandlerManager implements AppModule {
 
     const preview = document.createElement('iframe');
     preview.className = 'embed-preview-frame';
-    preview.title = 'World Monitor live map preview';
+    preview.title = `${BRAND.name} live map preview`;
     preview.loading = 'lazy';
     preview.referrerPolicy = 'strict-origin-when-cross-origin';
     preview.src = embedUrl;
@@ -1844,6 +1872,15 @@ export class EventHandlerManager implements AppModule {
       WM_OPEN_NOTIFICATIONS_FOR_COUNTRY,
       this.boundNotifyForCountryHandler,
     );
+
+    // Strategic Risk "Enable" source/action buttons dispatch this event.
+    this.boundEnablePanelHandler = (e: Event) => {
+      const panelId = (e as CustomEvent<{ panelId?: string }>).detail?.panelId;
+      if (typeof panelId === 'string' && panelId) {
+        this.enablePanelById(panelId);
+      }
+    };
+    window.addEventListener('enable-panel', this.boundEnablePanelHandler);
   }
 
   setupAuthWidget(): void {
@@ -2204,7 +2241,19 @@ export class EventHandlerManager implements AppModule {
           this.ctx.mapLayers = { ...this.ctx.mapLayers, resilienceScore: false };
           saveToStorage(STORAGE_KEYS.mapLayers, this.ctx.mapLayers);
         }
+        this.syncSatellitesFlatHint();
       });
+    });
+    // Initial coherence tip for default-on satellites on flat map.
+    // Retry a few times — map mode / layer hydration can lag the first paint.
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 1500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 3500);
+    window.setTimeout(() => this.syncSatellitesFlatHint(), 6000);
+  }
+
+  private syncSatellitesFlatHint(): void {
+    syncSatellitesFlatHint(!!this.ctx.mapLayers.satellites, this.ctx.map, {
+      onPredictPasses: () => this.callbacks.predictOverheadPassesAtMapCenter?.(),
     });
   }
 

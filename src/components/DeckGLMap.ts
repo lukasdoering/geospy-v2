@@ -683,6 +683,10 @@ export class DeckGLMap {
     if (!this.maplibreMap) return;
     const canvas = this.maplibreMap.getCanvas();
     canvas.addEventListener('contextmenu', this.handleContextMenu);
+    // Also listen on the map container: some automation / overlay stacks deliver
+    // contextmenu to the wrapper rather than the WebGL canvas, which previously
+    // fell through to the browser menu and skipped Open Country Brief / passes.
+    this.container.addEventListener('contextmenu', this.handleContextMenu);
     canvas.addEventListener('pointerdown', this.handleCountryClickPointerDown);
     canvas.addEventListener('pointermove', this.handleCountryClickPointerMove);
     canvas.addEventListener('pointerup', this.handleCountryClickPointerEnd);
@@ -696,6 +700,7 @@ export class DeckGLMap {
     this.maplibreMap.off('dragstart', this.markCountryDragGesture);
     this.maplibreMap.off('dragend', this.refreshCountryDragSuppression);
     canvas.removeEventListener('contextmenu', this.handleContextMenu);
+    this.container.removeEventListener('contextmenu', this.handleContextMenu);
     canvas.removeEventListener('pointerdown', this.handleCountryClickPointerDown);
     canvas.removeEventListener('pointermove', this.handleCountryClickPointerMove);
     canvas.removeEventListener('pointerup', this.handleCountryClickPointerEnd);
@@ -2412,13 +2417,17 @@ export class DeckGLMap {
       onClick: info => {
         const obj = info?.object as EnergyPipeline | undefined;
         if (!obj?.id) return false;
-        // Emit an event; PipelineStatusPanel listens and opens its drawer.
-        // Cross-component coupling stays loose — no direct reference to the
-        // panel class, and if the panel isn't mounted the event is a no-op.
+        // Enable PipelineStatusPanel first (lazy mount), then open its drawer.
+        // Same enable-panel + brief delay contract as EnergyDisruptionsPanel.
         try {
-          window.dispatchEvent(new CustomEvent('energy:open-pipeline-detail', {
-            detail: { pipelineId: obj.id },
+          window.dispatchEvent(new CustomEvent('enable-panel', {
+            detail: { panelId: 'pipeline-status' },
           }));
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('energy:open-pipeline-detail', {
+              detail: { pipelineId: obj.id },
+            }));
+          }, 80);
         } catch {
           // Non-browser / tauri edge cases — silent no-op.
         }
@@ -2538,12 +2547,16 @@ export class DeckGLMap {
       onClick: info => {
         const obj = info?.object as EnergyStorageDot | undefined;
         if (!obj?.id) return false;
-        // Dispatch to StorageFacilityMapPanel — same loose-coupling
-        // pattern as the pipelines layer.
+        // Enable StorageFacilityMapPanel first, then open its drawer.
         try {
-          window.dispatchEvent(new CustomEvent('energy:open-storage-facility-detail', {
-            detail: { facilityId: obj.id },
+          window.dispatchEvent(new CustomEvent('enable-panel', {
+            detail: { panelId: 'storage-facility-map' },
           }));
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('energy:open-storage-facility-detail', {
+              detail: { facilityId: obj.id },
+            }));
+          }, 80);
         } catch {
           // Silent no-op on non-browser runtimes.
         }
@@ -2640,9 +2653,14 @@ export class DeckGLMap {
         const obj = info?.object as ShortagePin | undefined;
         if (!obj?.id) return false;
         try {
-          window.dispatchEvent(new CustomEvent('energy:open-fuel-shortage-detail', {
-            detail: { shortageId: obj.id },
+          window.dispatchEvent(new CustomEvent('enable-panel', {
+            detail: { panelId: 'fuel-shortages' },
           }));
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent('energy:open-fuel-shortage-detail', {
+              detail: { shortageId: obj.id },
+            }));
+          }, 80);
         } catch {
           // Silent no-op on non-browser runtimes.
         }

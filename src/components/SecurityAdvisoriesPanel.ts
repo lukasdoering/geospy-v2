@@ -2,14 +2,17 @@ import { Panel } from './Panel';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { t } from '@/services/i18n';
 import type { SecurityAdvisory } from '@/services/security-advisories';
+import { advisoryCountryLabel, resolveAdvisoryMapFocus } from '@/utils/security-advisory-focus';
 
 type AdvisoryFilter = 'all' | 'critical' | 'US' | 'AU' | 'UK' | 'health';
 
 export class SecurityAdvisoriesPanel extends Panel {
   private advisories: SecurityAdvisory[] = [];
   private activeFilter: AdvisoryFilter = 'all';
+  private searchQuery = '';
   private refreshInterval: ReturnType<typeof setInterval> | null = null;
   private onRefreshRequest?: () => void;
+  private onMapFocus?: (lat: number, lon: number) => void;
 
   constructor() {
     super({
@@ -33,6 +36,33 @@ export class SecurityAdvisoriesPanel extends Panel {
       if (target.closest('.sa-refresh-btn')) {
         this.showLoading(t('components.securityAdvisories.loading'));
         this.onRefreshRequest?.();
+        return;
+      }
+      // Title links open the advisory source — don't steal that click for map focus.
+      if (target.closest('a')) return;
+      const row = target.closest<HTMLElement>('[data-sa-focus]');
+      if (!row) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onMapFocus?.(lat, lon);
+      }
+    });
+    this.content.addEventListener('input', (e) => {
+      const inp = e.target as HTMLInputElement;
+      if (inp.dataset.role !== 'sa-search') return;
+      this.searchQuery = inp.value;
+      this.render({ restoreSearchFocus: true });
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-sa-focus]');
+      if (!row) return;
+      e.preventDefault();
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onMapFocus?.(lat, lon);
       }
     });
   }
@@ -50,18 +80,30 @@ export class SecurityAdvisoriesPanel extends Panel {
   }
 
   private getFiltered(): SecurityAdvisory[] {
+    let list: SecurityAdvisory[];
     switch (this.activeFilter) {
       case 'critical':
-        return this.advisories.filter(a => a.level === 'do-not-travel' || a.level === 'reconsider');
+        list = this.advisories.filter(a => a.level === 'do-not-travel' || a.level === 'reconsider');
+        break;
       case 'health':
-        return this.advisories.filter(a => a.sourceCountry === 'EU' || a.sourceCountry === 'INT');
+        list = this.advisories.filter(a => a.sourceCountry === 'EU' || a.sourceCountry === 'INT');
+        break;
       case 'US':
       case 'AU':
       case 'UK':
-        return this.advisories.filter(a => a.sourceCountry === this.activeFilter);
+        list = this.advisories.filter(a => a.sourceCountry === this.activeFilter);
+        break;
       default:
-        return this.advisories;
+        list = this.advisories;
     }
+    const q = this.searchQuery.trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((a) =>
+      a.title.toLowerCase().includes(q)
+      || (a.country || '').toLowerCase().includes(q)
+      || a.source.toLowerCase().includes(q)
+      || a.sourceCountry.toLowerCase().includes(q),
+    );
   }
 
   private getLevelClass(level?: SecurityAdvisory['level']): string {
@@ -109,7 +151,7 @@ export class SecurityAdvisoriesPanel extends Panel {
     return date.toLocaleDateString();
   }
 
-  private render(): void {
+  private render(opts: { restoreSearchFocus?: boolean } = {}): void {
     if (this.advisories.length === 0) {
       this.setSafeContent(unsafeRawHtml(`<div class="panel-empty">${t('common.noDataAvailable')}</div>`, 'legacy Panel.setContent() migration'));
       return;
@@ -140,6 +182,7 @@ export class SecurityAdvisoriesPanel extends Panel {
 
     const filtersHtml = `
       <div class="sa-filters">
+        <input data-role="sa-search" data-testid="security-advisories-search" type="search" class="sa-search" placeholder="Search country / title" value="${escapeHtml(this.searchQuery)}" />
         <button class="sa-filter ${this.activeFilter === 'all' ? 'sa-filter-active' : ''}" data-filter="all">${t('common.all')}</button>
         <button class="sa-filter ${this.activeFilter === 'critical' ? 'sa-filter-active' : ''}" data-filter="critical">${t('components.securityAdvisories.critical')}</button>
         <button class="sa-filter ${this.activeFilter === 'US' ? 'sa-filter-active' : ''}" data-filter="US">\u{1F1FA}\u{1F1F8} US</button>
@@ -159,10 +202,19 @@ export class SecurityAdvisoriesPanel extends Panel {
         const levelCls = this.getLevelClass(a.level);
         const levelLabel = this.getLevelLabel(a.level);
         const flag = this.getSourceFlag(a.sourceCountry);
+        const focus = resolveAdvisoryMapFocus(a.country);
+        const countryChip = focus
+          ? `<span class="sa-country">${escapeHtml(advisoryCountryLabel(a.country))}</span>`
+          : '';
+        const focusAttrs = focus
+          ? ` data-sa-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show advisory on map"`
+          : '';
+        const clickableCls = focus ? ' sa-item-clickable' : '';
 
-        return `<div class="sa-item ${levelCls}">
+        return `<div class="sa-item ${levelCls}${clickableCls}"${focusAttrs}>
           <div class="sa-item-header">
             <span class="sa-badge ${levelCls}">${levelLabel}</span>
+            ${countryChip}
             <span class="sa-source">${flag} ${escapeHtml(a.source)}</span>
           </div>
           <div class="sa-body">
@@ -188,10 +240,23 @@ export class SecurityAdvisoriesPanel extends Panel {
         ${footerHtml}
       </div>
     `, 'legacy Panel.setContent() migration'));
+
+    if (opts.restoreSearchFocus) {
+      const inp = this.content.querySelector<HTMLInputElement>('input[data-role="sa-search"]');
+      if (inp) {
+        inp.focus();
+        const len = inp.value.length;
+        inp.setSelectionRange(len, len);
+      }
+    }
   }
 
   public setRefreshHandler(handler: () => void): void {
     this.onRefreshRequest = handler;
+  }
+
+  public setCountryClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
   }
 
   public destroy(): void {

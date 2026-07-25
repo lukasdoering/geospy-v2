@@ -148,7 +148,7 @@ export const COMMANDS: Command[] = [
   { id: 'panel:map', keywords: ['map', 'globe', 'global map'], label: 'Panel: Global Map', icon: '\u{1F5FA}\uFE0F', category: 'panels' },
   { id: 'panel:live-webcams', keywords: ['webcams', 'live cameras', 'cctv'], label: 'Panel: Live Webcams', icon: '\u{1F4F7}', category: 'panels' },
   { id: 'panel:windy-webcams', keywords: ['windy', 'weather cam', 'weather webcam', 'weather cameras'], label: 'Panel: Live Weather Cams', icon: '\u{1F4F9}', category: 'panels' },
-  { id: 'panel:chat-analyst', keywords: ['wm analyst', 'analyst', 'ai analyst', 'chat analyst', 'ask ai', 'intelligence analyst'], label: 'Panel: WM Analyst', icon: '\u{1F916}', category: 'panels' },
+  { id: 'panel:chat-analyst', keywords: ['wm analyst', 'geospy analyst', 'analyst', 'ai analyst', 'chat analyst', 'ask ai', 'intelligence analyst'], label: 'Panel: GeoSpy Analyst', icon: '\u{1F916}', category: 'panels' },
   { id: 'panel:insights', keywords: ['insights', 'ai insights', 'analysis'], label: 'Panel: AI Insights', icon: '\u{1F4A1}', category: 'panels' },
   { id: 'panel:strategic-posture', keywords: ['strategic posture', 'ai posture', 'posture assessment'], label: 'Panel: AI Strategic Posture', icon: '\u{1F3AF}', category: 'panels' },
   { id: 'panel:forecast', keywords: ['forecast', 'ai forecast', 'predictions ai'], label: 'Panel: AI Forecasts', icon: '\u{1F52E}', category: 'panels' },
@@ -267,9 +267,12 @@ export const COMMANDS: Command[] = [
   { id: 'view:light', keywords: ['light', 'light mode', 'day'], label: 'Switch to light mode', icon: '\u2600\uFE0F', category: 'view' },
   { id: 'view:fullscreen', keywords: ['fullscreen', 'full screen'], label: 'Toggle fullscreen', icon: '\u26F6', category: 'view' },
   { id: 'view:settings', keywords: ['settings', 'config', 'api keys'], label: 'Open settings', icon: '\u2699\uFE0F', category: 'view' },
+  { id: 'view:settings-satellites', keywords: ['satellites settings', 'overhead settings', 'elevation threshold', 'pass window', 'satellite prefs'], label: 'Open Settings \u2192 Satellites (overhead prefs)', icon: '\u{1F6F0}\uFE0F', category: 'view' },
   { id: 'view:refresh', keywords: ['refresh', 'reload', 'refresh all'], label: 'Refresh all data', icon: '\u{1F504}', category: 'view' },
   { id: 'view:resilience', keywords: ['resilience', 'resilience score', 'baseline', 'stress', 'country resilience'], label: 'Toggle resilience score', icon: '\u{1F6E1}\uFE0F', category: 'view' },
   { id: 'view:route-explorer', keywords: ['route', 'explorer', 'ship', 'shipping', 'freight', 'cargo', 'lane', 'hs code', 'hs2', 'import', 'export', 'plan a shipment'], label: 'Route Explorer \u2014 plan a shipment', icon: '\u{1F6A2}', category: 'view' },
+  { id: 'view:overhead-passes', keywords: ['overhead passes', 'orbital passes', 'satellite passes', 'predict passes', 'revisit', 'sgp4', 'leo passes'], label: 'Predict overhead satellite passes at map center', icon: '\u{1F6F0}\uFE0F', category: 'view' },
+  { id: 'view:overhead-passes-last', keywords: ['last overhead', 'rerun passes', 'previous passes', 'last location passes'], label: 'Re-run overhead passes at last location', icon: '\u{1F504}', category: 'view' },
 
   // Time range
   { id: 'time:1h', keywords: ['1h', 'last hour', '1 hour'], label: 'Show events from last hour', icon: '\u{1F550}', category: 'actions' },

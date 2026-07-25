@@ -6,7 +6,13 @@ import { formatTime, getCSSColor } from '@/utils';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
 import { computeNewSinceVisit } from '@/utils/new-since-visit';
 import { analysisWorker, enrichWithVelocityML, getClusterAssetContext, MAX_DISTANCE_KM, activityTracker, generateSummary, translateText, preloadRelatedAssetTables } from '@/services';
-import { getSourcePropagandaRisk, getSourceTier, getSourceType } from '@/config/feeds';
+import {
+  describePropagandaBadge,
+  getSourcePropagandaRisk,
+  getSourceTier,
+  getSourceTierBadgeTitle,
+  getSourceType,
+} from '@/config/feeds';
 import { SITE_VARIANT } from '@/config';
 import { t, getCurrentLanguage } from '@/services/i18n';
 import { track } from '@/services/analytics';
@@ -36,6 +42,7 @@ export class NewsPanel extends Panel {
   private onRelatedAssetClick?: (asset: RelatedAsset) => void;
   private onRelatedAssetsFocus?: (assets: RelatedAsset[], originLabel: string) => void;
   private onRelatedAssetsClear?: () => void;
+  private onLocationClick?: (lat: number, lon: number) => void;
   private isFirstRender = true;
   /** Cluster ids that arrived while the user was away (#4923) — their NEW
    * ribbons persist until seen instead of expiring with the 2-min window. */
@@ -130,6 +137,25 @@ export class NewsPanel extends Panel {
     this.onRelatedAssetClick = options.onRelatedAssetClick;
     this.onRelatedAssetsFocus = options.onRelatedAssetsFocus;
     this.onRelatedAssetsClear = options.onRelatedAssetsClear;
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
+  }
+
+  private hasMapCoords(lat?: number, lon?: number): boolean {
+    return (
+      typeof lat === 'number' &&
+      typeof lon === 'number' &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lon) &&
+      !(lat === 0 && lon === 0)
+    );
+  }
+
+  private renderMapChip(lat?: number, lon?: number): string {
+    if (!this.hasMapCoords(lat, lon)) return '';
+    return `<button type="button" class="news-item-map" data-lat="${lat}" data-lon="${lon}" title="Show on map" aria-label="Show on map">Map</button>`;
   }
 
   private createDeviationIndicator(): void {
@@ -408,7 +434,10 @@ export class NewsPanel extends Panel {
     if (items.length === 0) {
       this.renderRequestId += 1; // Cancel in-flight clustering from previous renders.
       this.setDataBadge('unavailable');
-      this.showError(t('common.noNewsAvailable'));
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noNewsAvailable'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -494,6 +523,7 @@ export class NewsPanel extends Panel {
         ${item.snippet ? `<div class="item-snippet">${escapeHtml(item.snippet.length > 200 ? item.snippet.slice(0, 200).replace(/\s+\S*$/, '') + '…' : item.snippet)}</div>` : ''}
         <div class="item-time">
           ${formatTime(item.pubDate)}
+          ${this.renderMapChip(item.lat, item.lon)}
           ${getCurrentLanguage() !== 'en' ? `<button class="item-translate-btn" title="Translate" data-text="${escapeHtml(item.title)}">文</button>` : ''}
         </div>
       </div>
@@ -654,18 +684,20 @@ export class NewsPanel extends Panel {
       ? `<span class="lang-badge">${cluster.lang.toUpperCase()}</span>`
       : '';
 
-    // Propaganda risk indicator for primary source
+    // Propaganda risk indicator for primary source (unknown never implies independent)
     const primaryPropRisk = getSourcePropagandaRisk(cluster.primarySource);
-    const primaryPropBadge = primaryPropRisk.risk !== 'low'
-      ? `<span class="propaganda-badge ${primaryPropRisk.risk}" title="${escapeHtml(primaryPropRisk.note || `State-affiliated: ${primaryPropRisk.stateAffiliated || 'Unknown'}`)}">${primaryPropRisk.risk === 'high' ? '⚠ State Media' : '! Caution'}</span>`
+    const primaryPropDesc = describePropagandaBadge(primaryPropRisk);
+    const primaryPropBadge = primaryPropDesc
+      ? `<span class="propaganda-badge ${primaryPropDesc.risk}" title="${escapeHtml(primaryPropDesc.title)}">${primaryPropDesc.label}</span>`
       : '';
 
-    // Source credibility badge for primary source (T1=Wire, T2=Verified outlet)
+    // Source credibility badge for primary source (T1=Wire/Gov star, T2=outlet)
+    // Label "Wire" only for actual wire types; gov ministries are not wires.
     const primaryTier = getSourceTier(cluster.primarySource);
     const primaryType = getSourceType(cluster.primarySource);
-    const tierLabel = primaryTier === 1 ? 'Wire' : ''; // Don't show "Major" - confusing with story importance
+    const tierLabel = primaryTier === 1 && primaryType === 'wire' ? 'Wire' : '';
     const tierBadge = primaryTier <= 2
-      ? `<span class="tier-badge tier-${primaryTier}" title="${primaryType === 'wire' ? 'Wire Service - Highest reliability' : primaryType === 'gov' ? 'Official Government Source' : 'Verified News Outlet'}">${primaryTier === 1 ? '★' : '●'}${tierLabel ? ` ${tierLabel}` : ''}</span>`
+      ? `<span class="tier-badge tier-${primaryTier}" title="${escapeHtml(getSourceTierBadgeTitle(primaryType))}">${primaryTier === 1 ? '★' : '●'}${tierLabel ? ` ${tierLabel}` : ''}</span>`
       : '';
 
     // Build "Also reported by" section for multi-source confirmation
@@ -673,9 +705,9 @@ export class NewsPanel extends Panel {
     const topSourcesHtml = otherSources.length > 0
       ? `<span class="also-reported">Also:</span>` + otherSources
         .map(s => {
-          const propRisk = getSourcePropagandaRisk(s.name);
-          const propBadge = propRisk.risk !== 'low'
-            ? `<span class="propaganda-badge ${propRisk.risk}" title="${escapeHtml(propRisk.note || `State-affiliated: ${propRisk.stateAffiliated || 'Unknown'}`)}">${propRisk.risk === 'high' ? '⚠' : '!'}</span>`
+          const propDesc = describePropagandaBadge(getSourcePropagandaRisk(s.name));
+          const propBadge = propDesc
+            ? `<span class="propaganda-badge ${propDesc.risk}" title="${escapeHtml(propDesc.title)}">${propDesc.shortLabel}</span>`
             : '';
           return `<span class="top-source tier-${s.tier}">${escapeHtml(s.name)}${propBadge}</span>`;
         })
@@ -706,6 +738,15 @@ export class NewsPanel extends Panel {
         </div>
       `
       : '';
+
+    // Prefer geocoded cluster coords; fall back to related-asset origin when clustering inferred a place.
+    const mapLat = this.hasMapCoords(cluster.lat, cluster.lon)
+      ? cluster.lat
+      : assetContext?.origin.lat;
+    const mapLon = this.hasMapCoords(cluster.lat, cluster.lon)
+      ? cluster.lon
+      : assetContext?.origin.lon;
+    const mapChip = this.renderMapChip(mapLat, mapLon);
 
     // Category tag from threat classification
     const cat = cluster.threat?.category;
@@ -757,6 +798,7 @@ export class NewsPanel extends Panel {
         <div class="cluster-meta">
           <span class="top-sources">${topSourcesHtml}</span>
           <span class="item-time">${formatTime(cluster.lastUpdated)}</span>
+          ${mapChip}
           ${getCurrentLanguage() !== 'en' ? `<button class="item-translate-btn" title="Translate" data-text="${escapeHtml(cluster.primaryTitle)}">文</button>` : ''}
         </div>
         ${relatedAssetsHtml}
@@ -767,6 +809,17 @@ export class NewsPanel extends Panel {
   private setupContentDelegation(): void {
     this.content.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+
+      const mapBtn = target.closest<HTMLElement>('.news-item-map');
+      if (mapBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const lat = Number(mapBtn.dataset.lat);
+        const lon = Number(mapBtn.dataset.lon);
+        if (!this.hasMapCoords(lat, lon)) return;
+        this.onLocationClick?.(lat, lon);
+        return;
+      }
 
       const assetBtn = target.closest<HTMLElement>('.related-asset');
       if (assetBtn) {

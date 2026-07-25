@@ -4,6 +4,7 @@ import { createCircuitBreaker } from '@/utils';
 import { getHydratedData } from '@/services/bootstrap';
 import { WildfireServiceClient } from '@/services/generated-rpc-clients';
 import { resolveFireDetectionTotalCount } from './payload';
+export { regionMapFocus } from './region-focus';
 
 export type { FireDetection };
 export { resolveFireDetectionTotalCount } from './payload';

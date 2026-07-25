@@ -23,6 +23,7 @@ import type { AviationCommandBar } from '@/components/AviationCommandBar';
 import { MobilePanelNav } from '@/components/MobilePanelNav';
 import { debounce, loadFromStorage, saveToStorage } from '@/utils';
 import { escapeHtml } from '@/utils/sanitize';
+import { BRAND } from '@/config/brand';
 import {
   FEEDS,
   CANONICAL_FEEDS,
@@ -710,7 +711,11 @@ export class PanelLayoutManager implements AppModule {
       case PanelGateReason.ANONYMOUS:
         return () => this.ctx.authModal?.open();
       case PanelGateReason.FREE_TIER:
-        return () => window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+        return () => window.open(
+          this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro',
+          '_blank',
+          'noopener,noreferrer',
+        );
       case PanelGateReason.PAYMENT_ON_HOLD:
       case PanelGateReason.RENEWAL_FAILED:
         // Pre-reserve the portal tab synchronously inside the click gesture
@@ -725,7 +730,11 @@ export class PanelLayoutManager implements AppModule {
         // for users who don't want to wait for the reactive update.
         return () => window.location.reload();
       case PanelGateReason.LAPSED:
-        return () => window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+        return () => window.open(
+          this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro',
+          '_blank',
+          'noopener,noreferrer',
+        );
       default:
         return () => {};
     }
@@ -824,12 +833,12 @@ export class PanelLayoutManager implements AppModule {
               <span class="variant-label">Good News</span>
             </a>`;
       })()}</div>
-          <span class="logo">MONITOR</span><span class="logo-mobile">World Monitor</span><span class="version">v${__APP_VERSION__}</span>${BETA_MODE ? '<span class="beta-badge">BETA</span>' : ''}
-          <a href="https://x.com/eliehabib" target="_blank" rel="noopener" class="credit-link">
+          <span class="logo">${BRAND.shortLogo}</span><span class="logo-mobile">${BRAND.name}</span><span class="version">v${__APP_VERSION__}</span>${BETA_MODE ? '<span class="beta-badge">BETA</span>' : ''}
+          <a href="https://x.com/eliehabib" target="_blank" rel="noopener" class="credit-link" title="Upstream ${BRAND.upstreamName} author">
             <svg class="x-logo" width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             <span class="credit-text">@eliehabib</span>
           </a>
-          <a href="https://github.com/koala73/worldmonitor" target="_blank" rel="noopener" class="github-link" title="${t('header.viewOnGitHub')}">
+          <a href="${BRAND.githubUrl}" target="_blank" rel="noopener" class="github-link" title="${t('header.viewOnGitHub')}">
             <svg width="16" height="16" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>
           </a>
           <button class="mobile-settings-btn" id="mobileSettingsBtn" title="${t('header.settings')}">
@@ -869,7 +878,7 @@ export class PanelLayoutManager implements AppModule {
       <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
       <nav class="mobile-menu" id="mobileMenu">
         <div class="mobile-menu-header">
-          <span class="mobile-menu-title">WORLD MONITOR</span>
+          <span class="mobile-menu-title">${BRAND.nameUpper}</span>
           <button class="mobile-menu-close" id="mobileMenuClose" aria-label="Close menu">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
           </button>
@@ -918,7 +927,7 @@ export class PanelLayoutManager implements AppModule {
         </a>
         <div class="mobile-menu-divider"></div>
         <div class="mobile-menu-footer-links">
-          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : 'https://www.worldmonitor.app/pro'}" target="_blank" rel="noopener">Pro</a>
+          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro'}" target="_blank" rel="noopener">Pro</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/blog/' : 'https://www.worldmonitor.app/blog/'}" target="_blank" rel="noopener">Blog</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/docs' : 'https://www.worldmonitor.app/docs'}" target="_blank" rel="noopener">Docs</a>
           <a href="https://status.worldmonitor.app/" target="_blank" rel="noopener">Status</a>
@@ -981,21 +990,21 @@ export class PanelLayoutManager implements AppModule {
         <div class="site-footer-brand">
           <img src="/favico/android-chrome-96x96.png" alt="" width="28" height="28" loading="lazy" decoding="async" class="site-footer-icon" />
           <div class="site-footer-brand-text">
-            <span class="site-footer-name">WORLD MONITOR</span>
-            <span class="site-footer-sub">v${__APP_VERSION__} &middot; <a href="https://x.com/eliehabib" target="_blank" rel="noopener" class="site-footer-credit">@eliehabib</a></span>
+            <span class="site-footer-name">${BRAND.nameUpper}</span>
+            <span class="site-footer-sub">v${__APP_VERSION__} &middot; fork of <a href="${BRAND.upstreamUrl}" target="_blank" rel="noopener" class="site-footer-credit">${BRAND.upstreamName}</a></span>
           </div>
         </div>
         <nav>
-          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : 'https://www.worldmonitor.app/pro'}" target="_blank" rel="noopener">Pro</a>
+          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro'}" target="_blank" rel="noopener">Pro</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/blog/' : 'https://www.worldmonitor.app/blog/'}" target="_blank" rel="noopener">Blog</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/docs' : 'https://www.worldmonitor.app/docs'}" target="_blank" rel="noopener">Docs</a>
           <a href="https://status.worldmonitor.app/" target="_blank" rel="noopener">Status</a>
-          <a href="https://github.com/koala73/worldmonitor" target="_blank" rel="noopener">GitHub</a>
+          <a href="${BRAND.githubUrl}" target="_blank" rel="noopener">GitHub</a>
           <a href="https://discord.gg/re63kWKxaz" target="_blank" rel="noopener">Discord</a>
           <a href="https://x.com/worldmonitorai" target="_blank" rel="noopener">X</a>
           ${this.ctx.isDesktopApp ? '' : `<span id="footerDownloadMount"></span>`}
         </nav>
-        <span class="site-footer-copy">&copy; ${new Date().getFullYear()} World Monitor</span>
+        <span class="site-footer-copy">&copy; ${new Date().getFullYear()} ${BRAND.name} · based on <a href="${BRAND.upstreamUrl}" target="_blank" rel="noopener">${BRAND.upstreamName}</a></span>
       </footer>
     `, "legacy direct innerHTML migration"));
     // Mark AFTER the innerHTML swap so the timestamp reflects when the new shell
@@ -1784,24 +1793,96 @@ export class PanelLayoutManager implements AppModule {
     this.lazyDefaultPanel('latest-brief', () => import('@/components/LatestBriefPanel'), 'LatestBriefPanel');
 
     this.lazyDefaultPanel('commodities', () => import('@/components/MarketPanel'), 'CommoditiesPanel');
-    this.lazyDefaultPanel('energy-complex', () => import('@/components/EnergyComplexPanel'), 'EnergyComplexPanel');
-    this.lazyDefaultPanel('oil-inventories', () => import('@/components/OilInventoriesPanel'), 'OilInventoriesPanel');
-    this.lazyDefaultPanel('energy-crisis', () => import('@/components/EnergyCrisisPanel'), 'EnergyCrisisPanel');
-    this.lazyDefaultPanel('chokepoint-strip', () => import('@/components/ChokepointStripPanel'), 'ChokepointStripPanel');
+    this.lazyDefaultPanel('energy-complex', () => import('@/components/EnergyComplexPanel'), 'EnergyComplexPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
+    this.lazyDefaultPanel('oil-inventories', () => import('@/components/OilInventoriesPanel'), 'OilInventoriesPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
+    this.lazyImportedPanel('energy-crisis', () => import('@/components/EnergyCrisisPanel'), 'EnergyCrisisPanel', (EnergyCrisisPanel) => {
+      const p = new EnergyCrisisPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
+    this.lazyImportedPanel('chokepoint-strip', () => import('@/components/ChokepointStripPanel'), 'ChokepointStripPanel', (ChokepointStripPanel) => {
+      const p = new ChokepointStripPanel();
+      p.setChokepointClickHandler((id: string) => {
+        this.ctx.map?.openChokepoint?.(id);
+      });
+      return p;
+    });
     this.lazyPanel('pipeline-status', () =>
-      this.importPanel('pipeline-status', () => import('@/components/PipelineStatusPanel'), 'PipelineStatusPanel', (PipelineStatusPanel) => new PipelineStatusPanel()),
+      this.importPanel('pipeline-status', () => import('@/components/PipelineStatusPanel'), 'PipelineStatusPanel', (PipelineStatusPanel) => {
+        const p = new PipelineStatusPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.pipelines) {
+            this.callbacks.applyMapLayerChange?.('pipelines', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('storage-facility-map', () =>
-      this.importPanel('storage-facility-map', () => import('@/components/StorageFacilityMapPanel'), 'StorageFacilityMapPanel', (StorageFacilityMapPanel) => new StorageFacilityMapPanel()),
+      this.importPanel('storage-facility-map', () => import('@/components/StorageFacilityMapPanel'), 'StorageFacilityMapPanel', (StorageFacilityMapPanel) => {
+        const p = new StorageFacilityMapPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.storageFacilities) {
+            this.callbacks.applyMapLayerChange?.('storageFacilities', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('fuel-shortages', () =>
-      this.importPanel('fuel-shortages', () => import('@/components/FuelShortagePanel'), 'FuelShortagePanel', (FuelShortagePanel) => new FuelShortagePanel()),
+      this.importPanel('fuel-shortages', () => import('@/components/FuelShortagePanel'), 'FuelShortagePanel', (FuelShortagePanel) => {
+        const p = new FuelShortagePanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.fuelShortages) {
+            this.callbacks.applyMapLayerChange?.('fuelShortages', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('energy-disruptions', () =>
-      this.importPanel('energy-disruptions', () => import('@/components/EnergyDisruptionsPanel'), 'EnergyDisruptionsPanel', (EnergyDisruptionsPanel) => new EnergyDisruptionsPanel()),
+      this.importPanel('energy-disruptions', () => import('@/components/EnergyDisruptionsPanel'), 'EnergyDisruptionsPanel', (EnergyDisruptionsPanel) => {
+        const p = new EnergyDisruptionsPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+          // Enable both energy asset layers — disruption may be pipeline or storage.
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.pipelines) {
+            this.callbacks.applyMapLayerChange?.('pipelines', true, 'programmatic');
+          }
+          if (this.ctx.mapLayers && !this.ctx.mapLayers.storageFacilities) {
+            this.callbacks.applyMapLayerChange?.('storageFacilities', true, 'programmatic');
+          }
+        });
+        return p;
+      }),
     );
     this.lazyPanel('energy-risk-overview', () =>
-      this.importPanel('energy-risk-overview', () => import('@/components/EnergyRiskOverviewPanel'), 'EnergyRiskOverviewPanel', (EnergyRiskOverviewPanel) => new EnergyRiskOverviewPanel()),
+      this.importPanel('energy-risk-overview', () => import('@/components/EnergyRiskOverviewPanel'), 'EnergyRiskOverviewPanel', (EnergyRiskOverviewPanel) => {
+        const p = new EnergyRiskOverviewPanel();
+        p.setHormuzFocusHandler(() => {
+          this.ctx.map?.openChokepoint?.('hormuz_strait');
+        });
+        p.setEuGasFocusHandler(() => {
+          this.ctx.map?.setCenter(50, 10, 3);
+        });
+        p.setDisruptionsFocusHandler(() => {
+          this.ctx.map?.setCenter(29, 48, 3);
+        });
+        return p;
+      }),
     );
     this.lazyDefaultPanel('polymarket', () => import('@/components/PredictionPanel'), 'PredictionPanel');
 
@@ -1831,12 +1912,40 @@ export class PanelLayoutManager implements AppModule {
     this.createNewsPanel('github', 'panels.github');
     this.createNewsPanel('ipo', 'panels.ipo');
     this.createNewsPanel('thinktanks', 'panels.thinktanks');
-    this.lazyDefaultPanel('economic', () => import('@/components/EconomicPanel'), 'EconomicPanel');
-    this.lazyDefaultPanel('global-procurement', () => import('@/components/GlobalProcurementPanel'), 'GlobalProcurementPanel');
-    this.lazyDefaultPanel('consumer-prices', () => import('@/components/ConsumerPricesPanel'), 'ConsumerPricesPanel');
+    this.lazyDefaultPanel('economic', () => import('@/components/EconomicPanel'), 'EconomicPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
+    this.lazyImportedPanel('global-procurement', () => import('@/components/GlobalProcurementPanel'), 'GlobalProcurementPanel', (GlobalProcurementPanel) => {
+      const p = new GlobalProcurementPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
+    this.lazyImportedPanel('consumer-prices', () => import('@/components/ConsumerPricesPanel'), 'ConsumerPricesPanel', (ConsumerPricesPanel) => {
+      const p = new ConsumerPricesPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
 
-    this.lazyDefaultPanel('trade-policy', () => import('@/components/TradePolicyPanel'), 'TradePolicyPanel');
-    this.lazyDefaultPanel('sanctions-pressure', () => import('@/components/SanctionsPressurePanel'), 'SanctionsPressurePanel');
+    this.lazyImportedPanel('trade-policy', () => import('@/components/TradePolicyPanel'), 'TradePolicyPanel', (TradePolicyPanel) => {
+      const p = new TradePolicyPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
+    this.lazyImportedPanel('sanctions-pressure', () => import('@/components/SanctionsPressurePanel'), 'SanctionsPressurePanel', (SanctionsPressurePanel) => {
+      const p = new SanctionsPressurePanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
     this.lazyImportedPanel('supply-chain', () => import('@/components/SupplyChainPanel'), 'SupplyChainPanel', (SupplyChainPanel) => {
       const supplyChainPanel = new SupplyChainPanel();
       supplyChainPanel.setOnScenarioActivate((id, result) => {
@@ -1844,6 +1953,12 @@ export class PanelLayoutManager implements AppModule {
       });
       supplyChainPanel.setOnDismissScenario(() => {
         this.ctx.map?.deactivateScenario();
+      });
+      supplyChainPanel.setChokepointFocusHandler((id) => {
+        this.ctx.map?.openChokepoint?.(id);
+      });
+      supplyChainPanel.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
       });
       this.ctx.map?.setSupplyChainPanel(supplyChainPanel);
       return supplyChainPanel;
@@ -1899,7 +2014,13 @@ export class PanelLayoutManager implements AppModule {
         'regional-intelligence',
         () => import('@/components/RegionalIntelligenceBoard'),
         'RegionalIntelligenceBoard',
-        (RegionalIntelligenceBoard) => new RegionalIntelligenceBoard(),
+        (RegionalIntelligenceBoard) => {
+          const p = new RegionalIntelligenceBoard();
+          p.setLocationClickHandler((lat: number, lon: number) => {
+            this.ctx.map?.setCenter(lat, lon, 3);
+          });
+          return p;
+        },
       ),
     );
 
@@ -1909,13 +2030,47 @@ export class PanelLayoutManager implements AppModule {
         this.callbacks.openCountryStory(code, name);
       });
       ciiPanel.setCountryClickHandler((code) => {
+        void import('@/utils/country-map-focus').then(({ resolveCountryMapFocus }) => {
+          const focus = resolveCountryMapFocus(code);
+          if (focus) this.ctx.map?.setCenter(focus.lat, focus.lon, 4);
+        });
         this.callbacks.openCountryBrief(code);
       });
       return ciiPanel;
     });
 
-    this.lazyDefaultPanel('cascade', () => import('@/components/CascadePanel'), 'CascadePanel');
-    this.lazyDefaultPanel('satellite-fires', () => import('@/components/SatelliteFiresPanel'), 'SatelliteFiresPanel');
+    this.lazyImportedPanel('cascade', () => import('@/components/CascadePanel'), 'CascadePanel', (CascadePanel) => {
+      const p = new CascadePanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      p.onSelect((nodeId) => {
+        if (!nodeId) return;
+        if (nodeId.startsWith('chokepoint:')) {
+          this.ctx.map?.openChokepoint?.(nodeId.slice('chokepoint:'.length));
+          return;
+        }
+        void import('@/services/infrastructure-cascade').then(({ buildDependencyGraph }) => {
+          const coords = buildDependencyGraph().nodes.get(nodeId)?.coordinates;
+          if (!coords || coords.length < 2) return;
+          const [lon, lat] = coords;
+          if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+            this.ctx.map?.setCenter(lat, lon, 5);
+          }
+        });
+      });
+      return p;
+    });
+    this.lazyImportedPanel('satellite-fires', () => import('@/components/SatelliteFiresPanel'), 'SatelliteFiresPanel', (SatelliteFiresPanel) => {
+      const p = new SatelliteFiresPanel();
+      p.setRegionClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 5);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.natural) {
+          this.callbacks.applyMapLayerChange?.('natural', true, 'programmatic');
+        }
+      });
+      return p;
+    });
 
     this.lazyDefaultPanel('defense-patents', () => import('@/components/DefensePatentsPanel'), 'DefensePatentsPanel');
 
@@ -1961,43 +2116,86 @@ export class PanelLayoutManager implements AppModule {
       const ucdpEventsPanel = new UcdpEventsPanel();
       ucdpEventsPanel.setEventClickHandler((lat, lon) => {
         this.ctx.map?.setCenter(lat, lon, 5);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.ucdpEvents) {
+          this.callbacks.applyMapLayerChange?.('ucdpEvents', true, 'programmatic');
+        }
       });
       return ucdpEventsPanel;
     });
 
-    this.lazyDefaultPanel('disease-outbreaks', () => import('@/components/DiseaseOutbreaksPanel'), 'DiseaseOutbreaksPanel');
+    this.lazyImportedPanel('disease-outbreaks', () => import('@/components/DiseaseOutbreaksPanel'), 'DiseaseOutbreaksPanel', (DiseaseOutbreaksPanel) => {
+      const p = new DiseaseOutbreaksPanel();
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        // Surface disease pins when jumping from the panel.
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.diseaseOutbreaks) {
+          this.callbacks.applyMapLayerChange?.('diseaseOutbreaks', true, 'programmatic');
+        }
+      });
+      return p;
+    });
     this.lazyDefaultPanel('social-velocity', () => import('@/components/SocialVelocityPanel'), 'SocialVelocityPanel');
     this.lazyDefaultPanel('wsb-ticker-scanner', () => import('@/components/WsbTickerScannerPanel'), 'WsbTickerScannerPanel');
 
     this.lazyImportedPanel('displacement', () => import('@/components/DisplacementPanel'), 'DisplacementPanel', (DisplacementPanel) => {
       const p = new DisplacementPanel();
-      p.setCountryClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.displacement) {
+          this.callbacks.applyMapLayerChange?.('displacement', true, 'programmatic');
+        }
+      });
       return p;
     });
 
     this.lazyImportedPanel('climate', () => import('@/components/ClimateAnomalyPanel'), 'ClimateAnomalyPanel', (ClimateAnomalyPanel) => {
       const p = new ClimateAnomalyPanel();
-      p.setZoneClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setZoneClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.climate) {
+          this.callbacks.applyMapLayerChange?.('climate', true, 'programmatic');
+        }
+      });
       return p;
     });
 
-    this.lazyDefaultPanel('population-exposure', () => import('@/components/PopulationExposurePanel'), 'PopulationExposurePanel');
+    this.lazyImportedPanel('population-exposure', () => import('@/components/PopulationExposurePanel'), 'PopulationExposurePanel', (PopulationExposurePanel) => {
+      const p = new PopulationExposurePanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 5);
+      });
+      return p;
+    });
 
     this.lazyImportedPanel('security-advisories', () => import('@/components/SecurityAdvisoriesPanel'), 'SecurityAdvisoriesPanel', (SecurityAdvisoriesPanel) => {
       const p = new SecurityAdvisoriesPanel();
       p.setRefreshHandler(() => { void this.callbacks.loadSecurityAdvisories?.(); });
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       return p;
     });
 
     this.lazyImportedPanel('radiation-watch', () => import('@/components/RadiationWatchPanel'), 'RadiationWatchPanel', (RadiationWatchPanel) => {
       const p = new RadiationWatchPanel();
-      p.setLocationClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.radiationWatch) {
+          this.callbacks.applyMapLayerChange?.('radiationWatch', true, 'programmatic');
+        }
+      });
       return p;
     });
 
     this.lazyImportedPanel('thermal-escalation', () => import('@/components/ThermalEscalationPanel'), 'ThermalEscalationPanel', (ThermalEscalationPanel) => {
       const p = new ThermalEscalationPanel();
-      p.setLocationClickHandler((lat: number, lon: number) => { this.ctx.map?.setCenter(lat, lon, 4); });
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        // Thermal clusters are FIRMS-derived — surface natural detections when focusing.
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.natural) {
+          this.callbacks.applyMapLayerChange?.('natural', true, 'programmatic');
+        }
+      });
       return p;
     });
 
@@ -2034,14 +2232,25 @@ export class PanelLayoutManager implements AppModule {
       'forecast',
       () => import('@/components/ForecastPanel'),
       'ForecastPanel',
-      undefined,
+      (p) => {
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+      },
       _lockPanels ? ['AI-powered geopolitical forecasts', 'Cross-domain cascade predictions', 'Prediction market calibration'] : undefined,
     );
 
-    this.lazyDefaultPanel(
+    this.lazyImportedPanel(
       'oref-sirens',
       () => import('@/components/OrefSirensPanel'),
       'OrefSirensPanel',
+      (OrefSirensPanel) => {
+        const p = new OrefSirensPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 7);
+        });
+        return p;
+      },
       undefined,
       _lockPanels ? [t('premium.features.orefSirens1'), t('premium.features.orefSirens2')] : undefined,
     );
@@ -2063,10 +2272,22 @@ export class PanelLayoutManager implements AppModule {
       );
     });
 
-    this.lazyDefaultPanel('world-clock', () => import('@/components/WorldClockPanel'), 'WorldClockPanel');
+    this.lazyPanel('world-clock', () =>
+      this.importPanel('world-clock', () => import('@/components/WorldClockPanel'), 'WorldClockPanel', (WorldClockPanel) => {
+        const p = new WorldClockPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 6);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
+        return p;
+      }),
+    );
 
     this.lazyImportedPanel('airline-intel', () => import('@/components/AirlineIntelPanel'), 'AirlineIntelPanel', (AirlineIntelPanel) => {
       const panel = new AirlineIntelPanel();
+      panel.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 6);
+      });
       void import('@/components/AviationCommandBar')
         .then(({ AviationCommandBar }) => {
           if (!this.ctx.isDestroyed) this.aviationCommandBar = new AviationCommandBar();
@@ -2078,16 +2299,40 @@ export class PanelLayoutManager implements AppModule {
     });
 
     this.lazyPanel('gulf-economies', () =>
-      this.importPanel('gulf-economies', () => import('@/components/GulfEconomiesPanel'), 'GulfEconomiesPanel', (GulfEconomiesPanel) => new GulfEconomiesPanel()),
+      this.importPanel('gulf-economies', () => import('@/components/GulfEconomiesPanel'), 'GulfEconomiesPanel', (GulfEconomiesPanel) => {
+        const p = new GulfEconomiesPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('grocery-basket', () =>
-      this.importPanel('grocery-basket', () => import('@/components/GroceryBasketPanel'), 'GroceryBasketPanel', (GroceryBasketPanel) => new GroceryBasketPanel()),
+      this.importPanel('grocery-basket', () => import('@/components/GroceryBasketPanel'), 'GroceryBasketPanel', (GroceryBasketPanel) => {
+        const p = new GroceryBasketPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('bigmac', () =>
-      this.importPanel('bigmac', () => import('@/components/BigMacPanel'), 'BigMacPanel', (BigMacPanel) => new BigMacPanel()),
+      this.importPanel('bigmac', () => import('@/components/BigMacPanel'), 'BigMacPanel', (BigMacPanel) => {
+        const p = new BigMacPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('fuel-prices', () =>
-      this.importPanel('fuel-prices', () => import('@/components/FuelPricesPanel'), 'FuelPricesPanel', (FuelPricesPanel) => new FuelPricesPanel()),
+      this.importPanel('fuel-prices', () => import('@/components/FuelPricesPanel'), 'FuelPricesPanel', (FuelPricesPanel) => {
+        const p = new FuelPricesPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 4);
+        });
+        return p;
+      }),
     );
     this.lazyPanel('fao-food-price-index', () =>
       this.importPanel('fao-food-price-index', () => import('@/components/FaoFoodPriceIndexPanel'), 'FaoFoodPriceIndexPanel', (FaoFoodPriceIndexPanel) => new FaoFoodPriceIndexPanel()),
@@ -2102,22 +2347,61 @@ export class PanelLayoutManager implements AppModule {
       return new LiveNewsPanel();
     });
 
-    this.lazyDefaultPanel('live-webcams', () => import('@/components/LiveWebcamsPanel'), 'LiveWebcamsPanel');
-    this.lazyDefaultPanel('windy-webcams', () => import('@/components/PinnedWebcamsPanel'), 'PinnedWebcamsPanel');
+    this.lazyPanel('live-webcams', () =>
+      this.importPanel('live-webcams', () => import('@/components/LiveWebcamsPanel'), 'LiveWebcamsPanel', (LiveWebcamsPanel) => {
+        const p = new LiveWebcamsPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 6);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
+        return p;
+      }),
+    );
+    this.lazyPanel('windy-webcams', () =>
+      this.importPanel('windy-webcams', () => import('@/components/PinnedWebcamsPanel'), 'PinnedWebcamsPanel', (PinnedWebcamsPanel) => {
+        const p = new PinnedWebcamsPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 7);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
+        return p;
+      }),
+    );
 
     this.lazyPanel('events', () =>
       this.importPanel(
         'events',
         () => import('@/components/TechEventsPanel'),
         'TechEventsPanel',
-        (TechEventsPanel) => new TechEventsPanel('events', () => this.ctx.allNews),
+        (TechEventsPanel) => {
+          const p = new TechEventsPanel('events', () => this.ctx.allNews);
+          p.setLocationClickHandler((lat: number, lon: number) => {
+            this.ctx.map?.setCenter(lat, lon, 5);
+            if (this.ctx.mapLayers && !this.ctx.mapLayers.techEvents) {
+              this.callbacks.applyMapLayerChange?.('techEvents', true, 'programmatic');
+            }
+          });
+          return p;
+        },
       ),
     );
-    this.lazyDefaultPanel('internet-disruptions', () => import('@/components/InternetDisruptionsPanel'), 'InternetDisruptionsPanel');
+    this.lazyImportedPanel('internet-disruptions', () => import('@/components/InternetDisruptionsPanel'), 'InternetDisruptionsPanel', (InternetDisruptionsPanel) => {
+      const p = new InternetDisruptionsPanel();
+      p.setCountryClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+        if (this.ctx.mapLayers && !this.ctx.mapLayers.outages) {
+          this.callbacks.applyMapLayerChange?.('outages', true, 'programmatic');
+        }
+      });
+      return p;
+    });
     this.lazyDefaultPanel('service-status', () => import('@/components/ServiceStatusPanel'), 'ServiceStatusPanel');
 
     this.lazyImportedPanel('tech-readiness', () => import('@/components/TechReadinessPanel'), 'TechReadinessPanel', (TechReadinessPanel) => {
       const p = new TechReadinessPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       // Only auto-refresh on variants whose bootstrap seeds techReadiness
       // (full + tech). On commodity/finance/energy the seed key is empty
       // and the 5s fetch at services/economic/index.ts:694 just times out.
@@ -2131,11 +2415,18 @@ export class PanelLayoutManager implements AppModule {
 
     this.lazyImportedPanel('national-debt', () => import('@/components/NationalDebtPanel'), 'NationalDebtPanel', (NationalDebtPanel) => {
       const p = new NationalDebtPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
       void p.refresh();
       return p;
     });
 
-    this.lazyDefaultPanel('cross-source-signals', () => import('@/components/CrossSourceSignalsPanel'), 'CrossSourceSignalsPanel');
+    this.lazyDefaultPanel('cross-source-signals', () => import('@/components/CrossSourceSignalsPanel'), 'CrossSourceSignalsPanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
 
     this.lazyImportedPanel('geo-hubs', () => import('@/components/GeoHubsPanel'), 'GeoHubsPanel', (GeoHubsPanel) => {
       const p = new GeoHubsPanel();
@@ -2149,7 +2440,13 @@ export class PanelLayoutManager implements AppModule {
       return p;
     });
 
-    this.lazyImportedPanel('ai-regulation', () => import('@/components/RegulationPanel'), 'RegulationPanel', (RegulationPanel) => new RegulationPanel('ai-regulation'));
+    this.lazyImportedPanel('ai-regulation', () => import('@/components/RegulationPanel'), 'RegulationPanel', (RegulationPanel) => {
+      const p = new RegulationPanel('ai-regulation');
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
 
     this.lazyPanel('macro-signals', () =>
       this.importPanel('macro-signals', () => import('@/components/MacroSignalsPanel'), 'MacroSignalsPanel', (MacroSignalsPanel) => new MacroSignalsPanel()),
@@ -2157,16 +2454,38 @@ export class PanelLayoutManager implements AppModule {
     this.lazyDefaultPanel('fear-greed', () => import('@/components/FearGreedPanel'), 'FearGreedPanel');
     this.lazyDefaultPanel('aaii-sentiment', () => import('@/components/AAIISentimentPanel'), 'AAIISentimentPanel');
     this.lazyDefaultPanel('market-breadth', () => import('@/components/MarketBreadthPanel'), 'MarketBreadthPanel');
-    this.lazyDefaultPanel('macro-tiles', () => import('@/components/MacroTilesPanel'), 'MacroTilesPanel');
+    this.lazyImportedPanel('macro-tiles', () => import('@/components/MacroTilesPanel'), 'MacroTilesPanel', (MacroTilesPanel) => {
+      const p = new MacroTilesPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
     this.lazyDefaultPanel('fsi', () => import('@/components/FSIPanel'), 'FSIPanel');
     this.lazyDefaultPanel('yield-curve', () => import('@/components/YieldCurvePanel'), 'YieldCurvePanel');
     this.lazyDefaultPanel('earnings-calendar', () => import('@/components/EarningsCalendarPanel'), 'EarningsCalendarPanel');
-    this.lazyDefaultPanel('economic-calendar', () => import('@/components/EconomicCalendarPanel'), 'EconomicCalendarPanel');
+    this.lazyImportedPanel('economic-calendar', () => import('@/components/EconomicCalendarPanel'), 'EconomicCalendarPanel', (EconomicCalendarPanel) => {
+      const p = new EconomicCalendarPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
     this.lazyDefaultPanel('cot-positioning', () => import('@/components/CotPositioningPanel'), 'CotPositioningPanel');
     this.lazyDefaultPanel('liquidity-shifts', () => import('@/components/LiquidityShiftsPanel'), 'LiquidityShiftsPanel');
     this.lazyDefaultPanel('positioning-247', () => import('@/components/PositioningPanel'), 'PositioningPanel');
-    this.lazyDefaultPanel('gold-intelligence', () => import('@/components/GoldIntelligencePanel'), 'GoldIntelligencePanel');
-    this.lazyDefaultPanel('hormuz-tracker', () => import('@/components/HormuzPanel'), 'HormuzPanel');
+    this.lazyDefaultPanel('gold-intelligence', () => import('@/components/GoldIntelligencePanel'), 'GoldIntelligencePanel', (p) => {
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+    });
+    this.lazyImportedPanel('hormuz-tracker', () => import('@/components/HormuzPanel'), 'HormuzPanel', (HormuzPanel) => {
+      const p = new HormuzPanel();
+      p.setMapFocusHandler(() => {
+        this.ctx.map?.openChokepoint?.('hormuz_strait');
+      });
+      return p;
+    });
     this.lazyDefaultPanel('etf-flows', () => import('@/components/ETFFlowsPanel'), 'ETFFlowsPanel');
     this.lazyDefaultPanel('stablecoins', () => import('@/components/StablecoinPanel'), 'StablecoinPanel');
 
@@ -2174,9 +2493,24 @@ export class PanelLayoutManager implements AppModule {
       this.lazyImportedPanel('runtime-config', () => import('@/components/RuntimeConfigPanel'), 'RuntimeConfigPanel', (RuntimeConfigPanel) => new RuntimeConfigPanel({ mode: 'alert' }));
     }
 
-    this.lazyDefaultPanel('insights', () => import('@/components/InsightsPanel'), 'InsightsPanel');
+    this.lazyImportedPanel('insights', () => import('@/components/InsightsPanel'), 'InsightsPanel', (InsightsPanel) => {
+      const p = new InsightsPanel();
+      p.setLocationClickHandler((lat: number, lon: number) => {
+        this.ctx.map?.setCenter(lat, lon, 4);
+      });
+      return p;
+    });
     if (isPanelInVariantDefaults('threat-timeline')) {
-      this.lazyDefaultPanel('threat-timeline', () => import('@/components/ThreatTimelinePanel'), 'ThreatTimelinePanel');
+      this.lazyPanel('threat-timeline', () =>
+        this.importPanel('threat-timeline', () => import('@/components/ThreatTimelinePanel'), 'ThreatTimelinePanel', (ThreatTimelinePanel) => {
+          const p = new ThreatTimelinePanel();
+          p.setLocationClickHandler((lat: number, lon: number) => {
+            this.ctx.map?.setCenter(lat, lon, 4);
+            this.ctx.map?.flashLocation(lat, lon, 3000);
+          });
+          return p;
+        }),
+      );
     }
 
     // Global Giving panel (all variants)
@@ -2186,6 +2520,10 @@ export class PanelLayoutManager implements AppModule {
     if (SITE_VARIANT === 'happy') {
       this.lazyImportedPanel('positive-feed', () => import('@/components/PositiveNewsFeedPanel'), 'PositiveNewsFeedPanel', (PositiveNewsFeedPanel) => {
         const p = new PositiveNewsFeedPanel();
+        p.setLocationClickHandler((lat, lon) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
         this.ctx.positivePanel = p;
         return p;
       });
@@ -2221,12 +2559,20 @@ export class PanelLayoutManager implements AppModule {
 
       this.lazyImportedPanel('digest', () => import('@/components/GoodThingsDigestPanel'), 'GoodThingsDigestPanel', (GoodThingsDigestPanel) => {
         const p = new GoodThingsDigestPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
         this.ctx.digestPanel = p;
         return p;
       });
 
       this.lazyImportedPanel('species', () => import('@/components/SpeciesComebackPanel'), 'SpeciesComebackPanel', (SpeciesComebackPanel) => {
         const p = new SpeciesComebackPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
         this.ctx.speciesPanel = p;
         return p;
       });
@@ -2237,6 +2583,9 @@ export class PanelLayoutManager implements AppModule {
     if (this.shouldCreatePanel('renewable')) {
       this.lazyImportedPanel('renewable', () => import('@/components/RenewableEnergyPanel'), 'RenewableEnergyPanel', (RenewableEnergyPanel) => {
         const p = new RenewableEnergyPanel();
+        p.setLocationClickHandler((lat: number, lon: number) => {
+          this.ctx.map?.setCenter(lat, lon, 3);
+        });
         this.ctx.renewablePanel = p;
         return p;
       });
@@ -2941,6 +3290,10 @@ export class PanelLayoutManager implements AppModule {
       onRelatedAssetClick: (asset) => this.handleRelatedAssetClick(asset),
       onRelatedAssetsFocus: (assets) => this.ctx.map?.highlightAssets(assets),
       onRelatedAssetsClear: () => this.ctx.map?.highlightAssets(null),
+    });
+    panel.setLocationClickHandler((lat, lon) => {
+      this.ctx.map?.setCenter(lat, lon, 4);
+      this.ctx.map?.flashLocation(lat, lon, 3000);
     });
   }
 

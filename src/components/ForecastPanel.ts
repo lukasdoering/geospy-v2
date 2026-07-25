@@ -6,6 +6,8 @@ import { getForecastMacroRegion } from '../../shared/forecast-macro-regions.js';
 import { unsafeRawHtml } from '@/utils/sanitize';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 import { mergeCachedCaseFiles, needsCaseFileRefetch, shouldFetchCaseFile } from './forecast-case-files';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
+import { toIso2 } from '@/utils/country-codes';
 
 const DOMAINS = ['all', 'conflict', 'market', 'supply_chain', 'political', 'military', 'cyber', 'infrastructure'] as const;
 const PANEL_MIN_PROBABILITY = 0.1;
@@ -252,6 +254,8 @@ function injectStyles(): void {
     .fc-sim-chip--skeptical::before { background: #e05252; }
     .fc-label-inner { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
     .fc-forecast-title { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .fc-map-toggle { color: var(--accent); }
+    .fc-map-toggle:focus-visible { outline: 1px solid var(--accent); outline-offset: 2px; }
   `;
   document.head.appendChild(style);
 }
@@ -283,12 +287,30 @@ export class ForecastPanel extends Panel {
   private selectedRegion: string = '';
   private theaters: SimulationTheater[] = [];
   private expandedTheaterId: string | null = null;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
+  }
 
   constructor() {
     super({ id: 'forecast', title: 'AI Forecasts', showCount: true, infoTooltip: t('components.forecast.infoTooltip') });
     injectStyles();
     this.content.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+
+      const mapBtn = target.closest('[data-fc-map-country]') as HTMLElement | null;
+      if (mapBtn?.dataset.fcMapCountry) {
+        this.focusCountry(mapBtn.dataset.fcMapCountry);
+        return;
+      }
 
       const filterBtn = target.closest('[data-fc-domain]') as HTMLElement | null;
       if (filterBtn) {
@@ -343,6 +365,14 @@ export class ForecastPanel extends Panel {
         if (toggleRow) toggleRow.style.display = toggleRow.style.display === 'flex' ? '' : 'flex';
         return;
       }
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const mapBtn = (e.target as HTMLElement).closest('[data-fc-map-country]') as HTMLElement | null;
+      if (!mapBtn?.dataset.fcMapCountry) return;
+      e.preventDefault();
+      this.focusCountry(mapBtn.dataset.fcMapCountry);
     });
   }
 
@@ -687,6 +717,12 @@ export class ForecastPanel extends Panel {
         <div class="fc-toggle-row">
           <span class="fc-toggle" data-fc-toggle="detail-${escapeHtml(f.id)}">Analysis</span>
           ${sigs.length > 0 ? `<span class="fc-toggle" data-fc-toggle="signals-${escapeHtml(f.id)}">Signals (${sigs.length})</span>` : ''}
+          ${(() => {
+            const code = toIso2(f.region || '');
+            return code
+              ? `<span class="fc-toggle fc-map-toggle" data-fc-map-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map">Map</span>`
+              : '';
+          })()}
         </div>
         <div class="fc-detail fc-hidden" data-fc-panel="detail-${escapeHtml(f.id)}">${f.caseFile ? this.renderDetailBody(f) : ''}</div>
         ${signalsHtml ? `<div class="fc-signals fc-hidden" data-fc-panel="signals-${escapeHtml(f.id)}">${signalsHtml}</div>` : ''}

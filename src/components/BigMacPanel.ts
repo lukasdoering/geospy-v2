@@ -3,6 +3,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { getHydratedData } from '@/services/bootstrap';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type { ListBigMacPricesResponse } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import { EconomicServiceClient } from '@/services/generated-rpc-clients';
@@ -10,8 +11,21 @@ import { EconomicServiceClient } from '@/services/generated-rpc-clients';
 const getEconomicClient = createLazyClient(() => new EconomicServiceClient(getRpcBaseUrl(), { fetch: rpcFetch }));
 
 export class BigMacPanel extends Panel {
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
   constructor() {
     super({ id: 'bigmac', title: t('panels.bigmac'), infoTooltip: t('components.bigmac.infoTooltip') });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<void> {
@@ -32,13 +46,19 @@ export class BigMacPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedMarketData'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
   private renderIndex(data: ListBigMacPricesResponse): void {
     if (!data.countries?.length) {
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedMarketData'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
@@ -65,7 +85,7 @@ export class BigMacPanel extends Panel {
           wowCell = `<td class="gb-cell ${wowCls}">${sign}${Math.abs(pct).toFixed(1)}%</td>`;
         }
       }
-      return `<tr>
+      return `<tr class="bm-row-clickable" data-country-code="${escapeHtml(c.code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(c.code)} on map">
         <td class="gb-item-name">${escapeHtml(c.flag)} ${escapeHtml(c.name)}</td>
         <td class="gb-cell ${cls}">$${c.usdPrice.toFixed(2)}</td>
         ${wowCell}
@@ -97,8 +117,25 @@ export class BigMacPanel extends Panel {
         </div>
         ${updatedAt ? `<div class="gb-updated">${t('components.status.updatedAt', { time: updatedAt })}</div>` : ''}
       </div>
+      <style>
+        .bm-row-clickable { cursor: pointer; }
+        .bm-row-clickable:hover td { background: color-mix(in srgb, var(--text-dim) 6%, transparent); }
+        .bm-row-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `;
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
+
+    const activate = (tr: HTMLElement): void => {
+      this.focusCountry(tr.dataset.countryCode);
+    };
+    this.content?.querySelectorAll<HTMLElement>('tr.bm-row-clickable').forEach(tr => {
+      tr.addEventListener('click', () => activate(tr));
+      tr.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(tr);
+      });
+    });
   }
 }

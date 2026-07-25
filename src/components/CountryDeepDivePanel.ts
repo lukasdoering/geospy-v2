@@ -47,6 +47,7 @@ import type {
 import { fetchMultiSectorCostShock, HS2_SHORT_LABELS } from '@/services/supply-chain';
 import type { MapContainer } from './MapContainer';
 import { dedupeHeadlines } from './CountryDeepDivePanel-news-utils';
+import { decodeHtmlEntities } from '../utils/decode-entities';
 import { renderFollowButton } from '@/utils/follow-button';
 import { renderNotifyCountryLink } from '@/utils/notify-country-link';
 import { exportCountryEvidenceMarkdown } from '@/utils/export';
@@ -62,6 +63,7 @@ const DEPENDENCY_FLAG_LABELS: Record<string, { text: string; cls: string }> = {
 import { toApiUrl } from '@/services/runtime';
 import type { ComputeEnergyShockScenarioResponse, ProductImpact } from '@/generated/client/worldmonitor/intelligence/v1/service_client';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 
 type ThreatLevel = 'critical' | 'high' | 'medium' | 'low' | 'info';
@@ -96,6 +98,20 @@ function truncateDisruptionLabel(eventType: string, shortDescription: string): s
   const base = `${eventType} — ${shortDescription}`;
   if (base.length <= DISRUPTION_LABEL_MAX_LEN) return base;
   return base.slice(0, DISRUPTION_LABEL_MAX_LEN - 1) + '…';
+}
+
+/** Map energy open-* CustomEvents to the panel that listens for them. */
+function panelIdForEnergyDetailEvent(eventName: string): string | null {
+  switch (eventName) {
+    case 'energy:open-pipeline-detail':
+      return 'pipeline-status';
+    case 'energy:open-storage-facility-detail':
+      return 'storage-facility-map';
+    case 'energy:open-fuel-shortage-detail':
+      return 'fuel-shortages';
+    default:
+      return null;
+  }
 }
 
 export class CountryDeepDivePanel implements CountryBriefPanel {
@@ -428,6 +444,8 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       if (extraSources.length > 0) {
         meta.setAttribute('title', `Also reported by: ${extraSources.join(', ')}`);
       }
+      const mapChip = this.makeNewsMapChip(item);
+      if (mapChip) meta.append(document.createTextNode(' '), mapChip);
       row.append(top, title, meta);
 
       if (i >= 5) {
@@ -438,6 +456,44 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
         this.newsBody.append(row);
       }
     }
+  }
+
+  /** Map chip for country-brief headlines — prefers item coords, else current country. */
+  private makeNewsMapChip(item: NewsItem): HTMLButtonElement | null {
+    const hasItemCoords =
+      typeof item.lat === 'number' &&
+      typeof item.lon === 'number' &&
+      Number.isFinite(item.lat) &&
+      Number.isFinite(item.lon) &&
+      !(item.lat === 0 && item.lon === 0);
+    const lat = hasItemCoords ? item.lat! : undefined;
+    const lon = hasItemCoords ? item.lon! : undefined;
+    // Geometry may be cold in unit tests — still show when country ISO2 present; resolve on click.
+    const countryCode = (this.currentCode || '').trim().toUpperCase();
+    if (!hasItemCoords && countryCode.length !== 2) return null;
+
+    const btn = this.el('button', 'cdp-news-map', 'Map') as HTMLButtonElement;
+    btn.type = 'button';
+    btn.title = 'Show on map';
+    btn.setAttribute('aria-label', 'Show on map');
+    if (hasItemCoords) {
+      btn.dataset.lat = String(lat);
+      btn.dataset.lon = String(lon);
+    } else {
+      btn.dataset.focus = countryCode;
+    }
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.dataset.lat != null && btn.dataset.lon != null) {
+        this.focusCoordsOnMap(Number(btn.dataset.lat), Number(btn.dataset.lon), 5);
+        return;
+      }
+      const focus = resolveCountryMapFocus(btn.dataset.focus || countryCode);
+      if (!focus) return;
+      this.focusCoordsOnMap(focus.lat, focus.lon, 4);
+    });
+    return btn;
   }
 
 
@@ -464,11 +520,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
 
     const list = this.el('ul', 'cdp-base-list');
     for (const base of summary.nearestBases.slice(0, 3)) {
-      const item = this.el('li', 'cdp-base-item');
-      const left = this.el('span', 'cdp-base-name', base.name);
-      const right = this.el('span', 'cdp-base-distance', `${Math.round(base.distanceKm)} km`);
-      item.append(left, right);
-      list.append(item);
+      list.append(this.makeMapFocusRow(
+        base.name,
+        `${Math.round(base.distanceKm)} km`,
+        () => this.focusBaseOnMap(base.id),
+      ));
     }
     this.militaryBody.append(list);
   }
@@ -519,12 +575,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       expandedDetails.append(typeLabel);
       const ul = this.el('ul', 'cdp-base-list');
       for (const asset of list.slice(0, 5)) {
-        const li = this.el('li', 'cdp-base-item');
-        li.append(
-          this.el('span', 'cdp-base-name', asset.name),
-          this.el('span', 'cdp-base-distance', `${Math.round(asset.distanceKm)} km`),
-        );
-        ul.append(li);
+        ul.append(this.makeMapFocusRow(
+          asset.name,
+          `${Math.round(asset.distanceKm)} km`,
+          () => this.focusAssetOnMap(type, asset.id),
+        ));
       }
       expandedDetails.append(ul);
     }
@@ -543,12 +598,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       expandedDetails.append(portsTitle);
       const portList = this.el('ul', 'cdp-base-list');
       for (const port of nearbyPorts) {
-        const li = this.el('li', 'cdp-base-item');
-        li.append(
-          this.el('span', 'cdp-base-name', `${port.name} (${port.type})`),
-          this.el('span', 'cdp-base-distance', `${Math.round(port.distanceKm)} km`),
-        );
-        portList.append(li);
+        portList.append(this.makeMapFocusRow(
+          `${port.name} (${port.type})`,
+          `${Math.round(port.distanceKm)} km`,
+          () => this.focusCoordsOnMap(port.lat, port.lon, 6),
+        ));
       }
       expandedDetails.append(portList);
     }
@@ -1409,14 +1463,33 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     header.append(this.el('div', 'cdp-economic-source', summary));
     section.append(header);
     for (const it of items.slice(0, 5)) {
-      const row = this.el('div', '');
+      const row = this.el('div', 'cdp-atlas-row');
       row.style.cssText = 'font-size:11px;color:#ddd;padding:2px 0;cursor:pointer';
       row.textContent = it.label || it.id;
-      row.addEventListener('click', () => {
+      row.setAttribute('role', 'button');
+      row.tabIndex = 0;
+      row.title = 'Open related energy panel';
+      row.setAttribute('aria-label', `Open ${it.label || it.id}`);
+      const activate = (e: Event): void => {
+        e.preventDefault();
         if (!it.id) return;
         try {
-          window.dispatchEvent(new CustomEvent(it.event, { detail: it.detail }));
+          // Enable the destination drawer first — same contract as
+          // EnergyDisruptionsPanel — so open-* detail isn't lost when the
+          // pipeline/storage/shortage panel is off or still lazy-mounting.
+          const panelId = panelIdForEnergyDetailEvent(it.event);
+          if (panelId) {
+            window.dispatchEvent(new CustomEvent('enable-panel', { detail: { panelId } }));
+          }
+          window.setTimeout(() => {
+            window.dispatchEvent(new CustomEvent(it.event, { detail: it.detail }));
+          }, 80);
         } catch { /* Non-browser runtime no-op */ }
+      };
+      row.addEventListener('click', activate);
+      row.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        activate(e);
       });
       section.append(row);
     }
@@ -1828,8 +1901,22 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
           const badge = this.el('span', `cdp-dep-badge ${flag.cls}`, flag.text);
           sectorCell.append(document.createTextNode(' '), badge);
         }
-        const cpCell = this.el('td', 'cdp-chokepoint-name');
+        const cpCell = this.el('td', 'cdp-chokepoint-name cdp-map-cell');
         cpCell.textContent = s.primaryChokepointName;
+        cpCell.title = 'Show chokepoint on map';
+        cpCell.setAttribute('role', 'button');
+        cpCell.tabIndex = 0;
+        cpCell.setAttribute('aria-label', `Show ${s.primaryChokepointName} on map`);
+        const openCp = (e: Event): void => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.map?.openChokepoint(s.primaryChokepointId);
+        };
+        cpCell.addEventListener('click', openCp);
+        cpCell.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          openCp(e);
+        });
         const scoreCell = this.el('td', 'cdp-exposure-score');
         scoreCell.textContent = `${s.exposureScore.toFixed(0)}`;
         scoreCell.style.color = CountryDeepDivePanel.exposureScoreColor(s.exposureScore);
@@ -1860,9 +1947,14 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       const table = this.el('table', 'cdp-trade-exposure-table');
       const tbody = this.el('tbody');
       for (const entry of sorted) {
-        const tr = this.el('tr');
-        const nameCell = this.el('td', 'cdp-chokepoint-name');
-        nameCell.textContent = entry.chokepointName || entry.chokepointId.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        const label = entry.chokepointName || entry.chokepointId.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        const tr = this.el('tr', 'cdp-chokepoint-fallback-row');
+        tr.setAttribute('role', 'button');
+        tr.tabIndex = 0;
+        tr.title = 'Show chokepoint on map';
+        tr.setAttribute('aria-label', `Show ${label} on map`);
+        const nameCell = this.el('td', 'cdp-chokepoint-name cdp-map-cell');
+        nameCell.textContent = label;
         const barWrap = this.el('td', 'cdp-exposure-bar-wrap');
         const bar = this.el('div', 'cdp-exposure-bar');
         bar.style.width = `${Math.min(entry.exposureScore, 100)}%`;
@@ -1870,6 +1962,16 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
         const pctCell = this.el('td', 'cdp-exposure-pct', `${entry.exposureScore.toFixed(1)}`);
         pctCell.style.color = CountryDeepDivePanel.exposureScoreColor(entry.exposureScore);
         tr.append(nameCell, barWrap, pctCell);
+        const openCp = (e: Event): void => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.map?.openChokepoint(entry.chokepointId);
+        };
+        tr.addEventListener('click', openCp);
+        tr.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          openCp(e);
+        });
         tbody.append(tr);
       }
       table.append(tbody);
@@ -2132,9 +2234,26 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
 
       for (const exp of rows) {
         const tr = this.el('tr');
-        const supplierTd = this.el('td', 'cdp-product-supplier');
+        const supplierTd = this.el('td', 'cdp-product-supplier cdp-map-cell');
         const flag = exp.partnerIso2 ? CountryDeepDivePanel.toFlagEmoji(exp.partnerIso2) : '';
         supplierTd.textContent = `${flag} ${exp.partnerIso2}`;
+        supplierTd.title = 'Show supplier on map';
+        supplierTd.setAttribute('role', 'button');
+        supplierTd.tabIndex = 0;
+        supplierTd.setAttribute('aria-label', `Show ${exp.partnerIso2} on map`);
+        const focusSupplier = (e: Event): void => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Geometry may be cold in unit tests — resolve at click time.
+          const focus = resolveCountryMapFocus(exp.partnerIso2);
+          if (!focus) return;
+          this.focusCoordsOnMap(focus.lat, focus.lon, 4);
+        };
+        supplierTd.addEventListener('click', focusSupplier);
+        supplierTd.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          focusSupplier(e);
+        });
         tr.append(supplierTd);
 
         const shareTd = this.el('td', 'cdp-product-share');
@@ -2158,11 +2277,20 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
           riskTd.append(badge);
 
           if (exp.risk.transitChokepoints.length > 0) {
-            const cpNames = exp.risk.transitChokepoints
-              .map(cp => cp.chokepointName)
-              .join(', ');
             const cpInfo = this.el('div', 'cdp-risk-chokepoints');
-            cpInfo.textContent = cpNames;
+            exp.risk.transitChokepoints.forEach((cp, idx) => {
+              if (idx > 0) cpInfo.append(document.createTextNode(', '));
+              const chip = this.el('button', 'cdp-risk-chokepoint-chip', cp.chokepointName);
+              chip.setAttribute('type', 'button');
+              chip.title = 'Show chokepoint on map';
+              chip.setAttribute('aria-label', `Show ${cp.chokepointName} on map`);
+              chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.map?.openChokepoint(cp.chokepointId);
+              });
+              cpInfo.append(chip);
+            });
             riskTd.append(cpInfo);
           }
         } else {
@@ -2992,6 +3120,68 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     this.map.flashAssets(type, assets.map((asset) => asset.id));
   }
 
+  /** Clickable atlas row → map focus (bases, ports, infra assets). */
+  private makeMapFocusRow(name: string, distanceLabel: string, onActivate: () => void): HTMLElement {
+    const item = this.el('li', 'cdp-base-item cdp-base-item--map');
+    item.setAttribute('role', 'button');
+    item.tabIndex = 0;
+    item.title = 'Show on map';
+    item.setAttribute('aria-label', `Show ${name} on map`);
+    item.append(
+      this.el('span', 'cdp-base-name', name),
+      this.el('span', 'cdp-base-distance', distanceLabel),
+    );
+    const activate = (e: Event): void => {
+      e.preventDefault();
+      e.stopPropagation();
+      onActivate();
+    };
+    item.addEventListener('click', activate);
+    item.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      activate(e);
+    });
+    return item;
+  }
+
+  private focusCoordsOnMap(lat: number, lon: number, zoom = 6): void {
+    if (!this.map) return;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return;
+    this.map.setCenter(lat, lon, zoom);
+    this.map.flashLocation(lat, lon, 3000);
+  }
+
+  private focusBaseOnMap(baseId: string): void {
+    if (!this.map || !baseId) return;
+    this.map.enableLayer('bases');
+    this.map.triggerBaseClick(baseId);
+  }
+
+  private focusAssetOnMap(type: AssetType, id: string): void {
+    if (!this.map || !id) return;
+    switch (type) {
+      case 'pipeline':
+        this.map.enableLayer('pipelines');
+        this.map.triggerPipelineClick(id);
+        break;
+      case 'cable':
+        this.map.enableLayer('cables');
+        this.map.triggerCableClick(id);
+        break;
+      case 'datacenter':
+        this.map.enableLayer('datacenters');
+        this.map.triggerDatacenterClick(id);
+        break;
+      case 'base':
+        this.focusBaseOnMap(id);
+        break;
+      case 'nuclear':
+        this.map.enableLayer('nuclear');
+        this.map.triggerNuclearClick(id);
+        break;
+    }
+  }
+
   private open(): void {
     if (this.panel.classList.contains('active')) return;
     this.lastFocusedElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -3175,14 +3365,8 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
   }
 
   private decodeEntities(text: string): string {
-    return text
-      .replace(/&amp;/g, '&')
-      .replace(/&lt;/g, '<')
-      .replace(/&gt;/g, '>')
-      .replace(/&quot;/g, '"')
-      .replace(/&#39;/g, "'")
-      .replace(/&#x27;/g, "'")
-      .replace(/&#x2F;/g, '/');
+    // Single-pass decode (issue #5436) — shared client implementation.
+    return decodeHtmlEntities(text);
   }
 
   private toThreatLevel(level: string | undefined): ThreatLevel {

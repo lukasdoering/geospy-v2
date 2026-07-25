@@ -27,12 +27,21 @@ export class RadiationWatchPanel extends Panel {
     });
     this.showLoading(t('components.radiationWatch.loading'));
 
-    this.content.addEventListener('click', (e) => {
-      const row = (e.target as HTMLElement).closest<HTMLElement>('.radiation-row');
+    const focusRow = (row: HTMLElement | null) => {
       if (!row) return;
       const lat = Number(row.dataset.lat);
       const lon = Number(row.dataset.lon);
       if (Number.isFinite(lat) && Number.isFinite(lon)) this.onLocationClick?.(lat, lon);
+    };
+    this.content.addEventListener('click', (e) => {
+      focusRow((e.target as HTMLElement).closest<HTMLElement>('.radiation-row[data-lat]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('.radiation-row[data-lat]');
+      if (!row) return;
+      e.preventDefault();
+      focusRow(row);
     });
   }
 
@@ -69,7 +78,7 @@ export class RadiationWatchPanel extends Panel {
         `<span class="radiation-badge radiation-freshness radiation-freshness-${obs.freshness}">${escapeHtml(obs.freshness)}</span>`,
       ].filter(Boolean).join('');
       return `
-        <tr class="radiation-row" data-lat="${obs.lat}" data-lon="${obs.lon}">
+        <tr class="radiation-row radiation-row-clickable" data-lat="${obs.lat}" data-lon="${obs.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show radiation observation on map">
           <td class="radiation-location">
             <div class="radiation-location-name">${escapeHtml(obs.location)}</div>
             <div class="radiation-location-meta">${escapeHtml(sourceLine)} · ${escapeHtml(t('components.radiationWatch.baseline', { value: baseline }))}</div>

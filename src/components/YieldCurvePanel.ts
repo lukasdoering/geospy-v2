@@ -282,7 +282,12 @@ export class YieldCurvePanel extends Panel {
 
       const validCount = this._current.filter(p => p.value !== null).length;
       if (validCount === 0) {
-        if (!this._hasData) this.showError('No yield data available', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">No yield data available</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 
@@ -290,7 +295,13 @@ export class YieldCurvePanel extends Panel {
       this._render();
       return true;
     } catch (e) {
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : 'Failed to load yield curve', () => void this.fetchData());
+      if (!this._hasData) {
+        const msg = e instanceof Error ? e.message : 'Failed to load yield curve';
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

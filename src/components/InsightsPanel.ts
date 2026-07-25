@@ -25,6 +25,7 @@ import { fetchServerInsights, getServerInsights, type ServerInsights, type Serve
 import { computeISQ, type SignalQuality, type SignalQualityInput } from '@/utils/signal-quality';
 import { extractEntitiesFromTitle } from '@/services/entity-extraction';
 import { getEntityIndex } from '@/services/entity-index';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type { ClusteredEvent, FocalPoint, MilitaryFlight } from '@/types';
 
@@ -39,6 +40,7 @@ export class InsightsPanel extends Panel {
   private lastFocalPoints: FocalPoint[] = [];
   private lastMilitaryFlights: MilitaryFlight[] = [];
   private lastClusters: ClusteredEvent[] = [];
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
   private aiFlowUnsubscribe: (() => void) | null = null;
   private frameworkUnsubscribe: (() => void) | null = null;
   private fwSelector: FrameworkSelector | null = null;
@@ -74,12 +76,43 @@ export class InsightsPanel extends Panel {
     this.fwSelector = new FrameworkSelector({ panelId: 'insights', isPremium: hasPremiumAccess(), panel: this, note: t('components.insights.frameworkNote') });
     this.header.appendChild(this.fwSelector.el);
 
+    this.content.addEventListener('click', (e) => {
+      // Don't steal clicks on headline links
+      if ((e.target as HTMLElement).closest('a')) return;
+      const card = (e.target as HTMLElement).closest<HTMLElement>(
+        '.focal-point-clickable, .convergence-zone-clickable, .insight-story-clickable',
+      );
+      if (!card?.dataset.country) return;
+      this.focusCountry(card.dataset.country);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const card = (e.target as HTMLElement).closest<HTMLElement>(
+        '.focal-point-clickable, .convergence-zone-clickable, .insight-story-clickable',
+      );
+      if (!card?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(card.dataset.country);
+    });
+
     // #4890: the World Brief text is the field LCP element in ~1/3 of desktop
     // views but normally paints only after clusters + hydration + sentiment
     // complete (p75 ~4.3s). Repeat visitors already have the previous brief in
     // the persistent cache — paint it with the shell so the LCP text lands in
     // the first paint window; the first real update pass overwrites it.
     void this.paintCachedBriefEarly();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public setMilitaryFlights(flights: MilitaryFlight[]): void {
@@ -505,7 +538,10 @@ export class InsightsPanel extends Panel {
       );
     } catch (error) {
       console.error('[InsightsPanel] Error:', error);
-      this.showError();
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Insights unavailable</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -611,8 +647,14 @@ export class InsightsPanel extends Panel {
         badges.push(`<span class="insight-badge velocity ${safeThreat}">${escapeHtml(story.category)}</span>`);
       }
 
+      const storyCountry = (story.countryCode || '').trim().toUpperCase();
+      const storyClickable = storyCountry ? ' insight-story-clickable' : '';
+      const storyAttrs = storyCountry
+        ? ` data-country="${escapeHtml(storyCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show story on map"`
+        : '';
+
       return `
-        <div class="insight-story">
+        <div class="insight-story${storyClickable}"${storyAttrs}>
           <div class="insight-story-header">
             <span class="insight-sentiment-dot ${sentimentClass}"></span>
             <span class="insight-story-title">${escapeHtml(story.primaryTitle.slice(0, 100))}${story.primaryTitle.length > 100 ? '...' : ''}</span>
@@ -736,8 +778,14 @@ export class InsightsPanel extends Panel {
         badges.push(`<span class="insight-badge alert">⚠ ${t('components.insights.alert')}</span>`);
       }
 
+      const storyCountry = (this.extractISQInput(cluster).countryCode || '').trim().toUpperCase();
+      const storyClickable = storyCountry ? ' insight-story-clickable' : '';
+      const storyAttrs = storyCountry
+        ? ` data-country="${escapeHtml(storyCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show story on map"`
+        : '';
+
       return `
-        <div class="insight-story">
+        <div class="insight-story${storyClickable}"${storyAttrs}>
           <div class="insight-story-header">
             <span class="insight-sentiment-dot ${sentimentClass}"></span>
             <span class="insight-story-title">${escapeHtml(cluster.primaryTitle.slice(0, 100))}${cluster.primaryTitle.length > 100 ? '...' : ''}</span>
@@ -867,9 +915,13 @@ export class InsightsPanel extends Panel {
       };
 
       const icons = zone.signalTypes.map(t => signalIcons[t] || '📍').join('');
+      const focusCode = (zone.countries?.[0] || '').trim().toUpperCase();
+      const attrs = focusCode
+        ? ` class="convergence-zone convergence-zone-clickable" data-country="${escapeHtml(focusCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(zone.region)} on map"`
+        : ' class="convergence-zone"';
 
       return `
-        <div class="convergence-zone">
+        <div${attrs}>
           <div class="convergence-region">${icons} ${escapeHtml(zone.region)}</div>
           <div class="convergence-description">${escapeHtml(zone.description)}</div>
           <div class="convergence-stats">${t('components.insights.signalTypesEvents', { types: zone.signalTypes.length, events: zone.totalSignals })}</div>
@@ -911,9 +963,14 @@ export class InsightsPanel extends Panel {
       const topHeadline = fp.topHeadlines[0];
       const headlineText = topHeadline?.title?.slice(0, 60) || '';
       const headlineUrl = sanitizeUrl(topHeadline?.url || '');
+      const countryCode = fp.entityType === 'country' ? (fp.entityId || '').trim().toUpperCase() : '';
+      const clickable = Boolean(countryCode);
+      const attrs = clickable
+        ? ` class="focal-point focal-point-clickable ${urgencyClass}" data-country="${escapeHtml(countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(fp.displayName)} on map"`
+        : ` class="focal-point ${urgencyClass}"`;
 
       return `
-        <div class="focal-point ${urgencyClass}">
+        <div${attrs}>
           <div class="focal-point-header">
             <span class="focal-point-name">${escapeHtml(fp.displayName)}</span>
             <span class="focal-point-urgency ${urgencyClass}">${fp.urgency.toUpperCase()}</span>

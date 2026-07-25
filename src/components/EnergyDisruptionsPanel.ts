@@ -2,6 +2,12 @@ import { Panel } from './Panel';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
 import { attributionFooterHtml, ATTRIBUTION_FOOTER_CSS } from '@/utils/attribution-footer';
+import {
+  resolvePipelineMapFocus,
+  resolveStorageFacilityMapFocus,
+} from '@/utils/energy-asset-map-focus';
+import { getCachedPipelineRegistries } from '@/shared/pipeline-registry-store';
+import { getCachedStorageFacilityRegistry } from '@/shared/storage-facility-registry-store';
 
 import type {
   ListEnergyDisruptionsResponse,
@@ -72,6 +78,7 @@ export class EnergyDisruptionsPanel extends Panel {
   private data: ListEnergyDisruptionsResponse | null = null;
   private activeTypeFilter = '';
   private ongoingOnly = false;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -97,6 +104,43 @@ export class EnergyDisruptionsPanel extends Panel {
     // data-attributes, so it works regardless of whether the DOM has
     // flushed yet or has been re-rendered since the last filter change.
     this.content.addEventListener('click', this.handleContentClick);
+    this.content.addEventListener('keydown', this.handleContentKeydown);
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private activateRow(row: HTMLTableRowElement): void {
+    const eventId = row.dataset.eventId;
+    const assetId = row.dataset.assetId;
+    const assetType = row.dataset.assetType;
+    if (!eventId || !assetId || !assetType) return;
+    this.focusAssetOnMap(assetId, assetType);
+    this.dispatchOpenAsset(eventId, assetId, assetType);
+  }
+
+  /** Fly map immediately from cached registries (before drawer mounts). */
+  private focusAssetOnMap(assetId: string, assetType: string): void {
+    if (!this.onMapFocus) return;
+    if (assetType === 'storage') {
+      const { registry } = getCachedStorageFacilityRegistry();
+      const raw = registry?.facilities?.[assetId] as
+        | { location?: { lat?: number; lon?: number } }
+        | undefined;
+      const focus = resolveStorageFacilityMapFocus(raw?.location);
+      if (focus) this.onMapFocus(focus.lat, focus.lon);
+      return;
+    }
+    const { gas, oil } = getCachedPipelineRegistries();
+    const raw = (gas?.pipelines?.[assetId] ?? oil?.pipelines?.[assetId]) as
+      | {
+          startPoint?: { lat?: number; lon?: number };
+          endPoint?: { lat?: number; lon?: number };
+        }
+      | undefined;
+    const focus = resolvePipelineMapFocus(raw?.startPoint, raw?.endPoint);
+    if (focus) this.onMapFocus(focus.lat, focus.lon);
   }
 
   private handleContentClick = (e: Event): void => {
@@ -116,14 +160,16 @@ export class EnergyDisruptionsPanel extends Panel {
     }
 
     const row = target.closest<HTMLTableRowElement>('tr.ed-row');
-    if (row) {
-      const eventId = row.dataset.eventId;
-      const assetId = row.dataset.assetId;
-      const assetType = row.dataset.assetType;
-      if (eventId && assetId && assetType) {
-        this.dispatchOpenAsset(eventId, assetId, assetType);
-      }
-    }
+    if (row) this.activateRow(row);
+  };
+
+  private handleContentKeydown = (e: KeyboardEvent): void => {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const target = e.target as HTMLElement | null;
+    const row = target?.closest<HTMLTableRowElement>('tr.ed-row');
+    if (!row) return;
+    e.preventDefault();
+    this.activateRow(row);
   };
 
   public async fetchData(): Promise<void> {
@@ -142,7 +188,10 @@ export class EnergyDisruptionsPanel extends Panel {
       // match" rather than as an error. Conflating the two previously
       // showed a retry button on what was a legitimate empty state.
       if (live.upstreamUnavailable) {
-        this.showError('Energy disruptions log unavailable', () => void this.fetchData());
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Energy disruptions feed is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;
@@ -150,7 +199,10 @@ export class EnergyDisruptionsPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Energy disruptions log error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Energy disruptions feed is temporarily unavailable. Retrying on the next refresh.</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -243,6 +295,7 @@ export class EnergyDisruptionsPanel extends Panel {
         .ed-table td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); vertical-align: top; }
         .ed-row { cursor: pointer; }
         .ed-row:hover td { background: rgba(255,255,255,0.03); }
+        .ed-row:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: -2px; }
         .ed-event { font-weight: 600; color: var(--text, #eee); }
         .ed-sub { font-size: 9px; color: var(--text-dim, #888); text-transform: uppercase; letter-spacing: 0.04em; }
         .ed-asset-type { display: inline-block; padding: 1px 6px; border-radius: 8px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; background: rgba(255,255,255,0.08); color: var(--text-dim, #aaa); margin-right: 4px; }
@@ -268,13 +321,23 @@ export class EnergyDisruptionsPanel extends Panel {
     // with matching drawer-side rendering (scroll-into-view + visual
     // emphasis); until then, emitting an unread field was a misleading
     // API surface (Codex P2).
+    //
+    // Enable the destination panel first — EventHandlers listens for
+    // enable-panel — so the open-* detail event isn't lost when the
+    // pipeline/storage panel is off or still lazy.
+    const targetPanelId = assetType === 'storage' ? 'storage-facility-map' : 'pipeline-status';
+    window.dispatchEvent(new CustomEvent('enable-panel', { detail: { panelId: targetPanelId } }));
+
     const detail = assetType === 'storage'
       ? { facilityId: assetId }
       : { pipelineId: assetId };
     const eventName = assetType === 'storage'
       ? 'energy:open-storage-facility-detail'
       : 'energy:open-pipeline-detail';
-    window.dispatchEvent(new CustomEvent(eventName, { detail }));
+    // Brief delay so lazy mount can attach its detail listener.
+    window.setTimeout(() => {
+      window.dispatchEvent(new CustomEvent(eventName, { detail }));
+    }, 80);
   }
 
   private renderRow(e: EnergyDisruptionEntry): string {
@@ -285,10 +348,11 @@ export class EnergyDisruptionsPanel extends Panel {
     const causeChain = e.causeChain.join(' → ') || '—';
 
     return `
-      <tr class="ed-row"
+      <tr class="ed-row ed-row-clickable"
           data-event-id="${escapeHtml(e.id)}"
           data-asset-id="${escapeHtml(e.assetId)}"
-          data-asset-type="${escapeHtml(e.assetType)}">
+          data-asset-type="${escapeHtml(e.assetType)}"
+          role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(e.assetId || e.id)} on map">
         <td>
           <div class="ed-event">${glyph} ${escapeHtml(e.eventType)}</div>
           <div class="ed-sub">${escapeHtml(e.shortDescription)}</div>

@@ -6,6 +6,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { formatPrice, formatChange, getChangeClass } from '@/utils';
 import { miniSparkline } from '@/utils/sparkline';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 function hasAnalytics(data: OilAnalytics | null): boolean {
   return !!(data?.wtiPrice || data?.brentPrice || data?.usProduction || data?.usInventory);
@@ -19,6 +20,7 @@ export class EnergyComplexPanel extends Panel {
   private euGas: GetEuGasStorageResponse | null = null;
   private oilStocksAnalysis: GetOilStocksAnalysisResponse | null = null;
   private lngVulnerability: LngVulnerabilityData | null = null;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -27,6 +29,36 @@ export class EnergyComplexPanel extends Panel {
       defaultRowSpan: 2,
       infoTooltip: t('components.energyComplex.infoTooltip'),
     });
+    if (!document.getElementById('oil-stocks-row-clickable-style')) {
+      const style = document.createElement('style');
+      style.id = 'oil-stocks-row-clickable-style';
+      style.textContent = '.oil-stocks-row-clickable{cursor:pointer}.oil-stocks-row-clickable:hover{filter:brightness(1.08)}.oil-stocks-row-clickable:focus-visible{outline:2px solid var(--accent);outline-offset:-2px}';
+      document.head.appendChild(style);
+    }
+    this.content.addEventListener('click', (e) => {
+      const row = (e.target as HTMLElement).closest('.oil-stocks-row-clickable') as HTMLElement | null;
+      if (!row?.dataset.country) return;
+      this.focusCountry(row.dataset.country);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('.oil-stocks-row-clickable') as HTMLElement | null;
+      if (!row?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(row.dataset.country);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public updateAnalytics(data: OilAnalytics): void {
@@ -78,7 +110,7 @@ export class EnergyComplexPanel extends Panel {
         ? `<span class="energy-below-obligation-badge">Below 90d</span>`
         : '';
       return `
-        <tr class="oil-stocks-row">
+        <tr class="oil-stocks-row oil-stocks-row-clickable" data-country="${escapeHtml(m.iso2)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(m.iso2)} on map">
           <td class="oil-stocks-rank">${escapeHtml(String(m.rank))}</td>
           <td class="oil-stocks-iso">${escapeHtml(m.iso2)}</td>
           <td class="oil-stocks-days">${daysDisplay}${warningBadge}</td>
@@ -117,7 +149,7 @@ export class EnergyComplexPanel extends Panel {
 
     const top5 = d.top20LngDependent.slice(0, 5);
     const rows = top5.map(e => `
-      <tr class="oil-stocks-row">
+      <tr class="oil-stocks-row oil-stocks-row-clickable" data-country="${escapeHtml(e.iso2)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(e.iso2)} on map">
         <td class="oil-stocks-iso">${escapeHtml(e.iso2)}</td>
         <td class="oil-stocks-days">${escapeHtml((e.lngShareOfImports * 100).toFixed(1))}%</td>
         <td class="oil-stocks-vs">${escapeHtml(String(Math.round(e.lngImportsTj)))} TJ</td>

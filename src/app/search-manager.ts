@@ -38,6 +38,10 @@ export interface SearchManagerCallbacks {
   openCountryBriefByCode: (code: string, country: string) => void;
   /** Enables a currently-disabled panel (CMD+K "Add"). Returns false if blocked (unknown / free-tier cap). */
   enablePanel: (panelId: string) => boolean;
+  /** Predict LEO overhead passes at the current map center (GeoSpy). */
+  predictOverheadPassesAtMapCenter: () => void;
+  /** Re-run overhead passes at the last requested map coordinates (GeoSpy). */
+  predictOverheadPassesAtLastLocation: () => void;
 }
 
 export class SearchManager implements AppModule {
@@ -385,11 +389,26 @@ export class SearchManager implements AppModule {
         setTimeout(() => { this.ctx.map?.setCenter(ecosystem.lat, ecosystem.lon, 4); }, 300);
         break;
       }
-      case 'techevent':
+      case 'techevent': {
+        const event = result.data as { coords?: { lat?: number; lng?: number; virtual?: boolean } };
         this.ctx.map?.setView('global');
         this.ctx.map?.enableLayer('techEvents');
         this.ctx.mapLayers.techEvents = true;
+        const lat = event?.coords?.lat;
+        const lng = event?.coords?.lng;
+        if (
+          event?.coords
+          && !event.coords.virtual
+          && typeof lat === 'number'
+          && typeof lng === 'number'
+          && Number.isFinite(lat)
+          && Number.isFinite(lng)
+          && !(lat === 0 && lng === 0)
+        ) {
+          setTimeout(() => { this.ctx.map?.setCenter(lat, lng, 5); }, 300);
+        }
         break;
+      }
       case 'techhq': {
         const hq = result.data as typeof TECH_HQS[0];
         this.ctx.map?.setView('global');
@@ -566,6 +585,10 @@ export class SearchManager implements AppModule {
           }
         } else if (action === 'settings') {
           this.ctx.unifiedSettings?.open();
+        } else if (action === 'settings-satellites') {
+          void import('@/utils/overhead-settings-focus').then(({ openOverheadPassSettings }) => {
+            openOverheadPassSettings((tab) => this.ctx.unifiedSettings?.open(tab));
+          });
         } else if (action === 'refresh') {
           window.location.reload();
         } else if (action === 'resilience') {
@@ -587,6 +610,10 @@ export class SearchManager implements AppModule {
             explorer.setMap(this.ctx.map);
             explorer.open();
           });
+        } else if (action === 'overhead-passes') {
+          this.callbacks.predictOverheadPassesAtMapCenter();
+        } else if (action === 'overhead-passes-last') {
+          this.callbacks.predictOverheadPassesAtLastLocation();
         }
         break;
 

@@ -43,6 +43,9 @@ export interface ThreatTimelineItem {
   isAlert: boolean;
   sourceCount: number;
   provenance: string;
+  countryCode?: string | null;
+  lat?: number;
+  lon?: number;
 }
 
 export interface ThreatTimelineDay {
@@ -204,6 +207,9 @@ function normalizeServerInsightStory(story: ServerInsightStory, index: number, f
   const timestampMs = parseTimestampMs(story.pubDate) ?? fallbackTimestampMs;
   const source = cleanSource(story.primarySource) || 'News Digest';
   const rawThreatLevel = String(story.threatLevel ?? '');
+  const countryCode = typeof story.countryCode === 'string' && story.countryCode.trim()
+    ? story.countryCode.trim().toUpperCase()
+    : null;
   return {
     id: `server-${index}-${stableSlug(story.primaryTitle)}`,
     title: story.primaryTitle || 'Untitled intelligence item',
@@ -216,6 +222,7 @@ function normalizeServerInsightStory(story: ServerInsightStory, index: number, f
     isAlert: Boolean(story.isAlert),
     sourceCount: Number.isFinite(story.sourceCount) ? story.sourceCount : 1,
     provenance: inferProvenance(source),
+    countryCode,
   };
 }
 
@@ -225,6 +232,9 @@ function normalizeClusterStory(cluster: ClusteredEvent, index: number): ThreatTi
   const topSource = cluster.topSources[0];
   const source = cleanSource(topSource?.name || cluster.primarySource) || 'News Digest';
   const rawThreatLevel = String(cluster.threat?.level ?? 'info');
+  const lat = typeof cluster.lat === 'number' && Number.isFinite(cluster.lat) ? cluster.lat : undefined;
+  const lon = typeof cluster.lon === 'number' && Number.isFinite(cluster.lon) ? cluster.lon : undefined;
+  const hasCoords = lat !== undefined && lon !== undefined && !(lat === 0 && lon === 0);
   return {
     id: cluster.id || `cluster-${index}-${stableSlug(cluster.primaryTitle)}`,
     title: cluster.primaryTitle || 'Untitled intelligence item',
@@ -237,6 +247,8 @@ function normalizeClusterStory(cluster: ClusteredEvent, index: number): ThreatTi
     isAlert: Boolean(cluster.isAlert),
     sourceCount: Number.isFinite(cluster.sourceCount) ? cluster.sourceCount : 1,
     provenance: inferProvenance(source, cluster.threat?.source),
+    lat: hasCoords ? lat : undefined,
+    lon: hasCoords ? lon : undefined,
   };
 }
 

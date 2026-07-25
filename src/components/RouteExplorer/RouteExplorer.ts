@@ -32,7 +32,10 @@ import { getAuthState } from '@/services/auth-state';
 import { trackGateHit, track, type UmamiEvent } from '@/services/analytics';
 
 import { TRADE_ROUTES } from '@/config/trade-routes';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
+import { copyTextToClipboard } from '@/utils/clipboard-feedback';
+import { showToast } from '@/utils';
 
 
 const TAB_LABELS: Record<ExplorerTab, string> = { 1: 'Current', 2: 'Alternatives', 3: 'Land', 4: 'Impact' };
@@ -53,6 +56,9 @@ interface MapRef {
   setBypassRoutes(corridors: Array<{ fromPort: [number, number]; toPort: [number, number] }>): void;
   clearBypassRoutes(): void;
   zoomToRoutes(routeIds: string[]): void;
+  openChokepoint?(id: string): void;
+  setCenter?(lat: number, lon: number, zoom?: number): void;
+  flashLocation?(lat: number, lon: number, durationMs?: number): void;
 }
 
 interface TestHook {
@@ -358,7 +364,7 @@ export class RouteExplorer {
         });
         void import('@/services/checkout')
           .then((m) => m.startCheckout('pro_monthly'))
-          .catch(() => window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer'));
+          .catch(() => window.open('/pro', '_blank', 'noopener,noreferrer'));
       }, { once: true });
     }
   }
@@ -486,7 +492,9 @@ export class RouteExplorer {
     body.className = 're-body';
 
     this.leftRail = new LeftRail();
-    this.currentTab = new CurrentRouteTab();
+    this.currentTab = new CurrentRouteTab({
+      onChokepointSelect: (id) => this.mapRef?.openChokepoint?.(id),
+    });
     this.alternativesTab = new AlternativesTab({
       onSelectBypass: (o) => this.handleBypassSelect(o),
     });
@@ -495,6 +503,13 @@ export class RouteExplorer {
     });
     this.impactTab = new CountryImpactTab({
       onDrillSideways: (hs2) => this.handleDrillSideways(hs2),
+      onExporterSelect: (iso2) => {
+        const focus = resolveCountryMapFocus(iso2);
+        if (!focus || !this.mapRef) return;
+        this.mapRef.setCenter?.(focus.lat, focus.lon, 4);
+        this.mapRef.flashLocation?.(focus.lat, focus.lon, 3000);
+      },
+      onChokepointSelect: (id) => this.mapRef?.openChokepoint?.(id),
     });
 
     this.contentEl = document.createElement('div');
@@ -677,10 +692,14 @@ export class RouteExplorer {
     const url = new URL(window.location.href);
     const serialized = serializeExplorerUrl(this.state);
     if (serialized) url.searchParams.set('explorer', serialized);
-    if (navigator.clipboard?.writeText) {
-      void navigator.clipboard.writeText(url.toString());
-      this.trackEvent('route-explorer:share-copied');
-    }
+    void copyTextToClipboard(url.toString()).then((ok) => {
+      if (ok) {
+        this.trackEvent('route-explorer:share-copied');
+        showToast('Share link copied');
+      } else {
+        showToast('Copy failed');
+      }
+    });
   }
 
   // ─── Analytics ─────────────────────────────────────────────────────────

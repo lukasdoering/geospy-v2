@@ -38,7 +38,12 @@ export class SocialVelocityPanel extends Panel {
     try {
       const data = await fetchSocialVelocity();
       if (!data.posts?.length) {
-        if (!this._hasData) this.showError('No signal data available', () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">No signal data available</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       this._posts = [...data.posts].sort((a, b) => b.velocityScore - a.velocityScore);
@@ -46,7 +51,13 @@ export class SocialVelocityPanel extends Panel {
       this._render();
       return true;
     } catch (e) {
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : 'Failed to load', () => void this.fetchData());
+      if (!this._hasData) {
+        const msg = e instanceof Error ? e.message : 'Failed to load';
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

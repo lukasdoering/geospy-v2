@@ -1,6 +1,7 @@
 import { Panel } from './Panel';
 import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import { toApiUrl } from '@/services/runtime';
 
 // SVG chart constants
@@ -161,7 +162,12 @@ function buildIeaBarChart(members: IeaMember[]): string {
   const obligX = ML + (90 / maxDays) * plotW;
   const obligLine = `<line x1="${obligX.toFixed(1)}" y1="10" x2="${obligX.toFixed(1)}" y2="${svgH - 5}" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
     <text x="${obligX.toFixed(1)}" y="9" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">90d</text>`;
-  return `<svg viewBox="0 0 ${SVG_W} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">${bars}${obligLine}</svg>`;
+  const chips = sorted.map(m =>
+    `<button type="button" class="oil-iea-country" data-country="${escapeHtml(m.iso2)}" title="Show on map" aria-label="Show ${escapeHtml(m.iso2)} on map">${escapeHtml(m.iso2)}</button>`
+  ).join('');
+  return `<svg viewBox="0 0 ${SVG_W} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">${bars}${obligLine}</svg>
+    <div class="oil-iea-countries" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px 2px">${chips}</div>
+    <style>.oil-iea-country{font-size:10px;font-family:var(--font-mono);padding:2px 6px;background:rgba(255,255,255,0.06);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;border-radius:3px}.oil-iea-country:hover{color:var(--text);border-color:var(--accent)}.oil-iea-country:focus-visible{outline:2px solid var(--accent);outline-offset:1px}</style>`;
 }
 
 function section(title: string, content: string, meta = ''): string {
@@ -180,6 +186,8 @@ function changeBadge(val: number | undefined, unit: string): string {
 }
 
 export class OilInventoriesPanel extends Panel {
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
   constructor() {
     super({
       id: 'oil-inventories',
@@ -188,18 +196,51 @@ export class OilInventoriesPanel extends Panel {
       infoTooltip: t('components.oilInventories.infoTooltip'),
       defaultRowSpan: 2,
     });
+    this.content.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest('.oil-iea-country') as HTMLElement | null;
+      if (!btn?.dataset.country) return;
+      this.focusCountry(btn.dataset.country);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (!(e instanceof KeyboardEvent)) return;
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const btn = (e.target as HTMLElement).closest('.oil-iea-country') as HTMLElement | null;
+      if (!btn?.dataset.country) return;
+      e.preventDefault();
+      this.focusCountry(btn.dataset.country);
+    });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<void> {
     try {
       const resp = await fetch(toApiUrl('/api/economic/v1/get-oil-inventories'));
-      if (!resp.ok) { this.showError('Oil inventory data unavailable', () => void this.fetchData(), 300); return; }
+      if (!resp.ok) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Oil inventory feed is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+        return;
+      }
       const data = (await resp.json()) as OilInventoriesData;
       if (!this.element?.isConnected) return;
       this.render(data);
     } catch {
       if (!this.element?.isConnected) return;
-      this.showError('Oil inventory data unavailable', () => void this.fetchData(), 300);
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Oil inventory feed is temporarily unavailable. Retrying on the next refresh.</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -267,7 +308,10 @@ export class OilInventoriesPanel extends Panel {
     }
 
     if (parts.length === 0) {
-      this.showError('Oil inventory data unavailable', () => void this.fetchData(), 300);
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">No oil inventory series currently available.</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 

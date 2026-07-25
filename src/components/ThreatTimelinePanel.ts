@@ -2,6 +2,7 @@ import * as d3 from 'd3';
 import { Panel } from './Panel';
 import { fetchServerInsights, getServerInsights, type ServerInsights } from '@/services/insights-loader';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import type { ClusteredEvent } from '@/types';
 import {
   THREAT_LEVELS,
@@ -33,6 +34,7 @@ interface StackRow {
 
 export class ThreatTimelinePanel extends Panel {
   private lastClusters: ClusteredEvent[] = [];
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({
@@ -43,7 +45,35 @@ export class ThreatTimelinePanel extends Panel {
       defaultRowSpan: 2,
     });
 
+    this.content.addEventListener('click', (e) => {
+      const btn = (e.target as HTMLElement).closest<HTMLButtonElement>('button.threat-timeline-map[data-focus]');
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      this.focusItem(btn.dataset.focus, btn.dataset.lat, btn.dataset.lon);
+    });
+
     this.renderEmpty('Waiting for intelligence insight data.');
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
+  }
+
+  private focusItem(countryCode?: string, latRaw?: string, lonRaw?: string): void {
+    if (!this.onLocationClick) return;
+    if (latRaw != null && lonRaw != null) {
+      const lat = Number(latRaw);
+      const lon = Number(lonRaw);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onLocationClick(lat, lon);
+        return;
+      }
+    }
+    if (!countryCode) return;
+    const focus = resolveCountryMapFocus(countryCode);
+    if (!focus) return;
+    this.onLocationClick(focus.lat, focus.lon);
   }
 
   public async refresh(fallbackClusters?: ClusteredEvent[]): Promise<void> {
@@ -247,6 +277,19 @@ export class ThreatTimelinePanel extends Panel {
     const source = escapeHtml(item.provenance || item.source || 'News Digest');
     const age = this.formatAge(item.timestampMs);
     const sourceCount = item.sourceCount > 1 ? `<span class="threat-timeline-source-count">${item.sourceCount} sources</span>` : '';
+    const hasCoords =
+      typeof item.lat === 'number' &&
+      typeof item.lon === 'number' &&
+      Number.isFinite(item.lat) &&
+      Number.isFinite(item.lon) &&
+      !(item.lat === 0 && item.lon === 0);
+    const country = (item.countryCode || '').trim().toUpperCase();
+    // Geometry may be cold in unit tests — still show Map when ISO2 present; focus resolves at click.
+    const mapHtml = hasCoords
+      ? `<button type="button" class="threat-timeline-map" data-lat="${item.lat}" data-lon="${item.lon}" title="Show on map" aria-label="Show on map">Map</button>`
+      : country.length === 2
+        ? `<button type="button" class="threat-timeline-map" data-focus="${escapeHtml(country)}" title="Show on map" aria-label="Show ${escapeHtml(country)} on map">Map</button>`
+        : '';
     return `
       <article class="threat-timeline-item">
         ${titleHtml}
@@ -254,6 +297,7 @@ export class ThreatTimelinePanel extends Panel {
           <span class="threat-timeline-source">${source}</span>
           ${sourceCount}
           <span>${escapeHtml(age)}</span>
+          ${mapHtml}
         </div>
       </article>
     `;
@@ -299,6 +343,8 @@ export class ThreatTimelinePanel extends Panel {
         a.threat-timeline-item-title:hover { color: var(--accent-color); }
         .threat-timeline-item-meta { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; color: var(--text-secondary); font-size: 10px; }
         .threat-timeline-source, .threat-timeline-source-count { border: 1px solid var(--border-color); border-radius: 999px; padding: 1px 6px; color: var(--text-secondary); }
+        .threat-timeline-map { margin-left: auto; padding: 1px 6px; font-size: 10px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; cursor: pointer; color: var(--accent-color, var(--accent)); background: transparent; border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent)) 45%, transparent); border-radius: 4px; }
+        .threat-timeline-map:hover { border-color: var(--accent-color, var(--accent)); }
         .threat-critical .threat-timeline-group-header { border-left: 3px solid #ef4444; }
         .threat-high .threat-timeline-group-header { border-left: 3px solid #f97316; }
         .threat-medium .threat-timeline-group-header { border-left: 3px solid #eab308; }

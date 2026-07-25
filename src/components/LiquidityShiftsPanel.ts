@@ -73,7 +73,12 @@ export class LiquidityShiftsPanel extends Panel {
         .sort((a, b) => COT_PRIORITY.indexOf(a.code ?? '') - COT_PRIORITY.indexOf(b.code ?? ''));
 
       if (cotRows.length === 0 && (stocksResp.quotes?.length ?? 0) === 0) {
-        if (!this._hasData) this.showError(t('components.liquidityShifts.unavailable'), () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('components.liquidityShifts.unavailable'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 
@@ -145,7 +150,13 @@ export class LiquidityShiftsPanel extends Panel {
       `, 'legacy Panel.setContent() migration'));
       return true;
     } catch (e) {
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : t('components.liquidityShifts.failed'), () => void this.fetchData());
+      if (!this._hasData) {
+        const msg = e instanceof Error ? e.message : t('components.liquidityShifts.failed');
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

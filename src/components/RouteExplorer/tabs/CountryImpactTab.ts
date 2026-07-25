@@ -24,6 +24,8 @@ import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 
 export interface CountryImpactTabOptions {
   onDrillSideways?: (hs2: string) => void;
+  onExporterSelect?: (iso2: string) => void;
+  onChokepointSelect?: (chokepointId: string) => void;
 }
 
 function hs4ToHs2(hs4: string): string {
@@ -82,7 +84,7 @@ export class CountryImpactTab {
   private renderMissing(): void {
     setTrustedHtml(this.element, trustedHtml('<div class="re-tab__empty">' +
       '<h3>No trade data available</h3>' +
-      '<p>WorldMonitor does not have bilateral trade data for this destination country yet.</p>' +
+      '<p>GeoSpy does not have bilateral trade data for this destination country yet.</p>' +
       '</div>', "legacy direct innerHTML migration"));
   }
 
@@ -96,14 +98,14 @@ export class CountryImpactTab {
   private renderLazy(): void {
     setTrustedHtml(this.element, trustedHtml('<div class="re-tab__empty">' +
       '<h3>Loading trade data</h3>' +
-      '<p>WorldMonitor is fetching trade data for this destination for the first time. ' +
+      '<p>GeoSpy is fetching trade data for this destination for the first time. ' +
       'Try again in a few seconds.</p>' +
       '</div>', "legacy direct innerHTML migration"));
   }
 
   private renderData(data: GetRouteImpactResponse): void {
     const bannerHtml = !data.hs2InSeededUniverse
-      ? '<div class="re-impact__banner">Lane value for this HS code is not in WorldMonitor\'s strategic-products dataset. Top strategic products shown below.</div>'
+      ? '<div class="re-impact__banner">Lane value for this HS code is not in GeoSpy\'s strategic-products dataset. Top strategic products shown below.</div>'
       : '';
 
     const laneHtml = data.hs2InSeededUniverse
@@ -158,15 +160,25 @@ export class CountryImpactTab {
 
   private renderProducts(products: StrategicProduct[]): string {
     if (products.length === 0) return '<div class="re-tab__empty">No products available.</div>';
-    const rows = products.map((p) =>
-      `<tr class="re-impact__product-row" data-hs2="${escapeHtml(hs4ToHs2(p.hs4))}" tabindex="0">` +
-      `<td class="re-impact__product-code">HS ${escapeHtml(p.hs4)}</td>` +
-      `<td class="re-impact__product-name">${escapeHtml(p.label)}</td>` +
-      `<td class="re-impact__product-value">${formatUsd(p.totalValueUsd)}</td>` +
-      `<td class="re-impact__product-exporter">${escapeHtml(p.topExporterIso2)} (${Math.round(p.topExporterShare * 100)}%)</td>` +
-      `<td class="re-impact__product-chokepoint">${escapeHtml(p.primaryChokepointId)}</td>` +
-      `</tr>`,
-    );
+    const rows = products.map((p) => {
+      const exporter = (p.topExporterIso2 || '').trim().toUpperCase();
+      const cpId = (p.primaryChokepointId || '').trim();
+      const exporterCell = exporter
+        ? `<td class="re-impact__product-exporter re-impact__geo-cell" data-exporter="${escapeHtml(exporter)}" role="button" tabindex="0" title="Show ${escapeHtml(exporter)} on map">${escapeHtml(exporter)} (${Math.round(p.topExporterShare * 100)}%)</td>`
+        : `<td class="re-impact__product-exporter">—</td>`;
+      const cpCell = cpId
+        ? `<td class="re-impact__product-chokepoint re-impact__geo-cell" data-cp-id="${escapeHtml(cpId)}" role="button" tabindex="0" title="Show chokepoint on map">${escapeHtml(cpId)}</td>`
+        : `<td class="re-impact__product-chokepoint">—</td>`;
+      return (
+        `<tr class="re-impact__product-row" data-hs2="${escapeHtml(hs4ToHs2(p.hs4))}" tabindex="0">` +
+        `<td class="re-impact__product-code">HS ${escapeHtml(p.hs4)}</td>` +
+        `<td class="re-impact__product-name">${escapeHtml(p.label)}</td>` +
+        `<td class="re-impact__product-value">${formatUsd(p.totalValueUsd)}</td>` +
+        exporterCell +
+        cpCell +
+        `</tr>`
+      );
+    });
     return [
       '<table class="re-impact__products">',
       '<thead><tr><th>HS4</th><th>Product</th><th>Value</th><th>Top Exporter</th><th>Chokepoint</th></tr></thead>',
@@ -176,15 +188,47 @@ export class CountryImpactTab {
   }
 
   private attachDrillListeners(): void {
-    if (!this.opts.onDrillSideways) return;
     const rows = this.element.querySelectorAll<HTMLElement>('.re-impact__product-row');
     rows.forEach((row) => {
       const hs2 = row.dataset.hs2;
-      if (!hs2) return;
-      const drill = () => this.opts.onDrillSideways?.(hs2);
-      row.addEventListener('click', drill);
-      row.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); drill(); }
+      if (hs2 && this.opts.onDrillSideways) {
+        const drill = () => this.opts.onDrillSideways?.(hs2);
+        row.addEventListener('click', (e) => {
+          if ((e.target as HTMLElement).closest('.re-impact__geo-cell')) return;
+          drill();
+        });
+        row.addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          if ((e.target as HTMLElement).closest('.re-impact__geo-cell')) return;
+          e.preventDefault();
+          drill();
+        });
+      }
+    });
+
+    this.element.querySelectorAll<HTMLElement>('.re-impact__geo-cell[data-exporter]').forEach((cell) => {
+      const iso2 = cell.dataset.exporter;
+      if (!iso2) return;
+      const focus = () => this.opts.onExporterSelect?.(iso2);
+      cell.addEventListener('click', (e) => { e.stopPropagation(); focus(); });
+      cell.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation();
+        focus();
+      });
+    });
+
+    this.element.querySelectorAll<HTMLElement>('.re-impact__geo-cell[data-cp-id]').forEach((cell) => {
+      const cpId = cell.dataset.cpId;
+      if (!cpId) return;
+      const focus = () => this.opts.onChokepointSelect?.(cpId);
+      cell.addEventListener('click', (e) => { e.stopPropagation(); focus(); });
+      cell.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        e.stopPropagation();
+        focus();
       });
     });
   }

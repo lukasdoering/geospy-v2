@@ -3,6 +3,7 @@ import { t } from '@/services/i18n';
 import { escapeHtml, unsafeRawHtml } from '@/utils/sanitize';
 import { getHydratedData } from '@/services/bootstrap';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type { ListGroceryBasketPricesResponse } from '@/generated/client/worldmonitor/economic/v1/service_client';
 import { EconomicServiceClient } from '@/services/generated-rpc-clients';
@@ -10,8 +11,21 @@ import { EconomicServiceClient } from '@/services/generated-rpc-clients';
 const getEconomicClient = createLazyClient(() => new EconomicServiceClient(getRpcBaseUrl(), { fetch: rpcFetch }));
 
 export class GroceryBasketPanel extends Panel {
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
+
   constructor() {
     super({ id: 'grocery-basket', title: t('panels.groceryBasket'), infoTooltip: t('components.groceryBasket.infoTooltip') });
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusCountry(code?: string): void {
+    if (!this.onMapFocus || !code) return;
+    const focus = resolveCountryMapFocus(code);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public async fetchData(): Promise<void> {
@@ -32,22 +46,29 @@ export class GroceryBasketPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedMarketData'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
   private renderBasket(data: ListGroceryBasketPricesResponse): void {
     if (!data.countries?.length) {
-      this.showError(t('common.failedMarketData'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noDataAvailable'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 
     const countries = data.countries;
     const itemIds = countries[0]?.items?.map(i => i.itemId) ?? [];
 
-    const headerCells = countries.map(c =>
-      `<th class="gb-country-header" title="${escapeHtml(c.name)}">${escapeHtml(c.flag)}<br><span class="gb-country-name">${escapeHtml(c.name)}</span></th>`
-    ).join('');
+    const headerCells = countries.map(c => {
+      const code = (c.code || '').trim().toUpperCase();
+      return `<th class="gb-country-header gb-country-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show ${escapeHtml(c.name)} on map">${escapeHtml(c.flag)}<br><span class="gb-country-name">${escapeHtml(c.name)}</span></th>`;
+    }).join('');
 
     const rows = itemIds.map(itemId => {
       const firstItem = countries[0]?.items?.find(i => i.itemId === itemId);
@@ -106,8 +127,25 @@ export class GroceryBasketPanel extends Panel {
         </div>
         ${updatedAt ? `<div class="gb-updated">${t('components.status.updatedAt', { time: updatedAt })}</div>` : ''}
       </div>
+      <style>
+        .gb-country-clickable { cursor: pointer; }
+        .gb-country-clickable:hover { background: color-mix(in srgb, var(--text-dim) 8%, transparent); }
+        .gb-country-clickable:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      </style>
     `;
 
     this.setSafeContent(unsafeRawHtml(html, 'legacy Panel.setContent() migration'));
+
+    const activate = (el: HTMLElement): void => {
+      this.focusCountry(el.dataset.countryCode);
+    };
+    this.content?.querySelectorAll<HTMLElement>('.gb-country-clickable').forEach(el => {
+      el.addEventListener('click', () => activate(el));
+      el.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(el);
+      });
+    });
   }
 }

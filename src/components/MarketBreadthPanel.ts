@@ -209,7 +209,12 @@ export class MarketBreadthPanel extends Panel {
       const client = new MarketServiceClient(getRpcBaseUrl(), { fetch: (...args: Parameters<typeof fetch>) => globalThis.fetch(...args) });
       const resp = await client.getMarketBreadthHistory({});
       if (resp.unavailable) {
-        if (!this.data) this.showError(t('common.noDataShort'), () => void this.fetchData());
+        if (!this.data) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('common.noDataShort'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
       // The RPC interface types these as `number` but the JSON wire preserves
@@ -219,14 +224,23 @@ export class MarketBreadthPanel extends Panel {
       this.renderPanel();
       return true;
     } catch (e) {
-      if (!this.data) this.showError(e instanceof Error ? e.message : t('common.failedToLoad'), () => void this.fetchData());
+      if (!this.data) {
+        const msg = e instanceof Error ? e.message : t('common.failedToLoad');
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }
 
   private renderPanel(): void {
     if (!this.data?.history?.length) {
-      this.showError(t('common.noDataShort'), () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.noDataShort'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 

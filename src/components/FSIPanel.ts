@@ -122,7 +122,12 @@ export class FSIPanel extends Panel {
       }
 
       if (fsiValue <= 0) {
-        if (!this._hasData) this.showError(t('components.fsi.errors.unavailable'), () => void this.fetchData());
+        if (!this._hasData) {
+          this.setSafeContent(unsafeRawHtml(
+            `<div class="panel-empty">${escapeHtml(t('components.fsi.errors.unavailable'))}</div>`,
+            'legacy Panel.setContent() migration',
+          ));
+        }
         return false;
       }
 
@@ -145,7 +150,13 @@ export class FSIPanel extends Panel {
       this.render({ fsiValue, fsiLabel, hygPrice, tltPrice, vix, hySpread }, euFsi);
       return true;
     } catch (e) {
-      if (!this._hasData) this.showError(e instanceof Error ? e.message : t('components.fsi.errors.failedToLoad'), () => void this.fetchData());
+      if (!this._hasData) {
+        const msg = e instanceof Error ? e.message : t('components.fsi.errors.failedToLoad');
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">${escapeHtml(msg)}</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+      }
       return false;
     }
   }

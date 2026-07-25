@@ -17,6 +17,24 @@ export class ClimateAnomalyPanel extends Panel {
       infoTooltip: t('components.climate.infoTooltip'),
     });
     this.showLoading(t('common.loadingClimateData'));
+    const focusRow = (row: HTMLElement | null): void => {
+      if (!row?.dataset.lat || !row.dataset.lon) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0)) {
+        this.onZoneClick?.(lat, lon);
+      }
+    };
+    this.content.addEventListener('click', (e) => {
+      focusRow((e.target as HTMLElement).closest<HTMLElement>('.climate-row[data-lat]'));
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('.climate-row[data-lat]');
+      if (!row) return;
+      e.preventDefault();
+      focusRow(row);
+    });
   }
 
   public setZoneClickHandler(handler: (lat: number, lon: number) => void): void {
@@ -50,9 +68,17 @@ export class ClimateAnomalyPanel extends Panel {
       const tempClass = a.tempDelta > 0 ? 'climate-warm' : 'climate-cold';
       const precipClass = a.precipDelta > 0 ? 'climate-wet' : 'climate-dry';
       const sevClass = `severity-${a.severity}`;
-      const rowClass = a.severity === 'extreme' ? ' climate-extreme-row' : '';
-
-      return safeHtml`<tr class="climate-row${rowClass}" data-lat="${a.lat}" data-lon="${a.lon}">
+      const extremeCls = a.severity === 'extreme' ? ' climate-extreme-row' : '';
+      const hasCoords = Number.isFinite(a.lat) && Number.isFinite(a.lon) && !(a.lat === 0 && a.lon === 0);
+      if (hasCoords) {
+        return safeHtml`<tr class="climate-row${extremeCls} climate-row-clickable" data-lat="${a.lat}" data-lon="${a.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show climate anomaly on map">
+        <td class="climate-zone"><span class="climate-icon">${icon}</span>${a.zone}</td>
+        <td class="climate-num ${tempClass}">${formatDelta(a.tempDelta, '°C')}</td>
+        <td class="climate-num ${precipClass}">${formatDelta(a.precipDelta, 'mm')}</td>
+        <td><span class="climate-badge ${sevClass}">${t(`components.climate.severity.${a.severity}`)}</span></td>
+      </tr>`;
+      }
+      return safeHtml`<tr class="climate-row${extremeCls}">
         <td class="climate-zone"><span class="climate-icon">${icon}</span>${a.zone}</td>
         <td class="climate-num ${tempClass}">${formatDelta(a.tempDelta, '°C')}</td>
         <td class="climate-num ${precipClass}">${formatDelta(a.precipDelta, 'mm')}</td>
@@ -75,13 +101,5 @@ export class ClimateAnomalyPanel extends Panel {
         </table>
       </div>
     `);
-
-    this.content.querySelectorAll('.climate-row').forEach(el => {
-      el.addEventListener('click', () => {
-        const lat = Number((el as HTMLElement).dataset.lat);
-        const lon = Number((el as HTMLElement).dataset.lon);
-        if (Number.isFinite(lat) && Number.isFinite(lon)) this.onZoneClick?.(lat, lon);
-      });
-    });
   }
 }

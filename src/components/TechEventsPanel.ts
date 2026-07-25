@@ -20,11 +20,16 @@ export class TechEventsPanel extends Panel {
   private events: TechEvent[] = [];
   private loading = true;
   private error: string | null = null;
+  private onMapFocus?: (lat: number, lon: number) => void;
 
   constructor(id: string, private getLatestNews?: () => NewsItem[]) {
     super({ id, title: t('panels.events'), showCount: true, infoTooltip: t('components.techEvents.infoTooltip') });
     this.element.classList.add('panel-tall');
     void this.fetchEvents();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
   }
 
   private async fetchEvents(): Promise<void> {
@@ -78,7 +83,9 @@ export class TechEventsPanel extends Panel {
     }
 
     if (this.error) {
-      this.showError(this.error, () => this.refresh());
+      replaceChildren(this.content,
+        h('div', { className: 'panel-empty', role: 'status' }, this.error),
+      );
       return;
     }
 
@@ -227,13 +234,16 @@ export class TechEventsPanel extends Panel {
           }, '\u{1F9E0}') : false,
           event.coords && !event.coords.virtual
             ? h('button', {
+              type: 'button',
               className: 'event-map-link',
               title: t('components.techEvents.showOnMap'),
+              'aria-label': t('components.techEvents.showOnMap'),
               onClick: (e: Event) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.panToLocation(event.coords!.lat, event.coords!.lng);
               },
-            }, '📍')
+            }, 'Map')
             : false,
         ),
       ),
@@ -241,10 +251,8 @@ export class TechEventsPanel extends Panel {
   }
 
   private panToLocation(lat: number, lng: number): void {
-    // Dispatch event for map to handle
-    window.dispatchEvent(new CustomEvent('tech-event-location', {
-      detail: { lat, lng, zoom: 10 }
-    }));
+    if (!Number.isFinite(lat) || !Number.isFinite(lng) || (lat === 0 && lng === 0)) return;
+    this.onMapFocus?.(lat, lng);
   }
 
   public refresh(): void {

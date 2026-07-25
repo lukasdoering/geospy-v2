@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
 import { attributionFooterHtml, ATTRIBUTION_FOOTER_CSS } from '@/utils/attribution-footer';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 import type {
   ListFuelShortagesResponse,
@@ -126,9 +127,11 @@ export class FuelShortagePanel extends Panel {
   private selectedId: string | null = null;
   private detail: GetFuelShortageDetailResponse | null = null;
   private detailLoading = false;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
   private openDetailHandler = (ev: Event): void => {
     const id = (ev as CustomEvent<{ shortageId?: string }>).detail?.shortageId;
     if (!id || !this.element?.isConnected) return;
+    this.focusShortageCountry(id);
     void this.loadDetail(id);
   };
 
@@ -146,6 +149,18 @@ export class FuelShortagePanel extends Panel {
     if (typeof window !== 'undefined') {
       window.addEventListener('energy:open-fuel-shortage-detail', this.openDetailHandler);
     }
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusShortageCountry(shortageId: string, countryHint?: string): void {
+    if (!this.onMapFocus) return;
+    const fromList = this.data?.shortages?.find(s => s.id === shortageId)?.country;
+    const focus = resolveCountryMapFocus(countryHint || fromList);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public destroy(): void {
@@ -179,8 +194,18 @@ export class FuelShortagePanel extends Panel {
 
       const live = await getSupplyChainClient().listFuelShortages({ country: '', product: '', severity: '' });
       if (!this.element?.isConnected) return;
-      if (live.upstreamUnavailable || !live.shortages?.length) {
-        this.showError('Fuel shortage registry unavailable', () => void this.fetchData());
+      if (live.upstreamUnavailable) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Fuel shortage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+        return;
+      }
+      if (!live.shortages?.length) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">No active fuel shortages currently tracked.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;
@@ -195,7 +220,10 @@ export class FuelShortagePanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Fuel shortage registry error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Fuel shortage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -287,6 +315,7 @@ export class FuelShortagePanel extends Panel {
         .fs-table td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .fs-table tr.fs-row { cursor: pointer; }
         .fs-table tr.fs-row:hover td { background: rgba(255,255,255,0.03); }
+        .fs-table tr.fs-row:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: -2px; }
         .fs-name { font-weight: 600; color: var(--text, #eee); }
         .fs-sub  { font-size: 9px; color: var(--text-dim, #888); text-transform: uppercase; letter-spacing: 0.04em; }
         .fs-badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 9px; font-weight: 700; color: #fff; text-transform: uppercase; letter-spacing: 0.04em; }
@@ -308,10 +337,19 @@ export class FuelShortagePanel extends Panel {
     `, 'legacy Panel.setContent() migration'));
 
     const table = this.element?.querySelector('.fs-table') as HTMLTableElement | null;
-    table?.querySelectorAll<HTMLTableRowElement>('tr.fs-row').forEach(tr => {
+    const activate = (tr: HTMLTableRowElement): void => {
       const id = tr.dataset.shortageId;
       if (!id) return;
-      tr.addEventListener('click', () => void this.loadDetail(id));
+      this.focusShortageCountry(id, tr.dataset.country);
+      void this.loadDetail(id);
+    };
+    table?.querySelectorAll<HTMLTableRowElement>('tr.fs-row').forEach(tr => {
+      tr.addEventListener('click', () => activate(tr));
+      tr.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(tr);
+      });
     });
     const closeBtn = this.element?.querySelector<HTMLButtonElement>('.fs-drawer-close');
     closeBtn?.addEventListener('click', () => this.closeDetail());
@@ -321,7 +359,7 @@ export class FuelShortagePanel extends Panel {
     const glyph = PRODUCT_GLYPH[s.product] ?? '•';
     const quality = deriveShortageEvidenceQuality(s.evidence);
     return `
-      <tr class="fs-row" data-shortage-id="${escapeHtml(s.id)}">
+      <tr class="fs-row fs-row-clickable" data-shortage-id="${escapeHtml(s.id)}" data-country="${escapeHtml(s.country)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(s.country)} on map">
         <td>
           <div class="fs-name">${glyph} ${escapeHtml(s.country)} · ${escapeHtml(s.product)}</div>
           <div class="fs-sub">${escapeHtml(s.causeChain.join(' · ') || '—')}</div>

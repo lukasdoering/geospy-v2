@@ -130,7 +130,7 @@ export class InvestmentsPanel extends Panel {
       const sectorLabel = getSectorLabel(inv.sector);
       const year = inv.yearAnnounced ?? inv.yearOperational ?? '—';
       return `
-        <div class="fdi-row" data-id="${escapeHtml(inv.id)}">
+        <div class="fdi-row fdi-row-clickable" data-id="${escapeHtml(inv.id)}" role="button" tabindex="0" title="Show on map" aria-label="Show investment on map">
           <div class="fdi-row-line1">
             <span class="fdi-flag">${flag}</span>
             <span class="fdi-asset-name">${escapeHtml(inv.assetName)}</span>
@@ -212,6 +212,12 @@ export class InvestmentsPanel extends Panel {
       }
     });
 
+    const activateRow = (row: HTMLElement | null): void => {
+      if (!row) return;
+      const inv = GULF_INVESTMENTS.find(i => i.id === row.dataset.id);
+      if (inv) this.onInvestmentClick?.(inv);
+    };
+
     this.content.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
 
@@ -235,13 +241,15 @@ export class InvestmentsPanel extends Panel {
         return;
       }
 
-      const row = target.closest('.fdi-row') as HTMLElement | null;
-      if (row) {
-        const inv = GULF_INVESTMENTS.find(i => i.id === row.dataset.id);
-        if (inv && this.onInvestmentClick) {
-          this.onInvestmentClick(inv);
-        }
-      }
+      activateRow(target.closest('.fdi-row') as HTMLElement | null);
+    });
+
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest('.fdi-row') as HTMLElement | null;
+      if (!row) return;
+      e.preventDefault();
+      activateRow(row);
     });
   }
 }

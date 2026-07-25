@@ -57,7 +57,7 @@ const FULL_PANELS: Record<string, PanelConfig> = {
   'stock-analysis': { name: 'Stock Analysis', enabled: true, priority: 1, premium: 'locked' as const },
   'stock-backtest': { name: 'Backtesting', enabled: true, priority: 1, premium: 'locked' as const },
   'daily-market-brief': { name: 'Daily Market Brief', enabled: true, priority: 1, premium: 'locked' as const },
-  'chat-analyst': { name: 'WM Analyst', enabled: true, priority: 1, premium: 'locked' as const },
+  'chat-analyst': { name: 'GeoSpy Analyst', enabled: true, priority: 1, premium: 'locked' as const },
   economic: { name: 'Macro Stress', enabled: true, priority: 1 },
   'global-procurement': { name: 'Global Procurement', enabled: true, priority: 1, premium: 'locked' as const },
   'trade-policy': { name: 'Trade Policy', enabled: true, priority: 1, premium: 'locked' as const },

@@ -367,6 +367,40 @@ describe('ThreatTimelinePanel utilities', () => {
     assert.equal(state.hasData, true);
   });
 
+  it('preserves countryCode from server insight stories for map focus', () => {
+    const items = normalizeServerInsightStories({
+      generatedAt: new Date(NOW_MS).toISOString(),
+      topStories: [
+        serverStory({ countryCode: 'sd', primaryTitle: 'Sudan item' }),
+        serverStory({ countryCode: null, primaryTitle: 'No country item' }),
+      ],
+    });
+    assert.equal(items[0]?.countryCode, 'SD');
+    assert.equal(items[1]?.countryCode, null);
+  });
+
+  it('preserves cluster lat/lon for map focus when present', () => {
+    const items = normalizeClusterStories([
+      {
+        id: 'c1',
+        primaryTitle: 'Cluster with coords',
+        primarySource: 'News Digest',
+        primaryLink: 'https://example.com/c1',
+        firstSeen: new Date(NOW_MS),
+        lastUpdated: new Date(NOW_MS),
+        sourceCount: 2,
+        topSources: [{ name: 'News Digest', url: 'https://example.com/c1' }],
+        isAlert: false,
+        lat: 15.5,
+        lon: 32.5,
+        threat: { level: 'high', category: 'conflict', source: 'keyword' },
+      } as ClusteredEvent,
+    ]);
+    assert.equal(items.length, 1);
+    assert.equal(items[0]?.lat, 15.5);
+    assert.equal(items[0]?.lon, 32.5);
+  });
+
   it('sorts grouped current alerts by threat severity before recency', () => {
     const items = normalizeServerInsightStories({
       generatedAt: new Date(NOW_MS).toISOString(),
@@ -458,7 +492,8 @@ describe('ThreatTimelinePanel registration', () => {
 
     assert.match(panelsSrc, /'threat-timeline':\s*\{\s*name:\s*'Threat Timeline'/);
     assert.match(panelsSrc, /intelligence:\s*\{[\s\S]*panelKeys:\s*\[[^\]]*'threat-timeline'/);
-    assert.match(layoutSrc, /isPanelInVariantDefaults\('threat-timeline'\)[\s\S]*lazyDefaultPanel\('threat-timeline',\s*\(\)\s*=>\s*import\('@\/components\/ThreatTimelinePanel'\),\s*'ThreatTimelinePanel'\)/);
+    assert.match(layoutSrc, /isPanelInVariantDefaults\('threat-timeline'\)[\s\S]*ThreatTimelinePanel/);
+    assert.match(layoutSrc, /threat-timeline[\s\S]*setLocationClickHandler/);
     assert.match(dataLoaderSrc, /isPanelInVariantDefaults\('threat-timeline'\)[\s\S]*panels\['threat-timeline'\]\s+as ThreatTimelinePanel/);
     assert.match(commandsSrc, /id:\s*'panel:threat-timeline'[\s\S]*keywords:\s*\[[^\]]*'threat trend'/);
   });

@@ -27,7 +27,10 @@ export class PredictionPanel extends Panel {
 
   public renderPredictions(data: PredictionMarket[]): void {
     if (data.length === 0) {
-      this.showError(t('common.failedPredictions'));
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">${escapeHtml(t('common.failedPredictions'))}</div>`,
+        'legacy Panel.setContent() migration',
+      ));
       return;
     }
 

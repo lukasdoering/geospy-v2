@@ -10,6 +10,8 @@ import { playAllLiveMedia, registerLiveMediaStarter, unregisterLiveMediaStarter,
 import { getLiveStreamsAlwaysOn, subscribeLiveStreamsSettingsChange } from '@/services/live-stream-settings';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 import { isAllowedWebcamEmbedMessageOrigin } from './_live-webcams-origin';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
+import { resolveTheaterMapFocus } from '@/utils/theater-map-focus';
 
 
 type WebcamRegion = 'middle-east' | 'europe' | 'asia' | 'americas' | 'space';
@@ -22,6 +24,28 @@ interface WebcamFeed {
   channelHandle: string;
   fallbackVideoId: string;
 }
+
+/** City-level centroids for map focus (Space / Multi feeds omitted). */
+const FEED_COORDS: Record<string, { lat: number; lon: number }> = {
+  jerusalem: { lat: 31.78, lon: 35.23 },
+  'tel-aviv': { lat: 32.08, lon: 34.78 },
+  mecca: { lat: 21.39, lon: 39.86 },
+  'beirut-mtv': { lat: 33.89, lon: 35.50 },
+  kyiv: { lat: 50.45, lon: 30.52 },
+  odessa: { lat: 46.48, lon: 30.73 },
+  paris: { lat: 48.86, lon: 2.35 },
+  'st-petersburg': { lat: 59.93, lon: 30.34 },
+  london: { lat: 51.51, lon: -0.13 },
+  washington: { lat: 38.91, lon: -77.04 },
+  'new-york': { lat: 40.71, lon: -74.01 },
+  'los-angeles': { lat: 34.05, lon: -118.24 },
+  miami: { lat: 25.76, lon: -80.19 },
+  taipei: { lat: 25.03, lon: 121.57 },
+  shanghai: { lat: 31.23, lon: 121.47 },
+  tokyo: { lat: 35.68, lon: 139.69 },
+  seoul: { lat: 37.57, lon: 126.98 },
+  sydney: { lat: -33.87, lon: 151.21 },
+};
 
 // Verified YouTube live stream IDs — validated Feb 2026 via title cross-check.
 // IDs may rotate; update when stale.
@@ -129,6 +153,7 @@ export class LiveWebcamsPanel extends Panel {
   private readonly forceSingleView = !isDesktopRuntime() && isMobileDevice();
   private readonly EMBED_READY_TIMEOUT_MS = 15000;
   private boundEmbedMessageHandler: (e: MessageEvent) => void;
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'live-webcams', title: t('panels.liveWebcams'), className: 'panel-wide', closable: true, collapsible: true, infoTooltip: t('components.liveWebcams.infoTooltip') });
@@ -264,9 +289,44 @@ export class LiveWebcamsPanel extends Panel {
     viewGroup.appendChild(gridBtn);
     viewGroup.appendChild(singleBtn);
 
+    const mapBtn = document.createElement('button');
+    mapBtn.type = 'button';
+    mapBtn.className = 'webcam-map-btn';
+    mapBtn.textContent = 'Map';
+    mapBtn.title = 'Show active webcam location on map';
+    mapBtn.setAttribute('aria-label', 'Show active webcam location on map');
+    mapBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.focusActiveFeedOnMap();
+    });
+
     this.toolbar.appendChild(regionGroup);
     this.toolbar.appendChild(viewGroup);
+    this.toolbar.appendChild(mapBtn);
     this.element.insertBefore(this.toolbar, this.content);
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
+  }
+
+  private resolveFeedFocus(feed: WebcamFeed): { lat: number; lon: number } | null {
+    const city = FEED_COORDS[feed.id];
+    if (city) return city;
+    if (feed.country === 'Multi') {
+      return resolveTheaterMapFocus(
+        feed.region === 'middle-east' ? 'Middle East' : feed.region.replace('-', ' '),
+      );
+    }
+    if (feed.country === 'Space' || feed.region === 'space') return null;
+    return resolveCountryMapFocus(feed.country);
+  }
+
+  private focusActiveFeedOnMap(): void {
+    if (!this.onLocationClick) return;
+    const focus = this.resolveFeedFocus(this.activeFeed);
+    if (!focus) return;
+    this.onLocationClick(focus.lat, focus.lon);
   }
 
   private setRegionFilter(filter: RegionFilter): void {
@@ -520,8 +580,25 @@ export class LiveWebcamsPanel extends Panel {
       playAll();
     });
 
+    const focus = this.resolveFeedFocus(feed);
+    if (focus) {
+      const mapChip = document.createElement('button');
+      mapChip.type = 'button';
+      mapChip.className = 'webcam-preview-map';
+      mapChip.textContent = 'Map';
+      mapChip.title = `Show ${feed.city} on map`;
+      mapChip.setAttribute('aria-label', `Show ${feed.city} on map`);
+      mapChip.addEventListener('click', (e) => {
+        e.stopPropagation();
+        this.activeFeed = feed;
+        this.onLocationClick?.(focus.lat, focus.lon);
+      });
+      preview.append(status, title, meta, mapChip, playBtn);
+    } else {
+      preview.append(status, title, meta, playBtn);
+    }
+
     preview.addEventListener('click', () => playAll());
-    preview.append(status, title, meta, playBtn);
     container.appendChild(preview);
   }
 

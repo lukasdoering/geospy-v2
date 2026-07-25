@@ -2,6 +2,7 @@ import { Panel } from './Panel';
 import { escapeHtml, sanitizeUrl, unsafeRawHtml } from '@/utils/sanitize';
 import { createLazyClient, getRpcBaseUrl, rpcFetch } from '@/services/rpc-client';
 import { attributionFooterHtml, ATTRIBUTION_FOOTER_CSS } from '@/utils/attribution-footer';
+import { resolveStorageFacilityMapFocus } from '@/utils/energy-asset-map-focus';
 
 import type {
   ListStorageFacilitiesResponse,
@@ -168,9 +169,11 @@ export class StorageFacilityMapPanel extends Panel {
   private detail: GetStorageFacilityDetailResponse | null = null;
   private detailLoading = false;
   private detailEvents: EnergyDisruptionEntry[] | undefined = undefined;
+  private onMapFocus: ((lat: number, lon: number) => void) | null = null;
   private openDetailHandler = (ev: Event): void => {
     const id = (ev as CustomEvent<{ facilityId?: string }>).detail?.facilityId;
     if (!id || !this.element?.isConnected) return;
+    this.focusFacility(id);
     void this.loadDetail(id);
   };
 
@@ -191,6 +194,18 @@ export class StorageFacilityMapPanel extends Panel {
     if (typeof window !== 'undefined') {
       window.addEventListener('energy:open-storage-facility-detail', this.openDetailHandler);
     }
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
+  }
+
+  private focusFacility(facilityId: string): void {
+    if (!this.onMapFocus) return;
+    const facility = this.data?.facilities?.find(f => f.id === facilityId);
+    const focus = resolveStorageFacilityMapFocus(facility?.location);
+    if (!focus) return;
+    this.onMapFocus(focus.lat, focus.lon);
   }
 
   public destroy(): void {
@@ -230,8 +245,18 @@ export class StorageFacilityMapPanel extends Panel {
 
       const live = await getSupplyChainClient().listStorageFacilities({ facilityType: '' });
       if (!this.element?.isConnected) return;
-      if (live.upstreamUnavailable || !live.facilities?.length) {
-        this.showError('Storage registry unavailable', () => void this.fetchData());
+      if (live.upstreamUnavailable) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">Storage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+        return;
+      }
+      if (!live.facilities?.length) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">No storage facilities currently tracked.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
         return;
       }
       this.data = live;
@@ -246,7 +271,10 @@ export class StorageFacilityMapPanel extends Panel {
     } catch (err) {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
-      this.showError('Storage registry error', () => void this.fetchData());
+      this.setSafeContent(unsafeRawHtml(
+        `<div class="panel-empty">Storage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+        'legacy Panel.setContent() migration',
+      ));
     }
   }
 
@@ -362,6 +390,7 @@ export class StorageFacilityMapPanel extends Panel {
         .sf-table th { text-align: left; font-size: 9px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim, #888); padding: 4px 6px; border-bottom: 1px solid rgba(255,255,255,0.08); }
         .sf-table td { padding: 6px; border-bottom: 1px solid rgba(255,255,255,0.04); }
         .sf-table tr.sf-row { cursor: pointer; }
+        .sf-table tr.sf-row:focus-visible { outline: 2px solid var(--accent, #4ade80); outline-offset: -2px; }
         .sf-table tr.sf-row:hover td { background: rgba(255,255,255,0.03); }
         .sf-name { font-weight: 600; color: var(--text, #eee); }
         .sf-sub  { font-size: 9px; color: var(--text-dim, #888); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -379,10 +408,19 @@ export class StorageFacilityMapPanel extends Panel {
     `, 'legacy Panel.setContent() migration'));
 
     const table = this.element?.querySelector('.sf-table') as HTMLTableElement | null;
-    table?.querySelectorAll<HTMLTableRowElement>('tr.sf-row').forEach(tr => {
+    const activate = (tr: HTMLTableRowElement): void => {
       const id = tr.dataset.facilityId;
       if (!id) return;
-      tr.addEventListener('click', () => void this.loadDetail(id));
+      this.focusFacility(id);
+      void this.loadDetail(id);
+    };
+    table?.querySelectorAll<HTMLTableRowElement>('tr.sf-row').forEach(tr => {
+      tr.addEventListener('click', () => activate(tr));
+      tr.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        e.preventDefault();
+        activate(tr);
+      });
     });
     const closeBtn = this.element?.querySelector<HTMLButtonElement>('.sf-drawer-close');
     closeBtn?.addEventListener('click', () => this.closeDetail());
@@ -392,7 +430,7 @@ export class StorageFacilityMapPanel extends Panel {
     const glyph = TYPE_GLYPH[f.facilityType] ?? '🔹';
     const typeLabel = TYPE_LABEL[f.facilityType] ?? f.facilityType;
     return `
-      <tr class="sf-row" data-facility-id="${escapeHtml(f.id)}">
+      <tr class="sf-row sf-row-clickable" data-facility-id="${escapeHtml(f.id)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(f.name)} on map">
         <td>
           <div class="sf-name">${glyph} ${escapeHtml(f.name)}</div>
           <div class="sf-sub">${escapeHtml(f.operator || '')}</div>

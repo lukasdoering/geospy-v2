@@ -14,6 +14,7 @@ export class InternetDisruptionsPanel extends Panel {
   private outages: InternetOutage[] = [];
   private ddos: ListInternetDdosAttacksResponse | null = null;
   private anomalies: TrafficAnomaly[] = [];
+  private onMapFocus?: (lat: number, lon: number) => void;
 
   constructor() {
     super({
@@ -25,13 +26,37 @@ export class InternetDisruptionsPanel extends Panel {
       infoTooltip: t('components.internetDisruptions.infoTooltip'),
     });
     this.content.addEventListener('click', (e: Event) => {
-      const btn = (e.target as HTMLElement).closest<HTMLElement>('[data-tab]');
+      const target = e.target as HTMLElement;
+      const btn = target.closest<HTMLElement>('[data-tab]');
       if (btn?.dataset.tab) {
         this.tab = btn.dataset.tab as Tab;
         this.render();
+        return;
+      }
+      const row = target.closest<HTMLElement>('[data-id-focus]');
+      if (!row) return;
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onMapFocus?.(lat, lon);
+      }
+    });
+    this.content.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const row = (e.target as HTMLElement).closest<HTMLElement>('[data-id-focus]');
+      if (!row) return;
+      e.preventDefault();
+      const lat = Number(row.dataset.lat);
+      const lon = Number(row.dataset.lon);
+      if (Number.isFinite(lat) && Number.isFinite(lon)) {
+        this.onMapFocus?.(lat, lon);
       }
     });
     this.showLoading();
+  }
+
+  public setCountryClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onMapFocus = handler;
   }
 
   public setOutages(outages: InternetOutage[]): void {
@@ -108,7 +133,16 @@ export class InternetDisruptionsPanel extends Panel {
     const severityColor = o.severity === 'total' ? '#ff2020' : o.severity === 'major' ? '#ff8800' : '#ffcc00';
     const badge = o.severity === 'total' ? 'NATIONWIDE' : o.severity === 'major' ? 'REGIONAL' : 'PARTIAL';
     const ongoing = !o.endDate;
-    return h('div', { className: 'id-row' },
+    const focusable = Number.isFinite(o.lat) && Number.isFinite(o.lon) && !(o.lat === 0 && o.lon === 0);
+    return h('div', {
+      className: focusable ? 'id-row id-row-clickable' : 'id-row',
+      dataset: focusable
+        ? { idFocus: '1', lat: String(o.lat), lon: String(o.lon) }
+        : undefined,
+      role: focusable ? 'button' : undefined,
+      tabIndex: focusable ? 0 : undefined,
+      title: focusable ? 'Show on map' : undefined,
+    },
       h('div', { className: 'id-row-header' },
         h('span', { className: 'id-severity-dot', style: { color: severityColor } }, '●'),
         h('span', { className: 'id-row-title' }, o.country),
@@ -190,7 +224,17 @@ export class InternetDisruptionsPanel extends Panel {
     const typeLabel = a.type.replace(/^ANOMALY_/, '');
     const location = a.locationName || a.locationCode || '';
     const asn = a.asnName ? `AS${a.asn} ${a.asnName}` : '';
-    return h('div', { className: 'id-row' },
+    const focusable = Number.isFinite(a.latitude) && Number.isFinite(a.longitude)
+      && !(a.latitude === 0 && a.longitude === 0);
+    return h('div', {
+      className: focusable ? 'id-row id-row-clickable' : 'id-row',
+      dataset: focusable
+        ? { idFocus: '1', lat: String(a.latitude), lon: String(a.longitude) }
+        : undefined,
+      role: focusable ? 'button' : undefined,
+      tabIndex: focusable ? 0 : undefined,
+      title: focusable ? 'Show on map' : undefined,
+    },
       h('div', { className: 'id-row-header' },
         h('span', { className: 'id-anomaly-type' }, typeLabel),
         location ? h('span', { className: 'id-row-title' }, location) : false,
