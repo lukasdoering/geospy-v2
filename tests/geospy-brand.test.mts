@@ -182,6 +182,20 @@ describe('GeoSpy brand config', () => {
     assert.doesNotMatch(grant, /A WorldMonitor Pro subscription is required/);
   });
 
+  it('brands public agent briefing surfaces as GeoSpy with upstream attribution', () => {
+    const llms = readFileSync(new URL('../public/llms.txt', import.meta.url), 'utf8');
+    assert.match(llms, /^# GeoSpy/m);
+    assert.match(llms, /AGPL.*fork of.*WorldMonitor|fork of \[WorldMonitor\]/i);
+    assert.match(llms, /When to Use GeoSpy/);
+    assert.match(llms, /### What is GeoSpy\?/);
+    assert.doesNotMatch(llms, /Used by 2M\+ people/);
+    assert.doesNotMatch(llms, /^# World Monitor$/m);
+
+    const agents = readFileSync(new URL('../public/agents.md', import.meta.url), 'utf8');
+    assert.match(agents, /^# GeoSpy — Agent Guide/m);
+    assert.match(agents, /forked from WorldMonitor|fork of WorldMonitor/i);
+  });
+
   it('brands map-layer explanation source strings as GeoSpy', () => {
     const layers = readFileSync(new URL('../src/config/map-layer-definitions.ts', import.meta.url), 'utf8');
     assert.match(layers, /GeoSpy conflict-zone registry/);
