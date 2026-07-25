@@ -929,7 +929,7 @@ export class Panel {
     } else {
       ctaBtn.addEventListener('click', () => {
         import('@/services/checkout').then(m => import('@/config/products').then(p => m.startCheckout(p.DEFAULT_UPGRADE_PRODUCT))).catch(() => {
-          window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+          window.open('/pro', '_blank', 'noopener,noreferrer');
         });
       });
     }
