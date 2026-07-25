@@ -95,6 +95,7 @@ const focusedTests = [
   'tests/threat-timeline-map-focus.test.mts',
   'tests/threat-timeline-panel.test.mts',
   'tests/market-implications-a11y.test.mts',
+  'tests/route-impact-map-focus.test.mts',
 ];
 
 function run(cmd, args, label) {
