@@ -484,7 +484,7 @@ export class ConsumerPricesPanel extends Panel {
     return visible.map((r) => {
       const cls = inflationSeverityClass(r.inflationPct);
       return `
-        <tr class="cp-global-row cp-global-row-clickable" data-cp-country="${escapeHtml(r.iso2)}" role="button" tabindex="0" title="Show on map">
+        <tr class="cp-global-row cp-global-row-clickable" data-cp-country="${escapeHtml(r.iso2)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.iso2)} on map">
           <td class="cp-global-flag">${escapeHtml(r.name)}</td>
           <td class="cp-infl-yoy ${cls}">${fmtInflation(r.inflationPct)}</td>
           <td class="cp-infl-eop">${fmtInflation(r.cpiEopPct)}</td>

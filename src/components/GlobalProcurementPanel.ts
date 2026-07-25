@@ -255,7 +255,7 @@ export class GlobalProcurementPanel extends Panel {
     const code = (tender.countryCode || '').trim().toUpperCase();
     const clickable = code.length === 2;
     const attrs = clickable
-      ? ` class="spending-award global-procurement-card global-procurement-card-clickable" data-procurement-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+      ? ` class="spending-award global-procurement-card global-procurement-card-clickable" data-procurement-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
       : ' class="spending-award global-procurement-card"';
     return `<article${attrs}>
       <div class="award-header"><span class="award-amount">${escapeHtml(tender.status.toUpperCase())}</span><span class="award-icon">${closingSoon ? '⏰' : '📄'}</span></div>

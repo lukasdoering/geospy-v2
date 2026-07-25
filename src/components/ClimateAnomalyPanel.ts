@@ -71,7 +71,7 @@ export class ClimateAnomalyPanel extends Panel {
       const extremeCls = a.severity === 'extreme' ? ' climate-extreme-row' : '';
       const hasCoords = Number.isFinite(a.lat) && Number.isFinite(a.lon) && !(a.lat === 0 && a.lon === 0);
       if (hasCoords) {
-        return safeHtml`<tr class="climate-row${extremeCls} climate-row-clickable" data-lat="${a.lat}" data-lon="${a.lon}" role="button" tabindex="0" title="Show on map">
+        return safeHtml`<tr class="climate-row${extremeCls} climate-row-clickable" data-lat="${a.lat}" data-lon="${a.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show climate anomaly on map">
         <td class="climate-zone"><span class="climate-icon">${icon}</span>${a.zone}</td>
         <td class="climate-num ${tempClass}">${formatDelta(a.tempDelta, '°C')}</td>
         <td class="climate-num ${precipClass}">${formatDelta(a.precipDelta, 'mm')}</td>

@@ -223,7 +223,7 @@ export class EconomicCalendarPanel extends Panel {
         // Aggregate region codes (EU/EUR/EA) won't resolve at click time — still
         // mark ISO country rows for a11y; focusCountry no-ops when unresolved.
         const rowAttrs = code && !['EU', 'EUR', 'EA'].includes(code)
-          ? ` class="ec-row-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" style="font-size:12px;line-height:1.2;cursor:pointer"`
+          ? ` class="ec-row-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map" style="font-size:12px;line-height:1.2;cursor:pointer"`
           : ' style="font-size:12px;line-height:1.2"';
 
         // Right column: actual value when released, countdown otherwise

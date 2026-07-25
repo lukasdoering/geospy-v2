@@ -437,7 +437,7 @@ export class AirlineIntelPanel extends Panel {
         const rows = this.opsData.map(s => {
             const focusable = Boolean(resolveAirportMapFocus(s.iata));
             const attrs = focusable
-                ? ` class="ops-row ops-row-clickable" data-iata="${escapeHtml(s.iata)}" role="button" tabindex="0" title="Show on map"`
+                ? ` class="ops-row ops-row-clickable" data-iata="${escapeHtml(s.iata)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(s.iata)} on map"`
                 : ' class="ops-row"';
             return `
       <div${attrs}>
@@ -538,7 +538,7 @@ export class AirlineIntelPanel extends Panel {
                 const hasPos = Number.isFinite(p.lat) && Number.isFinite(p.lon)
                     && !(Math.abs(p.lat) < 1e-6 && Math.abs(p.lon) < 1e-6);
                 const attrs = hasPos
-                    ? ` class="track-row track-row-clickable" data-lat="${p.lat}" data-lon="${p.lon}" role="button" tabindex="0" title="Show on map"`
+                    ? ` class="track-row track-row-clickable" data-lat="${p.lat}" data-lon="${p.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show aircraft on map"`
                     : ' class="track-row"';
                 return `
         <div${attrs}>

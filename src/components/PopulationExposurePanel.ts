@@ -62,7 +62,7 @@ export class PopulationExposurePanel extends Panel {
       const popClass = e.exposedPopulation >= 1_000_000 ? ' popexp-pop-large' : '';
       const focusable = Number.isFinite(e.lat) && Number.isFinite(e.lon) && !(e.lat === 0 && e.lon === 0);
       if (focusable) {
-        return safeHtml`<div class="popexp-card popexp-card-clickable" data-popexp-focus="1" data-lat="${e.lat}" data-lon="${e.lon}" role="button" tabindex="0" title="Show on map">
+        return safeHtml`<div class="popexp-card popexp-card-clickable" data-popexp-focus="1" data-lat="${e.lat}" data-lon="${e.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show population exposure on map">
         <div class="popexp-card-name">${typeIcon} ${e.eventName}</div>
         <div class="popexp-card-meta">
           <span class="popexp-card-pop${popClass}">${t('components.populationExposure.affectedCount', { count: formatPopulation(e.exposedPopulation) })}</span>

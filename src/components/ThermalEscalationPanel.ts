@@ -169,7 +169,7 @@ export class ThermalEscalationPanel extends Panel {
 
     const focusable = Number.isFinite(c.lat) && Number.isFinite(c.lon) && !(c.lat === 0 && c.lon === 0);
     const focusAttrs = focusable
-      ? ` data-te-focus="1" data-lat="${c.lat}" data-lon="${c.lon}" role="button" tabindex="0" title="Show on map"`
+      ? ` data-te-focus="1" data-lat="${c.lat}" data-lon="${c.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show thermal cluster on map"`
       : '';
     const clickableCls = focusable ? ' te-card-clickable' : '';
 

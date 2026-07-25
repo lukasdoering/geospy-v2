@@ -78,7 +78,7 @@ export class RadiationWatchPanel extends Panel {
         `<span class="radiation-badge radiation-freshness radiation-freshness-${obs.freshness}">${escapeHtml(obs.freshness)}</span>`,
       ].filter(Boolean).join('');
       return `
-        <tr class="radiation-row radiation-row-clickable" data-lat="${obs.lat}" data-lon="${obs.lon}" role="button" tabindex="0" title="Show on map">
+        <tr class="radiation-row radiation-row-clickable" data-lat="${obs.lat}" data-lon="${obs.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show radiation observation on map">
           <td class="radiation-location">
             <div class="radiation-location-name">${escapeHtml(obs.location)}</div>
             <div class="radiation-location-meta">${escapeHtml(sourceLine)} · ${escapeHtml(t('components.radiationWatch.baseline', { value: baseline }))}</div>

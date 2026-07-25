@@ -208,7 +208,7 @@ export class TradePolicyPanel extends Panel {
         const statusClass = r.status === 'high' ? 'status-active' : r.status === 'moderate' ? 'status-notified' : 'status-terminated';
         const statusLabel = r.status === 'high' ? t('components.tradePolicy.highTariff') : r.status === 'moderate' ? t('components.tradePolicy.moderateTariff') : t('components.tradePolicy.lowTariff');
         const sourceLink = this.renderSourceUrl(r.sourceUrl);
-        return `<div class="trade-restriction-card trade-card-clickable" data-trade-country="${escapeHtml(r.reportingCountry)}" role="button" tabindex="0" title="Show on map">
+        return `<div class="trade-restriction-card trade-card-clickable" data-trade-country="${escapeHtml(r.reportingCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.reportingCountry)} on map">
           <div class="trade-restriction-header">
             <span class="trade-country">${escapeHtml(r.reportingCountry)}</span>
             <span class="trade-badge">${escapeHtml(r.measureType)}</span>
@@ -396,7 +396,7 @@ export class TradePolicyPanel extends Panel {
     return `<div class="trade-barriers-list">
       ${this.barriersData.barriers.map(b => {
         const sourceLink = this.renderSourceUrl(b.sourceUrl);
-        return `<div class="trade-barrier-card trade-card-clickable" data-trade-country="${escapeHtml(b.notifyingCountry)}" role="button" tabindex="0" title="Show on map">
+        return `<div class="trade-barrier-card trade-card-clickable" data-trade-country="${escapeHtml(b.notifyingCountry)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(b.notifyingCountry)} on map">
           <div class="trade-barrier-header">
             <span class="trade-country">${escapeHtml(b.notifyingCountry)}</span>
             <span class="trade-badge">${escapeHtml(b.measureType)}</span>

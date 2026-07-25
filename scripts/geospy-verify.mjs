@@ -104,6 +104,7 @@ const focusedTests = [
   'tests/map-aria-polish.test.mts',
   'tests/push-footer-energy-a11y.test.mts',
   'tests/aria-pro-cta-calm.test.mts',
+  'tests/map-aria-bulk.test.mts',
 ];
 
 function run(cmd, args, label) {
