@@ -100,6 +100,7 @@ const focusedTests = [
   'tests/country-deepdive-map-focus.test.mts',
   'tests/positive-feed-map-focus.test.mts',
   'tests/energy-calm-unavailable.test.mts',
+  'tests/hero-tech-map-chip.test.mts',
 ];
 
 function run(cmd, args, label) {

@@ -727,6 +727,36 @@
   font-size: 10px;
 }
 
+.cdp-news-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.cdp-news-map {
+  margin-left: auto;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent-color, var(--accent));
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent)) 45%, transparent);
+  border-radius: 4px;
+}
+
+.cdp-news-map:hover {
+  border-color: var(--accent-color, var(--accent));
+}
+
+.cdp-atlas-row:focus-visible {
+  outline: 2px solid var(--accent-color, var(--accent));
+  outline-offset: 2px;
+}
+
 .cdp-signal-desc,
 .cdp-market-prob,
 .cdp-economic-value,

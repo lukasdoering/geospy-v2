@@ -444,6 +444,8 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       if (extraSources.length > 0) {
         meta.setAttribute('title', `Also reported by: ${extraSources.join(', ')}`);
       }
+      const mapChip = this.makeNewsMapChip(item);
+      if (mapChip) meta.append(document.createTextNode(' '), mapChip);
       row.append(top, title, meta);
 
       if (i >= 5) {
@@ -454,6 +456,44 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
         this.newsBody.append(row);
       }
     }
+  }
+
+  /** Map chip for country-brief headlines — prefers item coords, else current country. */
+  private makeNewsMapChip(item: NewsItem): HTMLButtonElement | null {
+    const hasItemCoords =
+      typeof item.lat === 'number' &&
+      typeof item.lon === 'number' &&
+      Number.isFinite(item.lat) &&
+      Number.isFinite(item.lon) &&
+      !(item.lat === 0 && item.lon === 0);
+    const lat = hasItemCoords ? item.lat! : undefined;
+    const lon = hasItemCoords ? item.lon! : undefined;
+    // Geometry may be cold in unit tests — still show when country ISO2 present; resolve on click.
+    const countryCode = (this.currentCode || '').trim().toUpperCase();
+    if (!hasItemCoords && countryCode.length !== 2) return null;
+
+    const btn = this.el('button', 'cdp-news-map', 'Map') as HTMLButtonElement;
+    btn.type = 'button';
+    btn.title = 'Show on map';
+    btn.setAttribute('aria-label', 'Show on map');
+    if (hasItemCoords) {
+      btn.dataset.lat = String(lat);
+      btn.dataset.lon = String(lon);
+    } else {
+      btn.dataset.focus = countryCode;
+    }
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.dataset.lat != null && btn.dataset.lon != null) {
+        this.focusCoordsOnMap(Number(btn.dataset.lat), Number(btn.dataset.lon), 5);
+        return;
+      }
+      const focus = resolveCountryMapFocus(btn.dataset.focus || countryCode);
+      if (!focus) return;
+      this.focusCoordsOnMap(focus.lat, focus.lon, 4);
+    });
+    return btn;
   }
 
 
@@ -1423,10 +1463,15 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     header.append(this.el('div', 'cdp-economic-source', summary));
     section.append(header);
     for (const it of items.slice(0, 5)) {
-      const row = this.el('div', '');
+      const row = this.el('div', 'cdp-atlas-row');
       row.style.cssText = 'font-size:11px;color:#ddd;padding:2px 0;cursor:pointer';
       row.textContent = it.label || it.id;
-      row.addEventListener('click', () => {
+      row.setAttribute('role', 'button');
+      row.tabIndex = 0;
+      row.title = 'Open related energy panel';
+      row.setAttribute('aria-label', `Open ${it.label || it.id}`);
+      const activate = (e: Event): void => {
+        e.preventDefault();
         if (!it.id) return;
         try {
           // Enable the destination drawer first — same contract as
@@ -1440,6 +1485,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
             window.dispatchEvent(new CustomEvent(it.event, { detail: it.detail }));
           }, 80);
         } catch { /* Non-browser runtime no-op */ }
+      };
+      row.addEventListener('click', activate);
+      row.addEventListener('keydown', (e: KeyboardEvent) => {
+        if (e.key !== 'Enter' && e.key !== ' ') return;
+        activate(e);
       });
       section.append(row);
     }

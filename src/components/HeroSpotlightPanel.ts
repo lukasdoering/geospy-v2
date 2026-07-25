@@ -44,10 +44,15 @@ export class HeroSpotlightPanel extends Panel {
       year: 'numeric',
     });
 
-    // Location button -- only when BOTH lat and lon are defined
-    const hasLocation = item.lat !== undefined && item.lon !== undefined;
+    // Location button -- only when BOTH lat and lon are finite and not Null Island
+    const hasLocation =
+      item.lat !== undefined &&
+      item.lon !== undefined &&
+      Number.isFinite(item.lat) &&
+      Number.isFinite(item.lon) &&
+      !(item.lat === 0 && item.lon === 0);
     const locationHtml = hasLocation
-      ? `<button class="hero-card-location-btn" data-lat="${item.lat}" data-lon="${item.lon}" type="button">Show on map</button>`
+      ? `<button class="hero-card-location-btn" data-lat="${item.lat}" data-lon="${item.lon}" type="button" title="Show on map" aria-label="Show story location on map">Map</button>`
       : '';
 
     setTrustedHtml(this.content, trustedHtml(`<div class="hero-card">
@@ -66,12 +71,13 @@ export class HeroSpotlightPanel extends Panel {
     if (hasLocation) {
       const btn = this.content.querySelector('.hero-card-location-btn');
       if (btn) {
-        btn.addEventListener('click', () => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
           const lat = Number(btn.getAttribute('data-lat'));
           const lon = Number(btn.getAttribute('data-lon'));
-          if (!Number.isNaN(lat) && !Number.isNaN(lon)) {
-            this.onLocationRequest?.(lat, lon);
-          }
+          if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return;
+          this.onLocationRequest?.(lat, lon);
         });
       }
     }

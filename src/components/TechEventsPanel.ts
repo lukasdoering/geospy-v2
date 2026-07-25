@@ -234,13 +234,16 @@ export class TechEventsPanel extends Panel {
           }, '\u{1F9E0}') : false,
           event.coords && !event.coords.virtual
             ? h('button', {
+              type: 'button',
               className: 'event-map-link',
               title: t('components.techEvents.showOnMap'),
+              'aria-label': t('components.techEvents.showOnMap'),
               onClick: (e: Event) => {
                 e.preventDefault();
+                e.stopPropagation();
                 this.panToLocation(event.coords!.lat, event.coords!.lng);
               },
-            }, '📍')
+            }, 'Map')
             : false,
         ),
       ),
