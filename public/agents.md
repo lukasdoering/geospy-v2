@@ -1,8 +1,8 @@
-# World Monitor — Agent Guide
+# GeoSpy — Agent Guide
 
-> How AI agents should work with worldmonitor.app: machine surfaces, authentication, crawl policy, rate limits, and discovery endpoints. Prefer the structured surfaces below over scraping the HTML dashboard — the dashboard is a WebGL SPA and yields nothing useful to a text parser.
+> How AI agents should work with GeoSpy (AGPL fork of WorldMonitor) and the upstream WorldMonitor machine surfaces it uses by default: authentication, crawl policy, rate limits, and discovery endpoints. Prefer the structured surfaces below over scraping the HTML dashboard — the dashboard is a WebGL SPA and yields nothing useful to a text parser.
 
-World Monitor is a real-time global intelligence dashboard: 500+ news feeds, 56 map layer types, country risk/resilience scores, AI briefs, forecasts, and market/supply-chain correlation, served as machine-readable JSON with documented methodology and provenance.
+GeoSpy is a real-time global intelligence dashboard forked from WorldMonitor: 500+ news feeds, 56 map layer types, country risk/resilience scores, AI briefs, forecasts, and market/supply-chain correlation. Live JSON APIs below are the upstream WorldMonitor hosts GeoSpy defaults to for zero-env data.
 
 ## Machine surfaces (use these)
 
