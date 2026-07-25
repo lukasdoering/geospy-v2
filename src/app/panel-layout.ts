@@ -2493,7 +2493,16 @@ export class PanelLayoutManager implements AppModule {
       return p;
     });
     if (isPanelInVariantDefaults('threat-timeline')) {
-      this.lazyDefaultPanel('threat-timeline', () => import('@/components/ThreatTimelinePanel'), 'ThreatTimelinePanel');
+      this.lazyPanel('threat-timeline', () =>
+        this.importPanel('threat-timeline', () => import('@/components/ThreatTimelinePanel'), 'ThreatTimelinePanel', (ThreatTimelinePanel) => {
+          const p = new ThreatTimelinePanel();
+          p.setLocationClickHandler((lat: number, lon: number) => {
+            this.ctx.map?.setCenter(lat, lon, 4);
+            this.ctx.map?.flashLocation(lat, lon, 3000);
+          });
+          return p;
+        }),
+      );
     }
 
     // Global Giving panel (all variants)
