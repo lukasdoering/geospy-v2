@@ -1352,6 +1352,49 @@
 .cdp-trade-exposure-table th { color: #64748b; font-weight: 500; padding: 3px 0; text-align: left; border-bottom: 1px solid rgba(100,116,139,0.15); font-size: 10px; text-transform: uppercase; letter-spacing: 0.04em; }
 .cdp-trade-exposure-table th.cdp-exposure-score-header { text-align: right; }
 .cdp-chokepoint-name { color: #cbd5e1; padding: 3px 0; }
+
+.cdp-map-cell {
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-color, var(--accent)) 40%, transparent);
+  text-underline-offset: 2px;
+}
+
+.cdp-map-cell:hover,
+.cdp-map-cell:focus-visible {
+  color: var(--accent-color, var(--accent));
+  outline: none;
+}
+
+.cdp-chokepoint-fallback-row {
+  cursor: pointer;
+}
+
+.cdp-chokepoint-fallback-row:hover,
+.cdp-chokepoint-fallback-row:focus-visible {
+  background: color-mix(in srgb, var(--accent-color, var(--accent)) 10%, transparent);
+  outline: none;
+}
+
+.cdp-risk-chokepoint-chip {
+  display: inline;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--accent-color, var(--accent)) 40%, transparent);
+  text-underline-offset: 2px;
+}
+
+.cdp-risk-chokepoint-chip:hover,
+.cdp-risk-chokepoint-chip:focus-visible {
+  color: var(--accent-color, var(--accent));
+  outline: none;
+}
 .cdp-sector-label { color: #e2e8f0; padding: 3px 0; font-weight: 500; }
 .cdp-exposure-score { text-align: right; padding: 3px 0; font-weight: 600; font-variant-numeric: tabular-nums; }
 .cdp-trade-exposure-table tbody tr { border-bottom: 1px solid rgba(100,116,139,0.08); }
