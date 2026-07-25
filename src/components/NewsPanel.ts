@@ -42,6 +42,7 @@ export class NewsPanel extends Panel {
   private onRelatedAssetClick?: (asset: RelatedAsset) => void;
   private onRelatedAssetsFocus?: (assets: RelatedAsset[], originLabel: string) => void;
   private onRelatedAssetsClear?: () => void;
+  private onLocationClick?: (lat: number, lon: number) => void;
   private isFirstRender = true;
   /** Cluster ids that arrived while the user was away (#4923) — their NEW
    * ribbons persist until seen instead of expiring with the 2-min window. */
@@ -136,6 +137,25 @@ export class NewsPanel extends Panel {
     this.onRelatedAssetClick = options.onRelatedAssetClick;
     this.onRelatedAssetsFocus = options.onRelatedAssetsFocus;
     this.onRelatedAssetsClear = options.onRelatedAssetsClear;
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
+  }
+
+  private hasMapCoords(lat?: number, lon?: number): boolean {
+    return (
+      typeof lat === 'number' &&
+      typeof lon === 'number' &&
+      Number.isFinite(lat) &&
+      Number.isFinite(lon) &&
+      !(lat === 0 && lon === 0)
+    );
+  }
+
+  private renderMapChip(lat?: number, lon?: number): string {
+    if (!this.hasMapCoords(lat, lon)) return '';
+    return `<button type="button" class="news-item-map" data-lat="${lat}" data-lon="${lon}" title="Show on map" aria-label="Show on map">Map</button>`;
   }
 
   private createDeviationIndicator(): void {
@@ -503,6 +523,7 @@ export class NewsPanel extends Panel {
         ${item.snippet ? `<div class="item-snippet">${escapeHtml(item.snippet.length > 200 ? item.snippet.slice(0, 200).replace(/\s+\S*$/, '') + '…' : item.snippet)}</div>` : ''}
         <div class="item-time">
           ${formatTime(item.pubDate)}
+          ${this.renderMapChip(item.lat, item.lon)}
           ${getCurrentLanguage() !== 'en' ? `<button class="item-translate-btn" title="Translate" data-text="${escapeHtml(item.title)}">文</button>` : ''}
         </div>
       </div>
@@ -718,6 +739,15 @@ export class NewsPanel extends Panel {
       `
       : '';
 
+    // Prefer geocoded cluster coords; fall back to related-asset origin when clustering inferred a place.
+    const mapLat = this.hasMapCoords(cluster.lat, cluster.lon)
+      ? cluster.lat
+      : assetContext?.origin.lat;
+    const mapLon = this.hasMapCoords(cluster.lat, cluster.lon)
+      ? cluster.lon
+      : assetContext?.origin.lon;
+    const mapChip = this.renderMapChip(mapLat, mapLon);
+
     // Category tag from threat classification
     const cat = cluster.threat?.category;
     const catLabel = cat && cat !== 'general' ? cat.charAt(0).toUpperCase() + cat.slice(1) : '';
@@ -768,6 +798,7 @@ export class NewsPanel extends Panel {
         <div class="cluster-meta">
           <span class="top-sources">${topSourcesHtml}</span>
           <span class="item-time">${formatTime(cluster.lastUpdated)}</span>
+          ${mapChip}
           ${getCurrentLanguage() !== 'en' ? `<button class="item-translate-btn" title="Translate" data-text="${escapeHtml(cluster.primaryTitle)}">文</button>` : ''}
         </div>
         ${relatedAssetsHtml}
@@ -778,6 +809,17 @@ export class NewsPanel extends Panel {
   private setupContentDelegation(): void {
     this.content.addEventListener('click', (e) => {
       const target = e.target as HTMLElement;
+
+      const mapBtn = target.closest<HTMLElement>('.news-item-map');
+      if (mapBtn) {
+        e.preventDefault();
+        e.stopPropagation();
+        const lat = Number(mapBtn.dataset.lat);
+        const lon = Number(mapBtn.dataset.lon);
+        if (!this.hasMapCoords(lat, lon)) return;
+        this.onLocationClick?.(lat, lon);
+        return;
+      }
 
       const assetBtn = target.closest<HTMLElement>('.related-asset');
       if (assetBtn) {

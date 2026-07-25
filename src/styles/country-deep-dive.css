@@ -842,6 +842,19 @@
   gap: 8px;
 }
 
+.cdp-base-item--map {
+  cursor: pointer;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: 0 -4px;
+}
+
+.cdp-base-item--map:hover,
+.cdp-base-item--map:focus-visible {
+  background: color-mix(in srgb, var(--accent-color, var(--accent)) 12%, transparent);
+  outline: none;
+}
+
 .cdp-base-distance {
   color: var(--text-faint);
   font-size: 10px;
