@@ -23,9 +23,14 @@ describe('country deep dive map focus', () => {
     assert.match(panel, /cdp-risk-chokepoint-chip/);
     assert.match(panel, /cdp-chokepoint-fallback-row/);
     assert.match(panel, /partnerIso2/);
+    assert.match(panel, /makeNewsMapChip/);
+    assert.match(panel, /cdp-news-map/);
+    assert.match(panel, /cdp-atlas-row/);
+    assert.match(panel, /stopPropagation/);
 
     const css = readFileSync(new URL('../src/styles/country-deep-dive.css', import.meta.url), 'utf8');
     assert.match(css, /\.cdp-base-item--map/);
     assert.match(css, /\.cdp-map-cell/);
+    assert.match(css, /\.cdp-news-map/);
   });
 });
