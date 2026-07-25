@@ -430,7 +430,7 @@ export class StorageFacilityMapPanel extends Panel {
     const glyph = TYPE_GLYPH[f.facilityType] ?? '🔹';
     const typeLabel = TYPE_LABEL[f.facilityType] ?? f.facilityType;
     return `
-      <tr class="sf-row sf-row-clickable" data-facility-id="${escapeHtml(f.id)}" role="button" tabindex="0" title="Show on map">
+      <tr class="sf-row sf-row-clickable" data-facility-id="${escapeHtml(f.id)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(f.name)} on map">
         <td>
           <div class="sf-name">${glyph} ${escapeHtml(f.name)}</div>
           <div class="sf-sub">${escapeHtml(f.operator || '')}</div>

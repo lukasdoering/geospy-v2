@@ -359,7 +359,7 @@ export class FuelShortagePanel extends Panel {
     const glyph = PRODUCT_GLYPH[s.product] ?? '•';
     const quality = deriveShortageEvidenceQuality(s.evidence);
     return `
-      <tr class="fs-row fs-row-clickable" data-shortage-id="${escapeHtml(s.id)}" data-country="${escapeHtml(s.country)}" role="button" tabindex="0" title="Show on map">
+      <tr class="fs-row fs-row-clickable" data-shortage-id="${escapeHtml(s.id)}" data-country="${escapeHtml(s.country)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(s.country)} on map">
         <td>
           <div class="fs-name">${glyph} ${escapeHtml(s.country)} · ${escapeHtml(s.product)}</div>
           <div class="fs-sub">${escapeHtml(s.causeChain.join(' · ') || '—')}</div>

@@ -711,7 +711,11 @@ export class PanelLayoutManager implements AppModule {
       case PanelGateReason.ANONYMOUS:
         return () => this.ctx.authModal?.open();
       case PanelGateReason.FREE_TIER:
-        return () => window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+        return () => window.open(
+          this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro',
+          '_blank',
+          'noopener,noreferrer',
+        );
       case PanelGateReason.PAYMENT_ON_HOLD:
       case PanelGateReason.RENEWAL_FAILED:
         // Pre-reserve the portal tab synchronously inside the click gesture
@@ -726,7 +730,11 @@ export class PanelLayoutManager implements AppModule {
         // for users who don't want to wait for the reactive update.
         return () => window.location.reload();
       case PanelGateReason.LAPSED:
-        return () => window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+        return () => window.open(
+          this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro',
+          '_blank',
+          'noopener,noreferrer',
+        );
       default:
         return () => {};
     }
@@ -919,7 +927,7 @@ export class PanelLayoutManager implements AppModule {
         </a>
         <div class="mobile-menu-divider"></div>
         <div class="mobile-menu-footer-links">
-          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : 'https://www.worldmonitor.app/pro'}" target="_blank" rel="noopener">Pro</a>
+          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro'}" target="_blank" rel="noopener">Pro</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/blog/' : 'https://www.worldmonitor.app/blog/'}" target="_blank" rel="noopener">Blog</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/docs' : 'https://www.worldmonitor.app/docs'}" target="_blank" rel="noopener">Docs</a>
           <a href="https://status.worldmonitor.app/" target="_blank" rel="noopener">Status</a>
@@ -987,7 +995,7 @@ export class PanelLayoutManager implements AppModule {
           </div>
         </div>
         <nav>
-          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : 'https://www.worldmonitor.app/pro'}" target="_blank" rel="noopener">Pro</a>
+          <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/pro' : '/pro'}" target="_blank" rel="noopener">Pro</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/blog/' : 'https://www.worldmonitor.app/blog/'}" target="_blank" rel="noopener">Blog</a>
           <a href="${this.ctx.isDesktopApp ? 'https://worldmonitor.app/docs' : 'https://www.worldmonitor.app/docs'}" target="_blank" rel="noopener">Docs</a>
           <a href="https://status.worldmonitor.app/" target="_blank" rel="noopener">Status</a>

@@ -227,7 +227,7 @@ export class OilInventoriesPanel extends Panel {
       const resp = await fetch(toApiUrl('/api/economic/v1/get-oil-inventories'));
       if (!resp.ok) {
         this.setSafeContent(unsafeRawHtml(
-          `<div class="panel-empty">Oil inventory data unavailable</div>`,
+          `<div class="panel-empty">Oil inventory feed is temporarily unavailable. Retrying on the next refresh.</div>`,
           'legacy Panel.setContent() migration',
         ));
         return;
@@ -238,7 +238,7 @@ export class OilInventoriesPanel extends Panel {
     } catch {
       if (!this.element?.isConnected) return;
       this.setSafeContent(unsafeRawHtml(
-        `<div class="panel-empty">Oil inventory data unavailable</div>`,
+        `<div class="panel-empty">Oil inventory feed is temporarily unavailable. Retrying on the next refresh.</div>`,
         'legacy Panel.setContent() migration',
       ));
     }
@@ -309,7 +309,7 @@ export class OilInventoriesPanel extends Panel {
 
     if (parts.length === 0) {
       this.setSafeContent(unsafeRawHtml(
-        `<div class="panel-empty">Oil inventory data unavailable</div>`,
+        `<div class="panel-empty">No oil inventory series currently available.</div>`,
         'legacy Panel.setContent() migration',
       ));
       return;

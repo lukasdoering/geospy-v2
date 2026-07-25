@@ -102,6 +102,7 @@ const focusedTests = [
   'tests/energy-calm-unavailable.test.mts',
   'tests/hero-tech-map-chip.test.mts',
   'tests/map-aria-polish.test.mts',
+  'tests/push-footer-energy-a11y.test.mts',
 ];
 
 function run(cmd, args, label) {

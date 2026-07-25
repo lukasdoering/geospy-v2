@@ -352,7 +352,7 @@ export class EnergyDisruptionsPanel extends Panel {
           data-event-id="${escapeHtml(e.id)}"
           data-asset-id="${escapeHtml(e.assetId)}"
           data-asset-type="${escapeHtml(e.assetType)}"
-          role="button" tabindex="0" title="Show on map">
+          role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(e.assetId || e.id)} on map">
         <td>
           <div class="ed-event">${glyph} ${escapeHtml(e.eventType)}</div>
           <div class="ed-sub">${escapeHtml(e.shortDescription)}</div>
