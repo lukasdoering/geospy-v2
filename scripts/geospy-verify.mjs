@@ -91,6 +91,7 @@ const focusedTests = [
   'tests/pinned-webcams-map-focus.test.mts',
   'tests/world-clock-map-focus.test.mts',
   'tests/goodthings-digest-map-focus.test.mts',
+  'tests/route-explorer-chokepoint-map.test.mts',
 ];
 
 function run(cmd, args, label) {

@@ -95,7 +95,7 @@ export class CurrentRouteTab {
     }
     const rows = exposures.map(
       (e, i) =>
-        `<tr class="re-current__cp-row" data-cp-id="${escapeHtml(e.chokepointId)}" tabindex="0">` +
+        `<tr class="re-current__cp-row" data-cp-id="${escapeHtml(e.chokepointId)}" role="button" tabindex="0" title="Show ${escapeHtml(e.chokepointName)} on map">` +
         `<td class="re-current__cp-rank">${i + 1}</td>` +
         `<td class="re-current__cp-name">${escapeHtml(e.chokepointName)}</td>` +
         `<td class="re-current__cp-exposure">${formatExposurePct(e.exposurePct)}</td>` +
@@ -117,7 +117,10 @@ export class CurrentRouteTab {
       const select = () => this.opts.onChokepointSelect?.(cpId);
       row.addEventListener('click', select);
       row.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') { e.preventDefault(); select(); }
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          select();
+        }
       });
     });
   }

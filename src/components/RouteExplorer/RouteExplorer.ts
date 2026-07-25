@@ -55,6 +55,7 @@ interface MapRef {
   setBypassRoutes(corridors: Array<{ fromPort: [number, number]; toPort: [number, number] }>): void;
   clearBypassRoutes(): void;
   zoomToRoutes(routeIds: string[]): void;
+  openChokepoint?(id: string): void;
 }
 
 interface TestHook {
@@ -488,7 +489,9 @@ export class RouteExplorer {
     body.className = 're-body';
 
     this.leftRail = new LeftRail();
-    this.currentTab = new CurrentRouteTab();
+    this.currentTab = new CurrentRouteTab({
+      onChokepointSelect: (id) => this.mapRef?.openChokepoint?.(id),
+    });
     this.alternativesTab = new AlternativesTab({
       onSelectBypass: (o) => this.handleBypassSelect(o),
     });
