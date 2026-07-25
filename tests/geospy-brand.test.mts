@@ -122,7 +122,8 @@ describe('GeoSpy brand config', () => {
     assert.match(unified, /access GeoSpy data programmatically/);
     assert.match(unified, /your GeoSpy account/);
     assert.match(unified, /GeoSpy Pro account/);
-    assert.match(unified, /GeoSpy API plan limit upgrade/);
+    assert.match(unified, /\$\{BRAND\.name\} API plan limit upgrade/);
+    assert.match(unified, /\$\{BRAND\.name\} billing is managed outside Dodo/);
     assert.doesNotMatch(unified, /access WorldMonitor data programmatically/);
     assert.doesNotMatch(unified, /your WorldMonitor account/);
   });

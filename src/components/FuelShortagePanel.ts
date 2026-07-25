@@ -194,9 +194,16 @@ export class FuelShortagePanel extends Panel {
 
       const live = await getSupplyChainClient().listFuelShortages({ country: '', product: '', severity: '' });
       if (!this.element?.isConnected) return;
-      if (live.upstreamUnavailable || !live.shortages?.length) {
+      if (live.upstreamUnavailable) {
         this.setSafeContent(unsafeRawHtml(
-          `<div class="panel-empty">Fuel shortage registry unavailable</div>`,
+          `<div class="panel-empty">Fuel shortage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+        return;
+      }
+      if (!live.shortages?.length) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">No active fuel shortages currently tracked.</div>`,
           'legacy Panel.setContent() migration',
         ));
         return;
@@ -214,7 +221,7 @@ export class FuelShortagePanel extends Panel {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
       this.setSafeContent(unsafeRawHtml(
-        `<div class="panel-empty">Fuel shortage registry unavailable</div>`,
+        `<div class="panel-empty">Fuel shortage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
         'legacy Panel.setContent() migration',
       ));
     }

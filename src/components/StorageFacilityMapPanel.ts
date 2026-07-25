@@ -245,9 +245,16 @@ export class StorageFacilityMapPanel extends Panel {
 
       const live = await getSupplyChainClient().listStorageFacilities({ facilityType: '' });
       if (!this.element?.isConnected) return;
-      if (live.upstreamUnavailable || !live.facilities?.length) {
+      if (live.upstreamUnavailable) {
         this.setSafeContent(unsafeRawHtml(
-          `<div class="panel-empty">Storage registry unavailable</div>`,
+          `<div class="panel-empty">Storage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+        return;
+      }
+      if (!live.facilities?.length) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">No storage facilities currently tracked.</div>`,
           'legacy Panel.setContent() migration',
         ));
         return;
@@ -265,7 +272,7 @@ export class StorageFacilityMapPanel extends Panel {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
       this.setSafeContent(unsafeRawHtml(
-        `<div class="panel-empty">Storage registry unavailable</div>`,
+        `<div class="panel-empty">Storage registry is temporarily unavailable. Retrying on the next refresh.</div>`,
         'legacy Panel.setContent() migration',
       ));
     }

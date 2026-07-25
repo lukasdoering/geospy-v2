@@ -12,6 +12,7 @@ import {
 } from '@/config/panels';
 import { isProUser } from '@/services/widget-store';
 import { SITE_VARIANT } from '@/config/variant';
+import { BRAND } from '@/config/brand';
 import { t } from '@/services/i18n';
 import { createSettingsButton } from '@/components/settings-button';
 import { confirmDialog } from '@/components/confirm-dialog';
@@ -143,7 +144,7 @@ export class UnifiedSettings {
         void openBillingPortal(reservedWin).then((result) => {
           if (result.outcome === 'no-customer') {
             showToast(
-              'Subscription is managed outside Dodo. Email support@worldmonitor.app for help.',
+              `${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`,
             );
           }
         });
@@ -163,7 +164,7 @@ export class UnifiedSettings {
           // generic Dodo portal that won't recognise them.
           if (result.outcome === 'no-customer') {
             showToast(
-              'Subscription is managed outside Dodo. Email support@worldmonitor.app for help.',
+              `${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`,
             );
           }
         });
@@ -744,7 +745,7 @@ export class UnifiedSettings {
       void openBillingPortal(reservedWin).then((result) => {
         if (result.outcome === 'no-customer') {
           showToast(
-            'Subscription is managed outside Dodo. Email support@worldmonitor.app for help.',
+            `${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`,
           );
         }
       });
@@ -1110,7 +1111,7 @@ export class UnifiedSettings {
       const reservedWin = prereserveBillingPortalTab();
       void openBillingPortal(reservedWin).then((result) => {
         if (result.outcome === 'no-customer') {
-          showToast('Subscription is managed outside Dodo. Email support@worldmonitor.app for help.');
+          showToast(`${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`);
         }
       });
       return;
@@ -1127,7 +1128,7 @@ export class UnifiedSettings {
         const reservedWin = prereserveBillingPortalTab();
         void openBillingPortal(reservedWin).then((result) => {
           if (result.outcome === 'no-customer') {
-            showToast('Subscription is managed outside Dodo. Email support@worldmonitor.app for help.');
+            showToast(`${BRAND.name} billing is managed outside Dodo. Email support@worldmonitor.app for help.`);
           }
         });
         return;
@@ -1144,7 +1145,7 @@ export class UnifiedSettings {
       return;
     }
     if (notice.ctaKind === 'contact_support') {
-      window.location.href = `mailto:support@worldmonitor.app?subject=${encodeURIComponent('GeoSpy API plan limit upgrade')}`;
+      window.location.href = `mailto:support@worldmonitor.app?subject=${encodeURIComponent(`${BRAND.name} API plan limit upgrade`)}`;
     }
   }
 
