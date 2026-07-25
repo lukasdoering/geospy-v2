@@ -90,6 +90,25 @@ describe('GeoSpy brand config', () => {
     assert.doesNotMatch(index, /href="https:\/\/www\.worldmonitor\.app\/pro">World Monitor Pro</);
   });
 
+  it('brands Pro FAQ and plans body copy as GeoSpy', () => {
+    const pro = readFileSync(new URL('../public/pro/index.html', import.meta.url), 'utf8');
+    assert.match(pro, /Is GeoSpy still free\?/);
+    assert.match(pro, /GeoSpy is primarily a global intelligence platform/);
+    assert.match(pro, /What is MCP in GeoSpy\?/);
+    assert.match(pro, /plug GeoSpy into Claude/);
+    assert.match(pro, /use GeoSpy as a tool/);
+    assert.match(pro, /building on GeoSpy data/);
+    assert.match(pro, /Keep using GeoSpy for free/);
+    assert.match(pro, /GeoSpy Analyst/);
+    assert.match(pro, /<h2>GeoSpy Pro — The Geopolitical AI Layer<\/h2>/);
+    assert.match(pro, /"@type": "SoftwareApplication"[\s\S]*?"name": "GeoSpy"/);
+    assert.doesNotMatch(pro, /Is World Monitor still free\?/);
+    assert.doesNotMatch(pro, /WM Analyst/);
+    assert.doesNotMatch(pro, /plug WorldMonitor into Claude/);
+    assert.doesNotMatch(pro, /Keep using World Monitor for free/);
+    assert.doesNotMatch(pro, /<h2>World Monitor Pro — The Geopolitical AI Layer<\/h2>/);
+  });
+
   it('brands Latest Brief and Settings API/MCP chrome as GeoSpy', () => {
     const brief = readFileSync(new URL('../src/components/LatestBriefPanel.ts', import.meta.url), 'utf8');
     assert.match(brief, /latest-brief-cover-title' \}, 'GeoSpy'/);
