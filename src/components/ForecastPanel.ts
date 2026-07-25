@@ -720,7 +720,7 @@ export class ForecastPanel extends Panel {
           ${(() => {
             const code = toIso2(f.region || '');
             return code
-              ? `<span class="fc-toggle fc-map-toggle" data-fc-map-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map">Map</span>`
+              ? `<span class="fc-toggle fc-map-toggle" data-fc-map-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map">Map</span>`
               : '';
           })()}
         </div>

@@ -163,7 +163,7 @@ function buildIeaBarChart(members: IeaMember[]): string {
   const obligLine = `<line x1="${obligX.toFixed(1)}" y1="10" x2="${obligX.toFixed(1)}" y2="${svgH - 5}" stroke="rgba(255,255,255,0.25)" stroke-width="1" stroke-dasharray="4 3"/>
     <text x="${obligX.toFixed(1)}" y="9" text-anchor="middle" fill="rgba(255,255,255,0.4)" font-size="7">90d</text>`;
   const chips = sorted.map(m =>
-    `<button type="button" class="oil-iea-country" data-country="${escapeHtml(m.iso2)}" title="Show on map">${escapeHtml(m.iso2)}</button>`
+    `<button type="button" class="oil-iea-country" data-country="${escapeHtml(m.iso2)}" title="Show on map" aria-label="Show ${escapeHtml(m.iso2)} on map">${escapeHtml(m.iso2)}</button>`
   ).join('');
   return `<svg viewBox="0 0 ${SVG_W} ${svgH}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;display:block">${bars}${obligLine}</svg>
     <div class="oil-iea-countries" style="display:flex;flex-wrap:wrap;gap:4px;padding:6px 8px 2px">${chips}</div>
