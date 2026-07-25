@@ -63,6 +63,7 @@ const DEPENDENCY_FLAG_LABELS: Record<string, { text: string; cls: string }> = {
 import { toApiUrl } from '@/services/runtime';
 import type { ComputeEnergyShockScenarioResponse, ProductImpact } from '@/generated/client/worldmonitor/intelligence/v1/service_client';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 
 
 type ThreatLevel = 'critical' | 'high' | 'medium' | 'low' | 'info';
@@ -1850,8 +1851,22 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
           const badge = this.el('span', `cdp-dep-badge ${flag.cls}`, flag.text);
           sectorCell.append(document.createTextNode(' '), badge);
         }
-        const cpCell = this.el('td', 'cdp-chokepoint-name');
+        const cpCell = this.el('td', 'cdp-chokepoint-name cdp-map-cell');
         cpCell.textContent = s.primaryChokepointName;
+        cpCell.title = 'Show chokepoint on map';
+        cpCell.setAttribute('role', 'button');
+        cpCell.tabIndex = 0;
+        cpCell.setAttribute('aria-label', `Show ${s.primaryChokepointName} on map`);
+        const openCp = (e: Event): void => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.map?.openChokepoint(s.primaryChokepointId);
+        };
+        cpCell.addEventListener('click', openCp);
+        cpCell.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          openCp(e);
+        });
         const scoreCell = this.el('td', 'cdp-exposure-score');
         scoreCell.textContent = `${s.exposureScore.toFixed(0)}`;
         scoreCell.style.color = CountryDeepDivePanel.exposureScoreColor(s.exposureScore);
@@ -1882,9 +1897,14 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       const table = this.el('table', 'cdp-trade-exposure-table');
       const tbody = this.el('tbody');
       for (const entry of sorted) {
-        const tr = this.el('tr');
-        const nameCell = this.el('td', 'cdp-chokepoint-name');
-        nameCell.textContent = entry.chokepointName || entry.chokepointId.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        const label = entry.chokepointName || entry.chokepointId.replace(/[-_]/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+        const tr = this.el('tr', 'cdp-chokepoint-fallback-row');
+        tr.setAttribute('role', 'button');
+        tr.tabIndex = 0;
+        tr.title = 'Show chokepoint on map';
+        tr.setAttribute('aria-label', `Show ${label} on map`);
+        const nameCell = this.el('td', 'cdp-chokepoint-name cdp-map-cell');
+        nameCell.textContent = label;
         const barWrap = this.el('td', 'cdp-exposure-bar-wrap');
         const bar = this.el('div', 'cdp-exposure-bar');
         bar.style.width = `${Math.min(entry.exposureScore, 100)}%`;
@@ -1892,6 +1912,16 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
         const pctCell = this.el('td', 'cdp-exposure-pct', `${entry.exposureScore.toFixed(1)}`);
         pctCell.style.color = CountryDeepDivePanel.exposureScoreColor(entry.exposureScore);
         tr.append(nameCell, barWrap, pctCell);
+        const openCp = (e: Event): void => {
+          e.preventDefault();
+          e.stopPropagation();
+          this.map?.openChokepoint(entry.chokepointId);
+        };
+        tr.addEventListener('click', openCp);
+        tr.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          openCp(e);
+        });
         tbody.append(tr);
       }
       table.append(tbody);
@@ -2154,9 +2184,26 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
 
       for (const exp of rows) {
         const tr = this.el('tr');
-        const supplierTd = this.el('td', 'cdp-product-supplier');
+        const supplierTd = this.el('td', 'cdp-product-supplier cdp-map-cell');
         const flag = exp.partnerIso2 ? CountryDeepDivePanel.toFlagEmoji(exp.partnerIso2) : '';
         supplierTd.textContent = `${flag} ${exp.partnerIso2}`;
+        supplierTd.title = 'Show supplier on map';
+        supplierTd.setAttribute('role', 'button');
+        supplierTd.tabIndex = 0;
+        supplierTd.setAttribute('aria-label', `Show ${exp.partnerIso2} on map`);
+        const focusSupplier = (e: Event): void => {
+          e.preventDefault();
+          e.stopPropagation();
+          // Geometry may be cold in unit tests — resolve at click time.
+          const focus = resolveCountryMapFocus(exp.partnerIso2);
+          if (!focus) return;
+          this.focusCoordsOnMap(focus.lat, focus.lon, 4);
+        };
+        supplierTd.addEventListener('click', focusSupplier);
+        supplierTd.addEventListener('keydown', (e: KeyboardEvent) => {
+          if (e.key !== 'Enter' && e.key !== ' ') return;
+          focusSupplier(e);
+        });
         tr.append(supplierTd);
 
         const shareTd = this.el('td', 'cdp-product-share');
@@ -2180,11 +2227,20 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
           riskTd.append(badge);
 
           if (exp.risk.transitChokepoints.length > 0) {
-            const cpNames = exp.risk.transitChokepoints
-              .map(cp => cp.chokepointName)
-              .join(', ');
             const cpInfo = this.el('div', 'cdp-risk-chokepoints');
-            cpInfo.textContent = cpNames;
+            exp.risk.transitChokepoints.forEach((cp, idx) => {
+              if (idx > 0) cpInfo.append(document.createTextNode(', '));
+              const chip = this.el('button', 'cdp-risk-chokepoint-chip', cp.chokepointName);
+              chip.setAttribute('type', 'button');
+              chip.title = 'Show chokepoint on map';
+              chip.setAttribute('aria-label', `Show ${cp.chokepointName} on map`);
+              chip.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                this.map?.openChokepoint(cp.chokepointId);
+              });
+              cpInfo.append(chip);
+            });
             riskTd.append(cpInfo);
           }
         } else {

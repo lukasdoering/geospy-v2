@@ -19,10 +19,15 @@ export class PositiveNewsFeedPanel extends Panel {
   private filteredItems: NewsItem[] = [];
   private filterButtons: Map<string, HTMLButtonElement> = new Map();
   private filterClickHandlers: Map<HTMLButtonElement, () => void> = new Map();
+  private onLocationClick: ((lat: number, lon: number) => void) | null = null;
 
   constructor() {
     super({ id: 'positive-feed', title: 'Good News Feed', showCount: true, trackActivity: true });
     this.createFilterBar();
+  }
+
+  public setLocationClickHandler(handler: (lat: number, lon: number) => void): void {
+    this.onLocationClick = handler;
   }
 
   /**
@@ -120,10 +125,22 @@ export class PositiveNewsFeedPanel extends Panel {
   }
 
   /**
-   * Delegated click handler for .positive-card-share buttons.
+   * Delegated click handler for share + Map buttons (must not navigate the card link).
    */
   private handleShareClick = (e: Event): void => {
     const target = e.target as HTMLElement;
+
+    const mapBtn = target.closest('.positive-card-map') as HTMLButtonElement | null;
+    if (mapBtn) {
+      e.preventDefault();
+      e.stopPropagation();
+      const lat = Number(mapBtn.dataset.lat);
+      const lon = Number(mapBtn.dataset.lon);
+      if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return;
+      this.onLocationClick?.(lat, lon);
+      return;
+    }
+
     const shareBtn = target.closest('.positive-card-share') as HTMLButtonElement | null;
     if (!shareBtn) return;
 
@@ -156,6 +173,15 @@ export class PositiveNewsFeedPanel extends Panel {
     const categoryBadgeHtml = item.happyCategory
       ? `<span class="positive-card-category cat-${escapeHtml(item.happyCategory)}">${escapeHtml(categoryLabel)}</span>`
       : '';
+    const hasLocation =
+      item.lat !== undefined &&
+      item.lon !== undefined &&
+      Number.isFinite(item.lat) &&
+      Number.isFinite(item.lon) &&
+      !(item.lat === 0 && item.lon === 0);
+    const mapHtml = hasLocation
+      ? `<button type="button" class="positive-card-map" data-lat="${item.lat}" data-lon="${item.lon}" title="Show on map" aria-label="Show story location on map">Map</button>`
+      : '';
 
     return `<a class="positive-card" href="${sanitizeUrl(item.link)}" target="_blank" rel="noopener" data-category="${escapeHtml(item.happyCategory || '')}">
   ${imageHtml}
@@ -165,8 +191,11 @@ export class PositiveNewsFeedPanel extends Panel {
       ${categoryBadgeHtml}
     </div>
     <span class="positive-card-title">${escapeHtml(item.title)}</span>
-    <span class="positive-card-time">${formatTime(item.pubDate)}</span>
-    <button class="positive-card-share" aria-label="Share this story" data-idx="${idx}">
+    <div class="positive-card-footer">
+      <span class="positive-card-time">${formatTime(item.pubDate)}</span>
+      ${mapHtml}
+    </div>
+    <button type="button" class="positive-card-share" aria-label="Share this story" data-idx="${idx}">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <path d="M4 12v8a2 2 0 002 2h12a2 2 0 002-2v-8"/>
         <polyline points="16 6 12 2 8 6"/>

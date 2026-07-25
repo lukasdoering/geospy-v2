@@ -474,6 +474,33 @@
   color: var(--text-dim);
 }
 
+[data-variant="happy"] .positive-card-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 2px;
+}
+
+[data-variant="happy"] .positive-card-map {
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent, #6B8F5E);
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent, #6B8F5E) 40%, transparent);
+  border-radius: 4px;
+  z-index: 2;
+  position: relative;
+}
+
+[data-variant="happy"] .positive-card-map:hover {
+  border-color: var(--accent, #6B8F5E);
+}
+
 /* ---------- Share button ---------- */
 [data-variant="happy"] .positive-card-share {
   position: absolute;

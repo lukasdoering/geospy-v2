@@ -2512,6 +2512,10 @@ export class PanelLayoutManager implements AppModule {
     if (SITE_VARIANT === 'happy') {
       this.lazyImportedPanel('positive-feed', () => import('@/components/PositiveNewsFeedPanel'), 'PositiveNewsFeedPanel', (PositiveNewsFeedPanel) => {
         const p = new PositiveNewsFeedPanel();
+        p.setLocationClickHandler((lat, lon) => {
+          this.ctx.map?.setCenter(lat, lon, 5);
+          this.ctx.map?.flashLocation(lat, lon, 3000);
+        });
         this.ctx.positivePanel = p;
         return p;
       });
