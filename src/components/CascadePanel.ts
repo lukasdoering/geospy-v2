@@ -150,7 +150,7 @@ export class CascadePanel extends Panel {
       ? countriesAffected.map(c => {
           const code = (c.country || c.countryName || '').trim();
           const attrs = code
-            ? ` class="cascade-country cascade-country-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+            ? ` class="cascade-country cascade-country-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(c.countryName || code)} on map"`
             : ' class="cascade-country"';
           return `
           <div${attrs} style="border-left: 3px solid ${this.getImpactColor(c.impactLevel)}">

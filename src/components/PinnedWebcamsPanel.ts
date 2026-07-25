@@ -108,6 +108,7 @@ export class PinnedWebcamsPanel extends Panel {
         mapBtn.className = 'pinned-webcam-map';
         mapBtn.textContent = 'Map';
         mapBtn.title = `Show ${cam.title || cam.webcamId} on map`;
+        mapBtn.setAttribute('aria-label', `Show ${cam.title || cam.webcamId} on map`);
         mapBtn.addEventListener('click', (e) => {
           e.stopPropagation();
           this.focusCamCoords(String(cam.lat), String(cam.lng));

@@ -110,7 +110,7 @@ export class EnergyComplexPanel extends Panel {
         ? `<span class="energy-below-obligation-badge">Below 90d</span>`
         : '';
       return `
-        <tr class="oil-stocks-row oil-stocks-row-clickable" data-country="${escapeHtml(m.iso2)}" role="button" tabindex="0" title="Show on map">
+        <tr class="oil-stocks-row oil-stocks-row-clickable" data-country="${escapeHtml(m.iso2)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(m.iso2)} on map">
           <td class="oil-stocks-rank">${escapeHtml(String(m.rank))}</td>
           <td class="oil-stocks-iso">${escapeHtml(m.iso2)}</td>
           <td class="oil-stocks-days">${daysDisplay}${warningBadge}</td>
@@ -149,7 +149,7 @@ export class EnergyComplexPanel extends Panel {
 
     const top5 = d.top20LngDependent.slice(0, 5);
     const rows = top5.map(e => `
-      <tr class="oil-stocks-row oil-stocks-row-clickable" data-country="${escapeHtml(e.iso2)}" role="button" tabindex="0" title="Show on map">
+      <tr class="oil-stocks-row oil-stocks-row-clickable" data-country="${escapeHtml(e.iso2)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(e.iso2)} on map">
         <td class="oil-stocks-iso">${escapeHtml(e.iso2)}</td>
         <td class="oil-stocks-days">${escapeHtml((e.lngShareOfImports * 100).toFixed(1))}%</td>
         <td class="oil-stocks-vs">${escapeHtml(String(Math.round(e.lngImportsTj)))} TJ</td>

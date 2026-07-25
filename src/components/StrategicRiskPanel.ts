@@ -413,7 +413,7 @@ export class StrategicRiskPanel extends Panel {
       const isConvergence = i === 0 && risk.startsWith('Convergence:') && topZone;
       if (isConvergence) {
         return `
-                <div class="risk-item risk-item-clickable" data-lat="${topZone.lat}" data-lon="${topZone.lon}" role="button" tabindex="0" title="Show on map">
+                <div class="risk-item risk-item-clickable" data-lat="${topZone.lat}" data-lon="${topZone.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show top risk on map">
                   <span class="risk-rank">${i + 1}.</span>
                   <span class="risk-text">${escapeHtml(risk)}</span>
                   <span class="risk-location-icon">↗</span>
@@ -449,7 +449,7 @@ export class StrategicRiskPanel extends Panel {
       const hasLocation = Number.isFinite(lat) && Number.isFinite(lon) && !(lat === 0 && lon === 0);
       const clickableClass = hasLocation ? 'risk-alert-clickable' : '';
       const locationAttrs = hasLocation
-        ? `data-lat="${lat}" data-lon="${lon}" role="button" tabindex="0" title="Show on map"`
+        ? `data-lat="${lat}" data-lon="${lon}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(alert.title)} on map"`
         : '';
 
       return `

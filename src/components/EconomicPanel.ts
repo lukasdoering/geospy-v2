@@ -431,7 +431,7 @@ export class EconomicPanel extends Panel {
       const label = diff < 0 ? t('components.economic.cut') : diff > 0 ? t('components.economic.hike') : t('components.economic.hold');
       const arrow = diff < 0 ? '▼' : diff > 0 ? '▲' : '–';
       return `
-              <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map">
+              <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.countryCode)} on map">
                 <div class="indicator-header">
                   <span class="indicator-name">${escapeHtml(r.centralBank)}</span>
                   <span class="indicator-id">${escapeHtml(r.countryCode)}</span>
@@ -457,7 +457,7 @@ export class EconomicPanel extends Panel {
         const color = r.realChange > 0 ? redColor : r.realChange < 0 ? greenColor : neutralColor;
         const arrow = r.realChange > 0 ? '▲' : r.realChange < 0 ? '▼' : '–';
         return `
-                <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map">
+                <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.countryName || r.countryCode)} on map">
                   <div class="indicator-header">
                     <span class="indicator-name">${escapeHtml(r.countryName)}</span>
                     <span class="indicator-id">${escapeHtml(r.countryCode)}</span>
@@ -487,7 +487,7 @@ export class EconomicPanel extends Panel {
         const arrow = diff > 0 ? '▲' : diff < 0 ? '▼' : '–';
         const changeStr = diff !== 0 ? `${diff > 0 ? '+' : ''}${(Math.round(diff * 10) / 10)}pp` : '–';
         return `
-                <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map">
+                <div class="economic-indicator economic-indicator-clickable" data-country="${escapeHtml(r.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(r.countryName || r.countryCode)} on map">
                   <div class="indicator-header">
                     <span class="indicator-name">${escapeHtml(r.countryName)}</span>
                     <span class="indicator-id">${escapeHtml(r.countryCode)}</span>
@@ -548,8 +548,11 @@ export class EconomicPanel extends Panel {
 
   private renderStress(): string {
     const d = this.stressData;
-    if (!d || d.unavailable || !Number.isFinite(d.compositeScore)) {
-      return `<div class="economic-empty">Stress index data unavailable</div>`;
+    if (!d || d.unavailable) {
+      return `<div class="economic-empty">Stress index is temporarily unavailable. Retrying on the next refresh.</div>`;
+    }
+    if (!Number.isFinite(d.compositeScore)) {
+      return `<div class="economic-empty">No stress index currently available.</div>`;
     }
 
     const color = stressScoreColor(d.compositeScore);

@@ -213,7 +213,7 @@ export class ResilienceWidget {
           return;
         }
         void this.openUpgradeFlow().catch(() => {
-          window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+          window.open('/pro', '_blank', 'noopener,noreferrer');
         });
       },
     }, cta) as HTMLButtonElement;
@@ -490,7 +490,7 @@ export class ResilienceWidget {
     await import('@/services/checkout')
       .then((module) => module.startCheckout(DEFAULT_UPGRADE_PRODUCT))
       .catch(() => {
-        window.open('https://worldmonitor.app/pro', '_blank', 'noopener,noreferrer');
+        window.open('/pro', '_blank', 'noopener,noreferrer');
       });
   }
 }
