@@ -145,7 +145,7 @@ export class HormuzPanel extends Panel {
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
           <span style="background:${sColor};color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:3px;letter-spacing:0.08em">${d.status.toUpperCase()}</span>
           ${dateStr}
-          <button type="button" data-role="hz-show-map" data-testid="hormuz-show-on-map" title="Show Hormuz Strait on map" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer">Show on map</button>
+          <button type="button" data-role="hz-show-map" data-testid="hormuz-show-on-map" title="Show Hormuz Strait on map" aria-label="Show Hormuz Strait on map" style="margin-left:auto;background:transparent;border:1px solid var(--border);color:var(--text-secondary);font-size:10px;padding:2px 8px;border-radius:4px;cursor:pointer">Show on map</button>
         </div>
         <div>${charts}</div>
         <div style="margin-top:4px;font-size:9px;color:var(--text-dim)">

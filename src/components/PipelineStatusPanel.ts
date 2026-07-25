@@ -448,7 +448,7 @@ export class PipelineStatusPanel extends Panel {
     const commodity = p.commodityType === 'gas' ? '⛽' : '🛢️';
     const route = `${escapeHtml(p.fromCountry)} → ${escapeHtml(p.toCountry)}`;
     return `
-      <tr class="pp-row pp-row-clickable" data-pipeline-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="Show on map">
+      <tr class="pp-row pp-row-clickable" data-pipeline-id="${escapeHtml(p.id)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(p.name)} on map">
         <td>
           <div class="pp-name">${commodity} ${escapeHtml(p.name)}</div>
           <div class="pp-sub">${escapeHtml(p.operator || '')}</div>
