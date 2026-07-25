@@ -32,6 +32,7 @@ import { getAuthState } from '@/services/auth-state';
 import { trackGateHit, track, type UmamiEvent } from '@/services/analytics';
 
 import { TRADE_ROUTES } from '@/config/trade-routes';
+import { resolveCountryMapFocus } from '@/utils/country-map-focus';
 import { setTrustedHtml, trustedHtml } from '@/utils/dom-utils';
 import { copyTextToClipboard } from '@/utils/clipboard-feedback';
 import { showToast } from '@/utils';
@@ -56,6 +57,8 @@ interface MapRef {
   clearBypassRoutes(): void;
   zoomToRoutes(routeIds: string[]): void;
   openChokepoint?(id: string): void;
+  setCenter?(lat: number, lon: number, zoom?: number): void;
+  flashLocation?(lat: number, lon: number, durationMs?: number): void;
 }
 
 interface TestHook {
@@ -500,6 +503,13 @@ export class RouteExplorer {
     });
     this.impactTab = new CountryImpactTab({
       onDrillSideways: (hs2) => this.handleDrillSideways(hs2),
+      onExporterSelect: (iso2) => {
+        const focus = resolveCountryMapFocus(iso2);
+        if (!focus || !this.mapRef) return;
+        this.mapRef.setCenter?.(focus.lat, focus.lon, 4);
+        this.mapRef.flashLocation?.(focus.lat, focus.lon, 3000);
+      },
+      onChokepointSelect: (id) => this.mapRef?.openChokepoint?.(id),
     });
 
     this.contentEl = document.createElement('div');
