@@ -99,6 +99,7 @@ const focusedTests = [
   'tests/news-cluster-map-focus.test.mts',
   'tests/country-deepdive-map-focus.test.mts',
   'tests/positive-feed-map-focus.test.mts',
+  'tests/energy-calm-unavailable.test.mts',
 ];
 
 function run(cmd, args, label) {

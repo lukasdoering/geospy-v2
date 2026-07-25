@@ -260,9 +260,16 @@ export class PipelineStatusPanel extends Panel {
 
       const live = await getSupplyChainClient().listPipelines({ commodityType: '' });
       if (!this.element?.isConnected) return;
-      if (live.upstreamUnavailable || !live.pipelines?.length) {
+      if (live.upstreamUnavailable) {
         this.setSafeContent(unsafeRawHtml(
-          `<div class="panel-empty">Pipeline registry unavailable</div>`,
+          `<div class="panel-empty">Pipeline registry is temporarily unavailable. Retrying on the next refresh.</div>`,
+          'legacy Panel.setContent() migration',
+        ));
+        return;
+      }
+      if (!live.pipelines?.length) {
+        this.setSafeContent(unsafeRawHtml(
+          `<div class="panel-empty">No pipelines currently tracked.</div>`,
           'legacy Panel.setContent() migration',
         ));
         return;
@@ -281,7 +288,7 @@ export class PipelineStatusPanel extends Panel {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
       this.setSafeContent(unsafeRawHtml(
-        `<div class="panel-empty">Pipeline registry unavailable</div>`,
+        `<div class="panel-empty">Pipeline registry is temporarily unavailable. Retrying on the next refresh.</div>`,
         'legacy Panel.setContent() migration',
       ));
     }

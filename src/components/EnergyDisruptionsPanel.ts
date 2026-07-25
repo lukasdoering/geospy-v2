@@ -189,7 +189,7 @@ export class EnergyDisruptionsPanel extends Panel {
       // showed a retry button on what was a legitimate empty state.
       if (live.upstreamUnavailable) {
         this.setSafeContent(unsafeRawHtml(
-          `<div class="panel-empty">Energy disruptions log unavailable</div>`,
+          `<div class="panel-empty">Energy disruptions feed is temporarily unavailable. Retrying on the next refresh.</div>`,
           'legacy Panel.setContent() migration',
         ));
         return;
@@ -200,7 +200,7 @@ export class EnergyDisruptionsPanel extends Panel {
       if (this.isAbortError(err)) return;
       if (!this.element?.isConnected) return;
       this.setSafeContent(unsafeRawHtml(
-        `<div class="panel-empty">Energy disruptions unavailable</div>`,
+        `<div class="panel-empty">Energy disruptions feed is temporarily unavailable. Retrying on the next refresh.</div>`,
         'legacy Panel.setContent() migration',
       ));
     }
