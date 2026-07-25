@@ -4652,9 +4652,31 @@ body.live-news-fullscreen-active .panels-grid > *:not(.live-news-fullscreen) {
 }
 
 .item-time {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
   font-size: 9px;
   color: var(--text-dim);
   margin-top: 4px;
+}
+
+.news-item-map {
+  margin-left: auto;
+  padding: 1px 6px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: var(--accent-color, var(--accent));
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--accent-color, var(--accent)) 45%, transparent);
+  border-radius: 4px;
+}
+
+.news-item-map:hover {
+  border-color: var(--accent-color, var(--accent));
 }
 
 /* Clustering */

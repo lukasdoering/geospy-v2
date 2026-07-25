@@ -3279,6 +3279,10 @@ export class PanelLayoutManager implements AppModule {
       onRelatedAssetsFocus: (assets) => this.ctx.map?.highlightAssets(assets),
       onRelatedAssetsClear: () => this.ctx.map?.highlightAssets(null),
     });
+    panel.setLocationClickHandler((lat, lon) => {
+      this.ctx.map?.setCenter(lat, lon, 4);
+      this.ctx.map?.flashLocation(lat, lon, 3000);
+    });
   }
 
   private handleRelatedAssetClick(asset: RelatedAsset): void {

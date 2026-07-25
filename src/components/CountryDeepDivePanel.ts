@@ -479,11 +479,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
 
     const list = this.el('ul', 'cdp-base-list');
     for (const base of summary.nearestBases.slice(0, 3)) {
-      const item = this.el('li', 'cdp-base-item');
-      const left = this.el('span', 'cdp-base-name', base.name);
-      const right = this.el('span', 'cdp-base-distance', `${Math.round(base.distanceKm)} km`);
-      item.append(left, right);
-      list.append(item);
+      list.append(this.makeMapFocusRow(
+        base.name,
+        `${Math.round(base.distanceKm)} km`,
+        () => this.focusBaseOnMap(base.id),
+      ));
     }
     this.militaryBody.append(list);
   }
@@ -534,12 +534,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       expandedDetails.append(typeLabel);
       const ul = this.el('ul', 'cdp-base-list');
       for (const asset of list.slice(0, 5)) {
-        const li = this.el('li', 'cdp-base-item');
-        li.append(
-          this.el('span', 'cdp-base-name', asset.name),
-          this.el('span', 'cdp-base-distance', `${Math.round(asset.distanceKm)} km`),
-        );
-        ul.append(li);
+        ul.append(this.makeMapFocusRow(
+          asset.name,
+          `${Math.round(asset.distanceKm)} km`,
+          () => this.focusAssetOnMap(type, asset.id),
+        ));
       }
       expandedDetails.append(ul);
     }
@@ -558,12 +557,11 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
       expandedDetails.append(portsTitle);
       const portList = this.el('ul', 'cdp-base-list');
       for (const port of nearbyPorts) {
-        const li = this.el('li', 'cdp-base-item');
-        li.append(
-          this.el('span', 'cdp-base-name', `${port.name} (${port.type})`),
-          this.el('span', 'cdp-base-distance', `${Math.round(port.distanceKm)} km`),
-        );
-        portList.append(li);
+        portList.append(this.makeMapFocusRow(
+          `${port.name} (${port.type})`,
+          `${Math.round(port.distanceKm)} km`,
+          () => this.focusCoordsOnMap(port.lat, port.lon, 6),
+        ));
       }
       expandedDetails.append(portList);
     }
@@ -3014,6 +3012,68 @@ export class CountryDeepDivePanel implements CountryBriefPanel {
     const assets = this.infrastructureByType.get(type) ?? [];
     if (assets.length === 0) return;
     this.map.flashAssets(type, assets.map((asset) => asset.id));
+  }
+
+  /** Clickable atlas row → map focus (bases, ports, infra assets). */
+  private makeMapFocusRow(name: string, distanceLabel: string, onActivate: () => void): HTMLElement {
+    const item = this.el('li', 'cdp-base-item cdp-base-item--map');
+    item.setAttribute('role', 'button');
+    item.tabIndex = 0;
+    item.title = 'Show on map';
+    item.setAttribute('aria-label', `Show ${name} on map`);
+    item.append(
+      this.el('span', 'cdp-base-name', name),
+      this.el('span', 'cdp-base-distance', distanceLabel),
+    );
+    const activate = (e: Event): void => {
+      e.preventDefault();
+      e.stopPropagation();
+      onActivate();
+    };
+    item.addEventListener('click', activate);
+    item.addEventListener('keydown', (e: KeyboardEvent) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      activate(e);
+    });
+    return item;
+  }
+
+  private focusCoordsOnMap(lat: number, lon: number, zoom = 6): void {
+    if (!this.map) return;
+    if (!Number.isFinite(lat) || !Number.isFinite(lon) || (lat === 0 && lon === 0)) return;
+    this.map.setCenter(lat, lon, zoom);
+    this.map.flashLocation(lat, lon, 3000);
+  }
+
+  private focusBaseOnMap(baseId: string): void {
+    if (!this.map || !baseId) return;
+    this.map.enableLayer('bases');
+    this.map.triggerBaseClick(baseId);
+  }
+
+  private focusAssetOnMap(type: AssetType, id: string): void {
+    if (!this.map || !id) return;
+    switch (type) {
+      case 'pipeline':
+        this.map.enableLayer('pipelines');
+        this.map.triggerPipelineClick(id);
+        break;
+      case 'cable':
+        this.map.enableLayer('cables');
+        this.map.triggerCableClick(id);
+        break;
+      case 'datacenter':
+        this.map.enableLayer('datacenters');
+        this.map.triggerDatacenterClick(id);
+        break;
+      case 'base':
+        this.focusBaseOnMap(id);
+        break;
+      case 'nuclear':
+        this.map.enableLayer('nuclear');
+        this.map.triggerNuclearClick(id);
+        break;
+    }
   }
 
   private open(): void {
