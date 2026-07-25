@@ -85,7 +85,7 @@ export class BigMacPanel extends Panel {
           wowCell = `<td class="gb-cell ${wowCls}">${sign}${Math.abs(pct).toFixed(1)}%</td>`;
         }
       }
-      return `<tr class="bm-row-clickable" data-country-code="${escapeHtml(c.code)}" role="button" tabindex="0" title="Show on map">
+      return `<tr class="bm-row-clickable" data-country-code="${escapeHtml(c.code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(c.code)} on map">
         <td class="gb-item-name">${escapeHtml(c.flag)} ${escapeHtml(c.name)}</td>
         <td class="gb-cell ${cls}">$${c.usdPrice.toFixed(2)}</td>
         ${wowCell}

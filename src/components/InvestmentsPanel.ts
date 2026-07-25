@@ -130,7 +130,7 @@ export class InvestmentsPanel extends Panel {
       const sectorLabel = getSectorLabel(inv.sector);
       const year = inv.yearAnnounced ?? inv.yearOperational ?? '—';
       return `
-        <div class="fdi-row fdi-row-clickable" data-id="${escapeHtml(inv.id)}" role="button" tabindex="0" title="Show on map">
+        <div class="fdi-row fdi-row-clickable" data-id="${escapeHtml(inv.id)}" role="button" tabindex="0" title="Show on map" aria-label="Show investment on map">
           <div class="fdi-row-line1">
             <span class="fdi-flag">${flag}</span>
             <span class="fdi-asset-name">${escapeHtml(inv.assetName)}</span>

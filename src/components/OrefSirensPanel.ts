@@ -137,7 +137,7 @@ export class OrefSirensPanel extends Panel {
       const totalAreas = wave.alerts.reduce((sum, a) => sum + (a.data?.length || 0), 0);
       const summary = uniqueTypes.join(', ') + (totalAreas > 0 ? ` - ${totalAreas} areas` : '');
 
-      return safeHtml`<div class="${rowClass} oref-row-clickable" data-oref-focus="1" role="button" tabindex="0" title="Show on map">
+      return safeHtml`<div class="${rowClass} oref-row-clickable" data-oref-focus="1" role="button" tabindex="0" title="Show on map" aria-label="Show siren alert on map">
         <div class="oref-wave-header">
           <span class="oref-wave-time">${this.formatWaveTime(wave.timestamp)}</span>
           ${badge}
@@ -171,7 +171,7 @@ export class OrefSirensPanel extends Panel {
     const alertRows = joinSafeHtml(this.alerts.slice(0, 20).map(alert => {
       const areas = (alert.data || []).join(', ');
       const time = this.formatAlertTime(alert.alertDate);
-      return safeHtml`<div class="oref-alert-row oref-row-clickable" data-oref-focus="1" role="button" tabindex="0" title="Show on map">
+      return safeHtml`<div class="oref-alert-row oref-row-clickable" data-oref-focus="1" role="button" tabindex="0" title="Show on map" aria-label="Show siren alert on map">
         <div class="oref-alert-header">
           <span class="oref-alert-title">${alert.title || alert.cat}</span>
           <span class="oref-alert-time">${time}</span>

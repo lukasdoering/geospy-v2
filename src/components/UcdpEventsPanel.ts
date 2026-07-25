@@ -137,7 +137,7 @@ export class UcdpEventsPanel extends Panel {
         const hasCoords = Number.isFinite(e.latitude) && Number.isFinite(e.longitude)
           && !(e.latitude === 0 && e.longitude === 0);
         const focusAttrs = hasCoords
-          ? ` data-lat="${e.latitude}" data-lon="${e.longitude}" role="button" tabindex="0" title="Show on map"`
+          ? ` data-lat="${e.latitude}" data-lon="${e.longitude}" role="button" tabindex="0" title="Show on map" aria-label="Show event on map"`
           : '';
         const clickableCls = hasCoords ? ' ucdp-row-clickable' : '';
 

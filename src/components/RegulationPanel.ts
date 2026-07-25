@@ -323,7 +323,7 @@ export class RegulationPanel extends Panel {
     // ISO2 profiles clickable; focusCountry no-ops when unresolvable.
     const code = (profile.countryCode || '').trim().toUpperCase();
     const attrs = code.length === 2
-      ? ` class="country-card stance-${profile.stance} regulation-map-clickable" data-reg-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+      ? ` class="country-card stance-${profile.stance} regulation-map-clickable" data-reg-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
       : ` class="country-card stance-${profile.stance}"`;
     return `
       <div${attrs}>

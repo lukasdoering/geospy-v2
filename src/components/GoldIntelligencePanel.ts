@@ -353,7 +353,7 @@ export class GoldIntelligencePanel extends Panel {
     const holderRow = (h: CbHolder, rank: number) => {
       const code = (h.iso3 || '').trim().toUpperCase();
       const clickable = code
-        ? ` class="gold-cb-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+        ? ` class="gold-cb-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
         : '';
       return `<div${clickable} style="display:flex;justify-content:space-between;font-size:10px;padding:1px 0">
       <span style="color:var(--text-dim)">${rank}. ${escapeHtml(h.name)}</span>
@@ -365,7 +365,7 @@ export class GoldIntelligencePanel extends Panel {
       const sign = m.deltaTonnes12m >= 0 ? '+' : '';
       const code = (m.iso3 || '').trim().toUpperCase();
       const clickable = code
-        ? ` class="gold-cb-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+        ? ` class="gold-cb-clickable" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
         : '';
       return `<div${clickable} style="display:flex;justify-content:space-between;font-size:10px;padding:1px 0">
         <span style="color:var(--text-dim)">${escapeHtml(m.name)}</span>

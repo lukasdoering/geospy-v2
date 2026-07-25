@@ -230,7 +230,7 @@ export class DiseaseOutbreaksPanel extends Panel {
         : (o.sourceName ? `<span style="font-size:9px;color:var(--text-dim)">${escapeHtml(o.sourceName)}</span>` : '');
 
       const focusAttrs = focus
-        ? ` data-disease-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" role="button" tabindex="0" title="Show on map" style="border-bottom:1px solid var(--border);padding:8px 0;cursor:pointer"`
+        ? ` data-disease-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show outbreak on map" style="border-bottom:1px solid var(--border);padding:8px 0;cursor:pointer"`
         : ' style="border-bottom:1px solid var(--border);padding:8px 0"';
 
       return `<div${focusAttrs}>

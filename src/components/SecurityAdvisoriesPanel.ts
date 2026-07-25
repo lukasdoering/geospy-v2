@@ -207,7 +207,7 @@ export class SecurityAdvisoriesPanel extends Panel {
           ? `<span class="sa-country">${escapeHtml(advisoryCountryLabel(a.country))}</span>`
           : '';
         const focusAttrs = focus
-          ? ` data-sa-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" role="button" tabindex="0" title="Show on map"`
+          ? ` data-sa-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show advisory on map"`
           : '';
         const clickableCls = focus ? ' sa-item-clickable' : '';
 

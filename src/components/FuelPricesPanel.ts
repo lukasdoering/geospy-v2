@@ -92,7 +92,7 @@ export class FuelPricesPanel extends Panel {
         return `<td class="gb-cell ${cls}">$${fuel.usdPrice.toFixed(3)}${wowStr}</td>`;
       }
 
-      return `<tr class="fp-row-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map">
+      return `<tr class="fp-row-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map">
         <td class="gb-item-name">${escapeHtml(c.flag)} ${escapeHtml(c.name)}</td>
         ${fuelCell(gas, cheapestGas, priceiestGas, c.code)}
         ${fuelCell(dsl, cheapestDsl, priciestDsl, c.code)}

@@ -83,7 +83,7 @@ export class GeoHubsPanel extends Panel {
       const topStory = hub.topStories[0];
 
       return `
-        <div class="geo-hub-item geo-hub-item-clickable ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}" role="button" tabindex="0" title="Show on map">
+        <div class="geo-hub-item geo-hub-item-clickable ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}" role="button" tabindex="0" title="Show on map" aria-label="Show hub on map">
           <div class="hub-rank">${index + 1}</div>
           <span class="geo-hub-indicator ${hub.activityLevel}"></span>
           <div class="hub-info">

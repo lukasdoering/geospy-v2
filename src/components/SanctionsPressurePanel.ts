@@ -129,7 +129,7 @@ export class SanctionsPressurePanel extends Panel {
     if (country.aircraftCount > 0) flags.push(`<span class="sanctions-pill">✈ ${country.aircraftCount}</span>`);
 
     return `
-      <div class="sanctions-row sanctions-row-clickable" data-country-code="${escapeHtml(country.countryCode)}" role="button" tabindex="0" title="Show on map">
+      <div class="sanctions-row sanctions-row-clickable" data-country-code="${escapeHtml(country.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(country.countryCode)} on map">
         <div class="sanctions-row-main">
           <div class="sanctions-row-title">${escapeHtml(country.countryName)}</div>
           <div class="sanctions-row-meta">${escapeHtml(country.countryCode)} · ${escapeHtml(t('components.sanctionsPressure.designations', { count: country.entryCount }))}</div>
@@ -161,7 +161,7 @@ export class SanctionsPressurePanel extends Panel {
     const code = entry.countryCodes[0] || '';
     const clickable = Boolean(code);
     const attrs = clickable
-      ? ` class="sanctions-entry sanctions-entry-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+      ? ` class="sanctions-entry sanctions-entry-clickable" data-country-code="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
       : ' class="sanctions-entry"';
 
     return `

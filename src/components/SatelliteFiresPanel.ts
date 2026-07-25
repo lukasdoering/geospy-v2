@@ -78,7 +78,7 @@ export class SatelliteFiresPanel extends Panel {
         : '';
       const focus = regionMapFocus(s);
       const focusAttrs = focus
-        ? ` data-fire-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" data-region-idx="${idx}" role="button" tabindex="0" title="Show on map"`
+        ? ` data-fire-focus="1" data-lat="${focus.lat}" data-lon="${focus.lon}" data-region-idx="${idx}" role="button" tabindex="0" title="Show on map" aria-label="Show fire region on map"`
         : '';
       return `<tr class="fire-row${highClass}${focus ? ' fire-row-clickable' : ''}"${focusAttrs}>
         <td class="fire-region">${escapeHtml(s.region)}${explosionBadge}</td>

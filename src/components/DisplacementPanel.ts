@@ -179,7 +179,7 @@ export class DisplacementPanel extends Panel {
 
         const hasCoords = Number.isFinite(c.lat) && Number.isFinite(c.lon) && !(c.lat === 0 && c.lon === 0);
         const focusAttrs = hasCoords
-          ? ` data-lat="${c.lat}" data-lon="${c.lon}" role="button" tabindex="0" title="Show on map"`
+          ? ` data-lat="${c.lat}" data-lon="${c.lon}" role="button" tabindex="0" title="Show on map" aria-label="Show displacement on map"`
           : '';
         const clickableCls = hasCoords ? ' disp-row-clickable' : '';
 

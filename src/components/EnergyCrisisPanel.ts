@@ -165,7 +165,7 @@ export class EnergyCrisisPanel extends Panel {
       const categoryClass = p.category === 'conservation' ? 'ecp-cat-conservation' : 'ecp-cat-support';
 
       return `
-        <div class="ecp-policy-row ecp-policy-row-clickable" data-country-code="${escapeHtml(p.countryCode)}" role="button" tabindex="0" title="Show on map">
+        <div class="ecp-policy-row ecp-policy-row-clickable" data-country-code="${escapeHtml(p.countryCode)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(p.countryCode)} on map">
           <div class="ecp-policy-header">
             <span class="ecp-country">${escapeHtml(p.country)}</span>
             <span class="ecp-pill ${categoryClass}">${escapeHtml(categoryLabel)}</span>

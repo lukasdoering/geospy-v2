@@ -63,7 +63,7 @@ export class GulfEconomiesPanel extends Panel {
       // geometry at click time (same contract as other country-focus panels).
       const clickable = Boolean(toIso2(q.country));
       const attrs = clickable
-        ? ` class="market-item gulf-quote-clickable" data-country="${escapeHtml(q.country)}" role="button" tabindex="0" title="Show on map"`
+        ? ` class="market-item gulf-quote-clickable" data-country="${escapeHtml(q.country)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(q.country)} on map"`
         : ' class="market-item"';
       return `
     <div${attrs}>

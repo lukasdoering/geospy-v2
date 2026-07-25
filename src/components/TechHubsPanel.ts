@@ -106,7 +106,7 @@ export class TechHubsPanel extends Panel {
       const topStory = hub.topStories[0];
 
       return `
-        <div class="tech-hub-item tech-hub-item-clickable ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}" role="button" tabindex="0" title="Show on map">
+        <div class="tech-hub-item tech-hub-item-clickable ${hub.activityLevel}" data-hub-id="${escapeHtml(hub.hubId)}" data-index="${index}" role="button" tabindex="0" title="Show on map" aria-label="Show hub on map">
           <div class="hub-rank">${index + 1}</div>
           <span class="hub-indicator ${hub.activityLevel}"></span>
           <div class="hub-info">

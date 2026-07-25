@@ -384,7 +384,7 @@ export class NationalDebtPanel extends Panel {
     const growthClass = entry.annualGrowth > 5 ? 'debt-growth-high' : entry.annualGrowth > 0 ? 'debt-growth-mid' : '';
 
     return `
-      <div class="debt-row debt-row-clickable" data-iso3="${escapeHtml(entry.iso3)}" role="button" tabindex="0" title="Show on map">
+      <div class="debt-row debt-row-clickable" data-iso3="${escapeHtml(entry.iso3)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(entry.iso3)} on map">
         <div class="debt-rank">${rank}</div>
         <div class="debt-flag">${flag}</div>
         <div class="debt-info">
