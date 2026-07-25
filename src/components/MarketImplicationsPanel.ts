@@ -35,6 +35,7 @@ function renderChain(chain: TransmissionNode[] | undefined): string {
       ? ` <span style="color:var(--text-dim);margin:0 2px">&rarr;</span> `
       : '';
     return `<span class="chain-node" data-chain-id="${id}" data-node-idx="${i}" data-logic="${escapeHtml(n.logic)}"
+      role="button" tabindex="0" title="Show rationale"
       style="cursor:pointer;border-bottom:1px dotted var(--text-dim)">${escapeHtml(n.node)}</span>${arrow}`;
   }).join('');
   return `
@@ -77,12 +78,12 @@ export class MarketImplicationsPanel extends Panel {
     this.fwSelector = new FrameworkSelector({ panelId: 'market-implications', isPremium: hasPremiumAccess(), panel: this, note: t('components.marketImplications.appliesToNext') });
     this.header.appendChild(this.fwSelector.el);
 
-    this.content.addEventListener('click', (e) => {
-      const node = (e.target as HTMLElement).closest('.chain-node') as HTMLElement | null;
+    const toggleNode = (node: HTMLElement | null): void => {
       if (!node) return;
-      const chainId = node.getAttribute('data-chain-id')!;
-      const nodeIdx = node.getAttribute('data-node-idx')!;
-      const logic = node.getAttribute('data-logic')!;
+      const chainId = node.getAttribute('data-chain-id');
+      const nodeIdx = node.getAttribute('data-node-idx');
+      const logic = node.getAttribute('data-logic');
+      if (!chainId || nodeIdx == null || logic == null) return;
       const logicEl = this.content.querySelector(`#chain-logic-${chainId}`) as HTMLElement | null;
       if (!logicEl) return;
       const isOpen = logicEl.style.display !== 'none';
@@ -94,6 +95,16 @@ export class MarketImplicationsPanel extends Panel {
         logicEl.setAttribute('data-open-idx', nodeIdx);
         logicEl.style.display = 'block';
       }
+    };
+    this.content.addEventListener('click', (e) => {
+      toggleNode((e.target as HTMLElement).closest('.chain-node') as HTMLElement | null);
+    });
+    this.content.addEventListener('keydown', (e) => {
+      if (e.key !== 'Enter' && e.key !== ' ') return;
+      const node = (e.target as HTMLElement).closest('.chain-node') as HTMLElement | null;
+      if (!node) return;
+      e.preventDefault();
+      toggleNode(node);
     });
   }
 
