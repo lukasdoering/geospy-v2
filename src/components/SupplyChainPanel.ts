@@ -508,7 +508,7 @@ export class SupplyChainPanel extends Panel {
               <span>${t('components.supplyChain.riskLevel')}: <span class="${riskClass}">${escapeHtml(ts.riskLevel)}</span></span>
               <span>${ts.incidentCount7d} ${t('components.supplyChain.incidents7d')}</span>
             </div>` : ''}
-            <div class="sc-metric-row">${warRiskBadge}${expanded ? ` <button type="button" class="sc-map-focus" data-chokepoint-map="${escapeHtml(cp.id)}" title="Show on map">Map</button>` : ''}</div>
+            <div class="sc-metric-row">${warRiskBadge}${expanded ? ` <button type="button" class="sc-map-focus" data-chokepoint-map="${escapeHtml(cp.id)}" title="Show on map" aria-label="Show ${escapeHtml(cp.name || cp.id)} on map">Map</button>` : ''}</div>
             ${cp.flowEstimate ? (() => {
               const fe = cp.flowEstimate;
               const pct = Math.round(fe.flowRatio * 100);
@@ -752,7 +752,7 @@ export class SupplyChainPanel extends Panel {
       const top3 = m.topProducers.slice(0, 3).map(p => {
         const code = (p.country || '').trim();
         const attrs = code
-          ? ` class="sc-mineral-producer" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map"`
+          ? ` class="sc-mineral-producer" data-country="${escapeHtml(code)}" role="button" tabindex="0" title="Show on map" aria-label="Show ${escapeHtml(code)} on map"`
           : '';
         return `<button type="button"${attrs}>${escapeHtml(p.country)} ${p.sharePct.toFixed(0)}%</button>`;
       }).join(' ');
