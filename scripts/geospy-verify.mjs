@@ -94,6 +94,7 @@ const focusedTests = [
   'tests/route-explorer-chokepoint-map.test.mts',
   'tests/threat-timeline-map-focus.test.mts',
   'tests/threat-timeline-panel.test.mts',
+  'tests/market-implications-a11y.test.mts',
 ];
 
 function run(cmd, args, label) {
